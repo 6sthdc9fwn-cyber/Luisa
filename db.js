@@ -457,13 +457,22 @@ function migrateDB() {
   if (!DB.global.personalizzazioni) DB.global.personalizzazioni = JSON.parse(JSON.stringify(DEFAULT_DB.global.personalizzazioni));
   if (!DB.global.personalizzazioni.grafico) DB.global.personalizzazioni.grafico = { tipo:'barre', filtroTipo:'totale', filtroValore:'', colore1:'', colore2:'' };
   if (!DB.global.metodi || !DB.global.metodi.length) DB.global.metodi = [...DEFAULT_DB.global.metodi];
+  const usi = {};
+  const contaUso = o => { if (o && o.metodo) usi[o.metodo] = (usi[o.metodo] || 0) + 1; };
+  Object.values(DB.anni).forEach(a => (a.transazioni || []).forEach(contaUso));
+  (DB.global.programmate || []).forEach(contaUso);
+  const metodiNoti = new Set(DB.global.metodi.map(m => m.toLowerCase()));
   const metodoCanonico = new Map();
-  DB.global.metodi = DB.global.metodi.filter(m => {
+  [...DB.global.metodi, ...Object.keys(usi)].forEach(m => {
     const k = m.toLowerCase();
-    if (metodoCanonico.has(k)) return false;
-    metodoCanonico.set(k, m);
-    return true;
+    if (!metodiNoti.has(k)) return;
+    const cur = metodoCanonico.get(k);
+    if (cur === undefined || (usi[m] || 0) > (usi[cur] || 0)) metodoCanonico.set(k, m);
   });
+  const metodiGiaVisti = new Set();
+  DB.global.metodi = DB.global.metodi
+    .filter(m => { const k = m.toLowerCase(); if (metodiGiaVisti.has(k)) return false; metodiGiaVisti.add(k); return true; })
+    .map(m => metodoCanonico.get(m.toLowerCase()));
   const unisciMetodo = o => { const c = o && o.metodo && metodoCanonico.get(o.metodo.toLowerCase()); if (c) o.metodo = c; };
   Object.values(DB.anni).forEach(a => (a.transazioni || []).forEach(unisciMetodo));
   (DB.global.programmate || []).forEach(unisciMetodo);

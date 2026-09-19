@@ -464,7 +464,7 @@ function saveTransaction() {
     toast('✅ Transazione aggiornata','success');
   } else {
     annoData().transazioni.push(t);
-    addCommissioneBonifico(t);
+    addCommissioneMetodo(t);
     toast('✅ Transazione aggiunta','success');
   }
   closeForm(); autoSave(); renderCurrentPage();

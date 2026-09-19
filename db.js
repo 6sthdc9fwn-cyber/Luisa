@@ -24,6 +24,7 @@ const DEFAULT_DB = {
     },
     programmate: [],
     metodi: ['Addebito conto','Bancomat','Carta di Credito','Contanti','Bonifico','Altro'],
+    commissioni: { 'Bonifico': 0.12 },
     personalizzazioni: {
       font: "'DM Sans', sans-serif",
       colori: { reddito: '', spese: '', debiti: '', investimenti: '', oro: '' },
@@ -94,6 +95,7 @@ function getConti() { return DB.global.conti || []; }
 
 // ── METODI DI PAGAMENTO ───────────────────────────────────────────
 function getMetodi() { return DB.global.metodi && DB.global.metodi.length ? DB.global.metodi : ['Bancomat','Carta di Credito','Contanti','Bonifico','Altro']; }
+function getCommissioneMetodo(metodo) { return (DB.global.commissioni && DB.global.commissioni[metodo]) || 0; }
 function populateMetodoSelect(selId, selectedVal) {
   const sel = document.getElementById(selId);
   if (!sel) return;
@@ -336,13 +338,14 @@ function deleteTransaction(id) {
   });
 }
 
-function addCommissioneBonifico(tx) {
-  if (tx.metodo !== 'Bonifico') return;
+function addCommissioneMetodo(tx) {
+  const importo = getCommissioneMetodo(tx.metodo);
+  if (!importo) return;
   annoData().transazioni.push({
     id: uid(), data: tx.data, mese: tx.mese,
     tipo: 'SPESE', categoria: 'Spese Bancarie',
-    descrizione: tx.descrizione ? `Commissione: ${tx.descrizione}` : 'Commissione bonifico',
-    importo: 0.12, metodo: '', conto: tx.conto, note: '', stato: 'Confermata'
+    descrizione: tx.descrizione ? `Commissione: ${tx.descrizione}` : `Commissione ${tx.metodo}`,
+    importo: importo, metodo: '', conto: tx.conto, note: '', stato: 'Confermata'
   });
 }
 
@@ -350,7 +353,7 @@ function confermaTx(id) {
   const tx = txAnno().find(t=>t.id===id);
   if (!tx) return;
   tx.stato = 'Confermata';
-  addCommissioneBonifico(tx);
+  addCommissioneMetodo(tx);
   autoSave();
   if (typeof renderCurrentPage === 'function') renderCurrentPage();
   toast(`✅ "${tx.descrizione}" confermata e conteggiata`, 'success');
@@ -455,6 +458,7 @@ function migrateDB() {
   if (!DB.global.personalizzazioni.grafico) DB.global.personalizzazioni.grafico = { tipo:'barre', filtroTipo:'totale', filtroValore:'', colore1:'', colore2:'' };
   if (!DB.global.metodi || !DB.global.metodi.length) DB.global.metodi = [...DEFAULT_DB.global.metodi];
   if (!DB.global.metodi.includes('Addebito conto')) DB.global.metodi.unshift('Addebito conto');
+  if (!DB.global.commissioni) DB.global.commissioni = DB.global.metodi.includes('Bonifico') ? { 'Bonifico': 0.12 } : {};
 }
 
 // ── PERSONALIZZAZIONI ─────────────────────────────────────────────

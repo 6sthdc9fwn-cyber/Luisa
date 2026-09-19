@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💰 Finanze Personali 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --reddito:    #004561;
+    --spese:      #C0392B;
+    --debiti:     #7358C3;
+    --investimenti: #16A34A;
+    --oro:        #D97706;
+    --bg:         #F8FAFC;
+    --card:       #FFFFFF;
+    --border:     #E2E8F0;
+    --text:       #0C0C2C;
+    --text2:      #475569;
+    --success:    #16A34A;
+    --warning:    #D97706;
+    --danger:     #C0392B;
+    --nav-w:      220px;
+    --radius:     12px;
+    --shadow:     0 2px 12px rgba(12,12,44,0.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;font-size:16px;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
+
+  /* ── NAV ── */
+  #nav{width:var(--nav-w);min-height:100vh;background:var(--text);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:.3s}
+  .nav-logo{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .nav-logo h1{font-family:'DM Serif Display',serif;font-size:18px;color:#fff;line-height:1.2}
+  .nav-logo span{font-size:12px;color:rgba(255,255,255,.5);font-weight:300}
+  .nav-links{flex:1;padding:12px 0;overflow-y:auto}
+  .nav-link{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.7);cursor:pointer;font-size:15px;font-weight:400;transition:.2s;border-left:3px solid transparent;text-decoration:none}
+  .nav-link:hover{background:rgba(255,255,255,.07);color:#fff}
+  .nav-link.active{background:rgba(255,255,255,.1);color:#fff;border-left-color:var(--oro)}
+  .nav-link .icon{font-size:18px;width:24px;text-align:center}
+  .nav-section{padding:8px 20px 4px;font-size:11px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.1em;font-weight:500}
+  .nav-user{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:13px}
+
+  /* ── MAIN ── */
+  #main{margin-left:var(--nav-w);flex:1;min-height:100vh;padding:32px}
+  .page{display:none}
+  .page.active{display:block}
+  .page-header{margin-bottom:28px}
+  .page-header h2{font-family:'DM Serif Display',serif;font-size:28px;color:var(--text)}
+  .page-header p{color:var(--text2);font-size:15px;margin-top:4px}
+
+  /* ── CARDS ── */
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border)}
+  .card-pad{padding:24px}
+
+  /* ── KPI CARDS ── */
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+  .kpi{background:var(--card);border-radius:var(--radius);padding:20px 24px;border:1px solid var(--border);box-shadow:var(--shadow);border-left:4px solid var(--border-accent,var(--border))}
+  .kpi.reddito{--border-accent:var(--reddito)}
+  .kpi.spese{--border-accent:var(--spese)}
+  .kpi.debiti{--border-accent:var(--debiti)}
+  .kpi.investimenti{--border-accent:var(--investimenti)}
+  .kpi label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);font-weight:500}
+  .kpi .val{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);margin:4px 0}
+  .kpi .sub{font-size:13px;color:var(--text2)}
+
+  /* ── TABLE ── */
+  .table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  thead th{background:#F1F5F9;padding:12px 14px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);font-weight:500;border-bottom:1px solid var(--border);white-space:nowrap}
+  tbody tr{border-bottom:1px solid var(--border);transition:.15s}
+  tbody tr:last-child{border-bottom:none}
+  tbody tr:hover{background:#F8FAFC}
+  tbody td{padding:11px 14px;vertical-align:middle}
+  .td-num{text-align:right;font-variant-numeric:tabular-nums;font-weight:500}
+  .td-date{white-space:nowrap;color:var(--text2);font-size:14px}
+
+  /* ── BADGE TIPO ── */
+  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  .badge-SPESE{background:#FEF2F2;color:var(--spese)}
+  .badge-REDDITO{background:#EFF6FF;color:var(--reddito)}
+  .badge-DEBITI{background:#F5F3FF;color:var(--debiti)}
+  .badge-INVESTIMENTI{background:#F0FDF4;color:var(--investimenti)}
+
+  /* ── STATO ── */
+  .stato{display:inline-block;font-size:12px;padding:2px 8px;border-radius:20px;font-weight:500}
+  .stato-Confermata{background:#DCFCE7;color:#166534}
+  .stato-Da\ confermare{background:#FEF9C3;color:#854D0E}
+  .stato-Programmata{background:#F1F5F9;color:#64748B}
+
+  /* ── FILTRI ── */
+  .filters{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+  .filters select,.filters input[type=text]{padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:.2s;min-height:44px}
+  .filters select:focus,.filters input:focus{border-color:var(--reddito);box-shadow:0 0 0 3px rgba(0,69,97,.1)}
+  .filters label{font-size:14px;color:var(--text2);font-weight:500}
+
+  /* ── FORM ── */
+  .form-modal-backdrop{display:none;position:fixed;inset:0;background:rgba(12,12,44,.4);z-index:200;backdrop-filter:blur(2px)}
+  .form-modal-backdrop.open{display:flex;align-items:center;justify-content:center}
+  .form-modal{background:var(--card);border-radius:var(--radius);padding:32px;width:min(620px,95vw);max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(12,12,44,.2)}
+  .form-modal h3{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:24px}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .form-group{display:flex;flex-direction:column;gap:6px}
+  .form-group.full{grid-column:1/-1}
+  .form-group label{font-size:14px;font-weight:500;color:var(--text2)}
+  .form-group input,.form-group select,.form-group textarea{padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;color:var(--text);outline:none;transition:.2s;min-height:44px}
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--reddito);box-shadow:0 0 0 3px rgba(0,69,97,.1)}
+  .form-group textarea{min-height:60px;resize:vertical}
+  .form-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:24px}
+
+  /* ── BUTTONS ── */
+  .btn{padding:10px 20px;border-radius:8px;font-size:15px;font-family:inherit;font-weight:500;cursor:pointer;border:none;transition:.2s;min-height:44px;display:inline-flex;align-items:center;gap:8px}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn-primary{background:var(--reddito);color:#fff}
+  .btn-primary:hover:not(:disabled){background:#A93226}
+  .btn-secondary{background:#F1F5F9;color:var(--text)}
+  .btn-secondary:hover{background:#E2E8F0}
+  .btn-danger{background:#FEF2F2;color:var(--spese)}
+  .btn-danger:hover{background:#FEE2E2}
+  .btn-small{padding:6px 12px;font-size:13px;min-height:32px}
+  .btn-icon{padding:8px;min-height:36px;min-width:36px;justify-content:center;background:transparent;color:var(--text2)}
+  .btn-icon:hover{background:#F1F5F9;color:var(--text)}
+
+  /* ── TOAST ── */
+  #toast-container{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
+  .toast{background:var(--text);color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;box-shadow:var(--shadow);animation:toastIn .3s ease;max-width:300px}
+  .toast.success{background:var(--success)}
+  .toast.error{background:var(--danger)}
+  @keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ── CONFIRM DIALOG ── */
+  #confirm-backdrop{display:none;position:fixed;inset:0;background:rgba(12,12,44,.4);z-index:300;backdrop-filter:blur(2px);align-items:center;justify-content:center}
+  #confirm-backdrop.open{display:flex}
+  #confirm-box{background:var(--card);border-radius:var(--radius);padding:28px;width:min(400px,90vw);box-shadow:0 20px 60px rgba(12,12,44,.2)}
+  #confirm-box h4{font-size:18px;font-weight:600;margin-bottom:10px}
+  #confirm-box p{color:var(--text2);font-size:15px;margin-bottom:20px}
+  #confirm-box .actions{display:flex;gap:10px;justify-content:flex-end}
+
+  /* ── DASHBOARD ── */
+  .chart-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+  .chart-box{background:var(--card);border-radius:var(--radius);padding:20px;border:1px solid var(--border)}
+  .chart-box h4{font-size:14px;font-weight:600;color:var(--text2);margin-bottom:16px;text-transform:uppercase;letter-spacing:.06em}
+  .bar-chart{display:flex;flex-direction:column;gap:8px}
+  .bar-row{display:grid;grid-template-columns:110px 1fr 70px;gap:8px;align-items:center}
+  .bar-label{font-size:13px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar-track{height:8px;background:#F1F5F9;border-radius:4px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:4px;transition:.5s}
+  .bar-value{font-size:13px;font-weight:500;text-align:right}
+  .month-chart{display:flex;align-items:flex-end;gap:6px;height:120px;padding-bottom:4px}
+  .month-bar-group{flex:1;display:flex;gap:2px;align-items:flex-end}
+  .month-bar{flex:1;border-radius:3px 3px 0 0;min-width:6px;transition:.4s}
+  .month-label{text-align:center;font-size:11px;color:var(--text2);margin-top:4px}
+  .saldi-table{width:100%;border-collapse:collapse;font-size:14px}
+  .saldi-table th{padding:8px 10px;text-align:left;font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;border-bottom:1px solid var(--border)}
+  .saldi-table td{padding:8px 10px;border-bottom:1px solid var(--border)}
+  .saldi-table td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}
+
+  /* ── MENSILE ── */
+  .mensile-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+  .mensile-section{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+  .mensile-header{padding:14px 16px;font-weight:600;font-size:14px;text-transform:uppercase;letter-spacing:.06em}
+  .mensile-header.reddito{background:#EFF6FF;color:var(--reddito);border-bottom:2px solid var(--reddito)}
+  .mensile-header.spese{background:#FEF2F2;color:var(--spese);border-bottom:2px solid var(--spese)}
+  .mensile-header.debiti{background:#F5F3FF;color:var(--debiti);border-bottom:2px solid var(--debiti)}
+  .mensile-header.investimenti{background:#F0FDF4;color:var(--investimenti);border-bottom:2px solid var(--investimenti)}
+  .mensile-body{padding:0}
+  .mensile-row{display:grid;grid-template-columns:1fr 60px 60px 60px;gap:4px;padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px;align-items:center}
+  .mensile-row:last-child{border-bottom:none}
+  .mensile-row.total{font-weight:600;background:#F8FAFC;font-size:13px}
+  .mensile-row .cat{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mensile-row .num{text-align:right;font-variant-numeric:tabular-nums}
+  .mensile-row .diff-pos{color:var(--success)}
+  .mensile-row .diff-neg{color:var(--danger)}
+  .quad-box{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:20px}
+  .quad-box h4{font-size:14px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+  .quad-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .quad-conto{border-radius:8px;padding:14px;border:1px solid var(--border)}
+  .quad-conto-title{font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;margin-bottom:8px}
+  .quad-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;border-bottom:1px solid var(--border)}
+  .quad-row:last-child{border-bottom:none}
+  .quad-status{text-align:center;font-size:20px;margin-top:8px}
+
+  /* ── BUDGET ── */
+  .budget-table{width:100%;border-collapse:collapse;font-size:14px}
+  .budget-table th{padding:10px 10px;text-align:right;font-size:12px;color:var(--text2);border-bottom:2px solid var(--border);background:#F1F5F9}
+  .budget-table th:first-child{text-align:left}
+  .budget-table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:right}
+  .budget-table td:first-child{text-align:left;font-weight:500}
+  .budget-table input{width:70px;padding:4px 6px;border:1px solid transparent;border-radius:4px;font-size:13px;text-align:right;font-family:inherit;background:transparent;outline:none}
+  .budget-table input:focus{border-color:var(--reddito);background:#fff}
+  .budget-section-header td{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:12px 10px 4px;color:var(--text2);background:#F8FAFC}
+
+  /* ── PROG SPESE ── */
+  .prog-table{width:100%;border-collapse:collapse;font-size:14px}
+  .prog-table th{padding:10px 12px;text-align:left;font-size:12px;color:var(--text2);border-bottom:2px solid var(--border);background:#F1F5F9;white-space:nowrap}
+  .prog-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+  .prog-stato-futura{background:#F0FDF4;color:#166534;padding:3px 8px;border-radius:12px;font-size:12px;font-weight:500}
+  .prog-stato-pagare{background:#FEF9C3;color:#854D0E;padding:3px 8px;border-radius:12px;font-size:12px;font-weight:500}
+  .prog-stato-pagata{background:#F1F5F9;color:#64748B;padding:3px 8px;border-radius:12px;font-size:12px;font-weight:500}
+
+  /* ── CATEGORIE ── */
+  .cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .cat-group-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+  .cat-group-header{padding:12px 16px;font-weight:600;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+  .cat-group-header.reddito{background:#EFF6FF;color:var(--reddito)}
+  .cat-group-header.spese{background:#FEF2F2;color:var(--spese)}
+  .cat-group-header.debiti{background:#F5F3FF;color:var(--debiti)}
+  .cat-group-header.investimenti{background:#F0FDF4;color:var(--investimenti)}
+  .cat-item{display:flex;justify-content:space-between;align-items:center;padding:9px 16px;border-bottom:1px solid var(--border);font-size:14px}
+  .cat-item:last-child{border-bottom:none}
+  .cat-item button{background:none;border:none;color:var(--text2);cursor:pointer;font-size:16px;padding:2px 4px;border-radius:4px;transition:.2s}
+  .cat-item button:hover{color:var(--danger);background:#FEF2F2}
+  .cat-add{padding:10px 16px;display:flex;gap:8px}
+  .cat-add input{flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;outline:none}
+  .cat-add input:focus{border-color:var(--reddito)}
+
+  /* ── IMPOSTAZIONI ── */
+  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  .settings-section{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:24px}
+  .settings-section h3{font-size:16px;font-weight:600;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+  .setting-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+  .setting-row:last-child{border-bottom:none}
+  .setting-row label{font-size:15px;font-weight:500}
+  .setting-row input{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;width:160px;min-height:44px}
+  .setting-row input:focus{border-color:var(--reddito)}
+
+  /* ── IMPORTA ── */
+  .import-area{border:2px dashed var(--border);border-radius:var(--radius);padding:40px;text-align:center;cursor:pointer;transition:.2s}
+  .import-area:hover{border-color:var(--reddito);background:#FEF2F2}
+  .import-area p{color:var(--text2);font-size:15px;margin-top:8px}
+
+  /* ── MOBILE TOGGLE ── */
+  #nav-toggle{display:none;position:fixed;top:12px;left:12px;z-index:150;background:var(--text);color:#fff;border:none;border-radius:8px;width:44px;height:44px;font-size:20px;cursor:pointer}
+  .nav-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:900px){
+    :root{--nav-w:0px}
+    #nav{transform:translateX(-220px);width:220px}
+    #nav.open{transform:translateX(0)}
+    #main{margin-left:0;padding:16px;padding-top:60px}
+    #nav-toggle{display:flex;align-items:center;justify-content:center}
+    .nav-overlay.open{display:block}
+    .kpi-grid{grid-template-columns:1fr 1fr}
+    .chart-row{grid-template-columns:1fr}
+    .mensile-grid{grid-template-columns:1fr 1fr}
+    .quad-grid{grid-template-columns:1fr 1fr}
+    .cat-grid{grid-template-columns:1fr 1fr}
+    .settings-grid{grid-template-columns:1fr}
+    .form-grid{grid-template-columns:1fr}
+  }
+  @media(max-width:600px){
+    .kpi-grid{grid-template-columns:1fr}
+    .mensile-grid{grid-template-columns:1fr}
+    .cat-grid{grid-template-columns:1fr}
+  }
+
+  /* ── MESE NAV ── */
+  .mese-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:20px}
+  .mese-tab{padding:8px 14px;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text2);transition:.2s}
+  .mese-tab.active{background:var(--reddito);color:#fff;border-color:var(--reddito)}
+  .mese-tab:hover:not(.active){background:#F1F5F9}
+
+  /* ── EMPTY STATE ── */
+  .empty{text-align:center;padding:48px 24px;color:var(--text2)}
+  .empty .icon{font-size:40px;margin-bottom:12px}
+  .empty p{font-size:15px}
+
+  /* ── AMOUNT COLORS ── */
+  .amt-in{color:var(--reddito);font-weight:600}
+  .amt-out{color:var(--spese);font-weight:600}
+  .amt-debt{color:var(--debiti);font-weight:600}
+  .amt-inv{color:var(--investimenti);font-weight:600}
+
+  /* scrollbar */
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:3px}
+</style>
+</head>
+<body>
+
+<button id="nav-toggle" onclick="toggleNav()">☰</button>
+<div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
+
+<!-- ── SIDEBAR ── -->
+<nav id="nav">
+  <div class="nav-logo">
+    <h1>💰 Finanze<br>Personali</h1>
+    <span id="nav-year">2026</span>
+  </div>
+  <div id="anno-switcher"></div>
+  <div class="nav-links">
+    <div class="nav-section">Panoramica</div>
+    <div class="nav-link active" onclick="goto('dashboard')" data-page="dashboard">
+      <span class="icon">📊</span> Dashboard
+    </div>
+    <div class="nav-link" onclick="goto('transazioni')" data-page="transazioni">
+      <span class="icon">📋</span> Transazioni
+    </div>
+    <div class="nav-section">Mensile</div>
+    <div class="nav-link" onclick="goto('mensile')" data-page="mensile">
+      <span class="icon">📅</span> Mese Corrente
+    </div>
+    <div class="nav-section">Gestione</div>
+    <div class="nav-link" onclick="goto('budget')" data-page="budget">
+      <span class="icon">🎯</span> Budget
+    </div>
+    <div class="nav-link" onclick="goto('programmate')" data-page="programmate">
+      <span class="icon">🔁</span> Spese Programmate
+    </div>
+    <div class="nav-link" onclick="goto('categorie')" data-page="categorie">
+      <span class="icon">🏷️</span> Categorie
+    </div>
+    <div class="nav-link" onclick="goto('impostazioni')" data-page="impostazioni">
+      <span class="icon">⚙️</span> Impostazioni
+    </div>
+  </div>
+  <div class="nav-user" id="nav-user">👤 Andrea</div>
+</nav>
+
+<!-- ── PAGES ── -->
+<main id="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <h2>Dashboard 2026</h2>
+      <p>Panoramica finanziaria annuale</p>
+    </div>
+    <div class="kpi-grid" id="kpi-grid"></div>
+    <div class="chart-row">
+      <div class="chart-box">
+        <h4>📈 Andamento mensile</h4>
+        <div id="chart-monthly"></div>
+        <div style="display:flex;gap:4px;justify-content:space-between;margin-top:2px" id="chart-labels"></div>
+      </div>
+      <div class="chart-box">
+        <h4>🥧 Spese per gruppo</h4>
+        <div id="chart-donut"></div>
+      </div>
+    </div>
+    <div class="chart-row">
+      <div class="chart-box">
+        <h4>🏆 Top categorie spese</h4>
+        <div class="bar-chart" id="chart-top-cat"></div>
+      </div>
+      <div class="chart-box">
+        <h4>💼 Patrimonio attuale</h4>
+        <div id="patrimonio-box"></div>
+      </div>
+    </div>
+    <div class="card card-pad" style="margin-top:16px">
+      <h4 style="font-size:14px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px">📆 Saldi mensili</h4>
+      <div class="table-wrap"><table><thead id="saldi-head"></thead><tbody id="saldi-body"></tbody></table></div>
+    </div>
+  </div>
+
+  <!-- TRANSAZIONI -->
+  <div class="page" id="page-transazioni">
+    <div class="page-header">
+      <h2>Transazioni</h2>
+      <p>Tutti i movimenti dell'anno</p>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+      <div class="filters" id="filters-trans">
+        <div>
+          <select id="f-mese" onchange="renderTransazioni()">
+            <option value="">Tutti i mesi</option>
+            <option value="1">Gennaio</option><option value="2">Febbraio</option>
+            <option value="3">Marzo</option><option value="4">Aprile</option>
+            <option value="5">Maggio</option><option value="6">Giugno</option>
+            <option value="7">Luglio</option><option value="8">Agosto</option>
+            <option value="9">Settembre</option><option value="10">Ottobre</option>
+            <option value="11">Novembre</option><option value="12">Dicembre</option>
+          </select>
+        </div>
+        <div>
+          <select id="f-tipo" onchange="renderTransazioni()">
+            <option value="">Tutti i tipi</option>
+            <option>SPESE</option><option>REDDITO</option>
+            <option>DEBITI</option><option>INVESTIMENTI</option>
+          </select>
+        </div>
+        <div>
+          <select id="f-cat" onchange="renderTransazioni()">
+            <option value="">Tutte le categorie</option>
+          </select>
+        </div>
+        <div>
+          <select id="f-conto" onchange="renderTransazioni()">
+            <option value="">Tutti i conti</option>
+          </select>
+        </div>
+        <div>
+          <select id="f-stato" onchange="renderTransazioni()">
+            <option value="">Tutti gli stati</option>
+            <option>Confermata</option>
+            <option>Da confermare</option>
+            <option>Programmata</option>
+          </select>
+        </div>
+        <div>
+          <input type="text" id="f-search" placeholder="🔍 Cerca..." oninput="renderTransazioni()" style="width:160px">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="openForm()">＋ Aggiungi</button>
+    </div>
+    <div id="trans-summary" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px"></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th><th>Tipo</th><th>Categoria</th><th>Descrizione</th>
+            <th>Metodo</th><th>Conto</th><th style="text-align:right">Importo</th>
+            <th>Stato</th><th>Note</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="trans-tbody"></tbody>
+      </table>
+    </div>
+    <div id="trans-empty" class="empty" style="display:none">
+      <div class="icon">📭</div>
+      <p>Nessuna transazione trovata</p>
+    </div>
+  </div>
+
+  <!-- MENSILE -->
+  <div class="page" id="page-mensile">
+    <div class="page-header">
+      <h2 id="mensile-title">Mese Corrente</h2>
+    </div>
+    <div class="mese-tabs" id="mese-tabs"></div>
+    <div class="mensile-grid" id="mensile-grid"></div>
+    <div class="quad-box" id="quad-box">
+      <h4>🔍 Quadratura Saldi</h4>
+      <div class="quad-grid" id="quad-grid"></div>
+    </div>
+  </div>
+
+  <!-- BUDGET -->
+  <div class="page" id="page-budget">
+    <div class="page-header">
+      <h2>Budget Annuale</h2>
+      <p>Pianifica le spese mensili per categoria</p>
+    </div>
+    <div class="card card-pad">
+      <div class="table-wrap"><table class="budget-table" id="budget-table"></table></div>
+    </div>
+    <div style="margin-top:16px;text-align:right">
+      <button class="btn btn-primary" onclick="saveBudget()">💾 Salva Budget</button>
+    </div>
+  </div>
+
+  <!-- PROGRAMMATE -->
+  <div class="page" id="page-programmate">
+    <div class="page-header">
+      <h2>Spese Programmate</h2>
+      <p>Regole ricorrenti — le transazioni vengono generate automaticamente con stato "Programmata"</p>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+      <button class="btn btn-secondary" onclick="generaTutteLeRegole()" style="background:#EFF6FF;color:var(--reddito);border:1px solid #BFDBFE">
+        ⚡ Genera transazioni per il <span id="anno-genera"></span>
+      </button>
+      <button class="btn btn-primary" onclick="openProgForm()">＋ Nuova regola</button>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table class="prog-table">
+          <thead>
+            <tr>
+              <th>Descrizione / Data</th><th>Categoria</th><th>Tipo</th>
+              <th style="text-align:right">Importo</th><th>Conto</th>
+              <th>Periodicità / Range</th><th>Date</th><th>Stato</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="prog-tbody"></tbody>
+        </table>
+      </div>
+      <div id="prog-empty" class="empty" style="display:none">
+        <div class="icon">🔁</div>
+        <p>Nessuna spesa programmata</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORIE -->
+  <div class="page" id="page-categorie">
+    <div class="page-header">
+      <h2>Categorie</h2>
+      <p>Gestisci le categorie di transazione</p>
+    </div>
+    <div class="cat-grid" id="cat-grid"></div>
+  </div>
+
+  <!-- IMPOSTAZIONI -->
+  <div class="page" id="page-impostazioni">
+    <div class="page-header">
+      <h2>Impostazioni</h2>
+      <p>Configurazione generale dell'app</p>
+    </div>
+    <div class="settings-grid">
+      <div class="settings-section">
+        <h3>👤 Profilo</h3>
+        <div class="setting-row"><label>Nome</label><input id="s-nome" type="text" value="Andrea"></div>
+        <div class="setting-row"><label>Valuta</label><input id="s-valuta" type="text" value="€"></div>
+      </div>
+      <div class="settings-section" id="conti-section">
+        <h3>🏦 Conti &amp; Saldi Iniziali</h3>
+        <div id="conti-list"></div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+          <p style="font-size:13px;color:var(--text2);margin-bottom:10px">Aggiungi nuovo conto:</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <input type="text" id="new-conto-icona" placeholder="🏦" style="width:52px;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:18px;text-align:center;outline:none">
+            <input type="text" id="new-conto-nome" placeholder="Nome conto..." style="flex:1;min-width:120px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;min-height:44px">
+            <input type="number" id="new-conto-saldo" placeholder="Saldo iniziale" step="0.01" style="width:140px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;min-height:44px">
+            <button class="btn btn-primary" onclick="addConto()">＋ Aggiungi</button>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section" style="grid-column:1/-1">
+        <h3>📥 Importa / Esporta dati</h3>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn btn-secondary" onclick="exportData()">📤 Esporta JSON</button>
+          <label class="btn btn-secondary" style="cursor:pointer">
+            📥 Importa JSON <input type="file" accept=".json" style="display:none" onchange="importData(event)">
+          </label>
+        </div>
+        <p style="font-size:13px;color:var(--text2);margin-top:12px">I dati sono salvati in un file JSON nella stessa cartella dell'app. Usa Esporta/Importa per backup o condivisione in famiglia.</p>
+      </div>
+    </div>
+    <div style="margin-top:16px;text-align:right">
+      <button class="btn btn-primary" onclick="saveSettings()">💾 Salva Impostazioni</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- FORM TRANSAZIONE -->
+<div class="form-modal-backdrop" id="form-backdrop">
+  <div class="form-modal">
+    <h3 id="form-title">➕ Nuova Transazione</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Data *</label>
+        <input type="date" id="f-data" required>
+      </div>
+      <div class="form-group">
+        <label>Tipo *</label>
+        <select id="f-ftipo" onchange="updateCatSelect()" required>
+          <option value="">-- Seleziona --</option>
+          <option>SPESE</option><option>REDDITO</option>
+          <option>DEBITI</option><option>INVESTIMENTI</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Categoria *</label>
+        <select id="f-fcat" required><option value="">-- Seleziona tipo prima --</option></select>
+      </div>
+      <div class="form-group">
+        <label>Importo (€) *</label>
+        <input type="number" id="f-importo" step="0.01" min="0.01" required>
+      </div>
+      <div class="form-group full">
+        <label>Descrizione *</label>
+        <input type="text" id="f-desc" required placeholder="es. Esselunga, Bar...">
+      </div>
+      <div class="form-group">
+        <label>Metodo pagamento</label>
+        <select id="f-metodo">
+          <option value="">-- Opzionale --</option>
+          <option>Bancomat</option><option>Carta di Credito</option>
+          <option>Contanti</option><option>Bonifico</option>
+          <option>PayPal</option><option>Prelievo</option><option>Prepagata</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Conto</label>
+        <select id="f-fconto"></select>
+      </div>
+      <div class="form-group">
+        <label>Stato</label>
+        <select id="f-fstato">
+          <option>Confermata</option>
+          <option>Da confermare</option>
+          <option>Programmata</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Note</label>
+        <textarea id="f-note" placeholder="Note opzionali..."></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeForm()">Annulla</button>
+      <button class="btn btn-primary" onclick="saveTransaction()" id="btn-save-trans">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- FORM SPESA PROGRAMMATA -->
+<div class="form-modal-backdrop" id="prog-backdrop">
+  <div class="form-modal">
+    <h3 id="prog-form-title">🔁 Nuova Spesa Programmata</h3>
+    <div class="form-grid">
+      <div class="form-group full"><label>Descrizione *</label><input type="text" id="pf-desc" required></div>
+      <div class="form-group">
+        <label>Tipo *</label>
+        <select id="pf-tipo" onchange="updateProgCatSelect()" required>
+          <option value="">--</option><option>SPESE</option><option>REDDITO</option>
+          <option>DEBITI</option><option>INVESTIMENTI</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Categoria *</label><select id="pf-cat" required><option value="">--</option></select></div>
+      <div class="form-group"><label>Importo (€) *</label><input type="number" id="pf-importo" step="0.01" min="0.01" required></div>
+      <div class="form-group">
+        <label>Conto</label>
+        <select id="pf-conto"></select>
+      </div>
+      <div class="form-group">
+        <label>Periodicità *</label>
+        <select id="pf-periodicita" required>
+          <option>Mensile</option><option>Settimanale</option><option>Bi-mensile</option>
+          <option>Trimestrale</option><option>Semestrale</option><option>Annuale</option>
+          <option>Una volta sola</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Data inizio *</label><input type="date" id="pf-inizio" required></div>
+      <div class="form-group"><label>Giorno del mese</label><input type="number" id="pf-giorno" min="1" max="31" placeholder="es. 15"></div>
+      <div class="form-group"><label>Data fine (opz.)</label><input type="date" id="pf-fine"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeProgForm()">Annulla</button>
+      <button class="btn btn-primary" onclick="saveProgRule()">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div id="confirm-backdrop">
+  <div id="confirm-box">
+    <h4 id="confirm-title">Conferma</h4>
+    <p id="confirm-msg"></p>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="confirmReject()">Annulla</button>
+      <button class="btn btn-danger" id="confirm-ok-btn" onclick="confirmAccept()">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  DATA LAYER — Multi-anno
+//  DB = {
+//    global: { nome, valuta, categorie, conti, programmate },
+//    anni: { 2026: { transazioni[], budget{}, saldiMensili{} }, ... }
+//  }
+//  annoAttivo = anno visualizzato correntemente (numero intero)
+// ════════════════════════════════════════════════════════════════
+
+const MESI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
+              'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+const MESI_SHORT = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+
+const DEFAULT_DB = {
+  global: {
+    nome: 'Andrea',
+    valuta: '€',
+    conti: [
+      { nome: 'Banca', icona: '🏦', saldoIniziale: { 2026: 7962.68 } },
+      { nome: 'Crypto', icona: '₿', saldoIniziale: { 2026: 1060.10 } },
+      { nome: 'PAC', icona: '📈', saldoIniziale: { 2026: 11957.94 } },
+      { nome: 'Trade Republic', icona: '🟢', saldoIniziale: { 2026: 0 } }
+    ],
+    categorie: {
+      SPESE: {
+        Casa: ['Telefono/Internet','Elettricità','Gas','Spese condominiali','Pay TV/Musica','Rimozione rifiuti','Assicurazione casa','Manutenzione','Oggetti da casa'],
+        Macchina: ['Carburante Macchina','Manutenzione Macchina','Servizi Macchina','Assicurazione Macchina'],
+        Moto: ['Carburante Moto','Manutenzione Moto','Servizi Moto','Assicurazione Moto'],
+        Vita: ['Spesa','Cibo','Bere','Parrucchiere','Abbigliamento','Prelievo','Svago','Oggetti personali','Sport','Regali','Medico','Trasporti'],
+        Varie: ['Scommesse','Spese Bancarie','Università','Fumo','Altro']
+      },
+      REDDITO: { Reddito: ['Stipendio','Interessi PAC','Interessi Crypto','Interessi Trade Republic','Reddito secondario','Dividendi','Rimborsi','Regali ricevuti'] },
+      DEBITI: { Debiti: ['Mutuo','Rata Macchina','Prestito studente','Carta di credito'] },
+      INVESTIMENTI: { Investimenti: ['PAC - Versamento','PAC - Prelievo','Crypto - Acquisto','Crypto - Vendita','Trade Republic - Versamento','Trade Republic - Prelievo','Altro investimento'] }
+    },
+    programmate: [
+      {id:'p1',descrizione:'Mutuo',categoria:'Mutuo',tipo:'DEBITI',importo:500.49,conto:'Banca',periodicita:'Mensile',dataInizio:'2026-01-15',giornoMese:15,dataFine:'2053-08-15'}
+    ]
+  },
+  anni: {
+    2026: {
+      transazioni: [
+        {id:'t1',data:'2026-01-05',mese:1,tipo:'REDDITO',categoria:'Stipendio',descrizione:'Project Dicembre',importo:2136,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t2',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Fumo',descrizione:'Tabacco',importo:14,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t3',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Bere',descrizione:'Harlem',importo:5,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t4',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Bere',descrizione:'Gasthouse',importo:10,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t5',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Spesa',descrizione:'Esselunga',importo:89.54,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t6',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Telefono/Internet',descrizione:'Icloud',importo:9.99,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t7',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Pay TV/Musica',descrizione:'Spotify',importo:37.65,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t8',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Spesa',descrizione:'MD',importo:14.09,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t9',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Spese Bancarie',descrizione:'Spese Conto',importo:1.11,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t10',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Cibo',descrizione:'Bar Atlantic',importo:7.9,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t11',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Cibo',descrizione:'Caffè project',importo:10,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t12',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Fumo',descrizione:'Sigarette',importo:5,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t13',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Cibo',descrizione:'Caffe Milano',importo:1,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t14',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Cibo',descrizione:'Piccolo',importo:2.4,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t15',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Cibo',descrizione:'BK',importo:13.35,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t16',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Cibo',descrizione:'Roadhouse',importo:26.1,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t17',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Cibo',descrizione:'Cena Tommi',importo:10,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t18',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Bere',descrizione:'Bicerì',importo:13.5,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t19',data:'2026-01-15',mese:1,tipo:'DEBITI',categoria:'Mutuo',descrizione:'Mutuo 5/360',importo:500.49,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t20',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Bere',descrizione:'Stadio Birre',importo:10,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t21',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Cibo',descrizione:'Mc',importo:6,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t22',data:'2026-01-05',mese:1,tipo:'INVESTIMENTI',categoria:'Crypto - Acquisto',descrizione:'Binance',importo:500,metodo:'Bonifico',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t23',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Spese Bancarie',descrizione:'Spese bonifico binance',importo:0.12,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t24',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Fumo',descrizione:'Tabacco',importo:15,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t25',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Cibo',descrizione:'Piadineria',importo:10,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t26',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Sport',descrizione:'Trimestrale Reborn',importo:310,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t27',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Carburante Macchina',descrizione:'Benzina',importo:55.01,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t28',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Bere',descrizione:'Birra Bormio',importo:6,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t29',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Sport',descrizione:'Skipass',importo:52.5,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t30',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Cibo',descrizione:'Colazione Livigno',importo:2,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t31',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Cibo',descrizione:'Pranzo Livigno',importo:39,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t32',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Bere',descrizione:'Apreski',importo:5,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t33',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Bere',descrizione:'Apreski',importo:41,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t34',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Cibo',descrizione:'Caffè Piccolo',importo:4.6,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t35',data:'2026-01-20',mese:1,tipo:'DEBITI',categoria:'Rata Macchina',descrizione:'Rata Macchina',importo:209.26,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t36',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Fumo',descrizione:'Tabacco',importo:7,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t37',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Cibo',descrizione:'Caffè Piscine',importo:6,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t38',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Spesa',descrizione:'Esselunga',importo:68.59,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t39',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Telefono/Internet',descrizione:'Fastweb',importo:27.95,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t40',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Cibo',descrizione:'Santuario',importo:12,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t41',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Bere',descrizione:'Birre Stadio',importo:15,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t42',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Fumo',descrizione:'Tabacco',importo:7,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t43',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Bere',descrizione:'Bar Haiti',importo:5.5,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t44',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Bere',descrizione:'Gasthouse',importo:9,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t45',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Carburante Macchina',descrizione:'Benzina',importo:77.01,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t46',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Bere',descrizione:'Bar Haiti',importo:14,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t47',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Servizi Macchina',descrizione:'Telepass',importo:8.4,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t48',data:'2026-01-05',mese:1,tipo:'SPESE',categoria:'Fumo',descrizione:'Tabacco',importo:7,metodo:'',conto:'Banca',note:'',stato:'Confermata'},
+        {id:'t49',data:'2026-01-05',mese:1,tipo:'INVESTIMENTI',categoria:'Trade Republic - Versamento',descrizione:'PAC TR',importo:50,metodo:'Bonifico',conto:'Trade Republic',note:'',stato:'Confermata'}
+      ],
+      budget: {},
+      saldiMensili: { Banca: { 1: { inserito: 11742.88 } } }
+    }
+  }
+};
+
+// ─── STATE ───────────────────────────────────────────────────────
+let DB = JSON.parse(JSON.stringify(DEFAULT_DB));
+let annoAttivo = 2026;          // anno visualizzato
+let currentPage = 'dashboard';
+let editingId = null;
+let editingProgId = null;
+let confirmCb = null;
+let selectedMese = 1;
+
+// ─── ACCESSORI ANNO ATTIVO ────────────────────────────────────────
+// Tutto il codice usa queste funzioni invece di accedere a DB.anni direttamente
+function annoData() {
+  if (!DB.anni[annoAttivo]) {
+    DB.anni[annoAttivo] = { transazioni: [], budget: {}, saldiMensili: {} };
+  }
+  return DB.anni[annoAttivo];
+}
+function txAnno()          { return annoData().transazioni; }
+function budgetAnno()      { return annoData().budget; }
+function saldiAnno()       { return annoData().saldiMensili; }
+function anniDisponibili() { return Object.keys(DB.anni).map(Number).sort((a,b)=>a-b); }
+
+// ─── HELPERS ─────────────────────────────────────────────────────
+const fmt = (n, dec=2) => {
+  if (n==null||isNaN(n)) return '—';
+  return new Intl.NumberFormat('it-IT',{minimumFractionDigits:dec,maximumFractionDigits:dec}).format(n);
+};
+const fmtEur = n => DB.global.valuta + ' ' + fmt(Math.abs(n));
+const uid  = () => 't' + Date.now() + Math.random().toString(36).slice(2,7);
+const pidx = () => 'p' + Date.now() + Math.random().toString(36).slice(2,5);
+
+function allCategorie(tipo) {
+  const c = DB.global.categorie[tipo];
+  if (!c) return [];
+  return Object.values(c).flat();
+}
+function categorieFlat() {
+  let arr = [];
+  for (const tipo of ['SPESE','REDDITO','DEBITI','INVESTIMENTI'])
+    arr = arr.concat(allCategorie(tipo).map(c=>({tipo,cat:c})));
+  return arr;
+}
+function getGruppoSpesa(cat) {
+  for (const [g, arr] of Object.entries(DB.global.categorie.SPESE||{}))
+    if (arr.includes(cat)) return g;
+  return 'Varie';
+}
+
+// ─── CONTI ───────────────────────────────────────────────────────
+function getConti() { return DB.global.conti || []; }
+function getSaldoIniziale(nomeConto) {
+  const c = getConti().find(c=>c.nome===nomeConto);
+  if (!c) return 0;
+  // saldoIniziale è un oggetto { 2026: X, 2027: Y }
+  if (typeof c.saldoIniziale === 'object') return c.saldoIniziale[annoAttivo] ?? 0;
+  return c.saldoIniziale ?? 0; // compat. vecchio formato
+}
+function setSaldoInizialeAnno(nomeConto, anno, val) {
+  const c = getConti().find(c=>c.nome===nomeConto);
+  if (!c) return;
+  if (typeof c.saldoIniziale !== 'object') c.saldoIniziale = {};
+  c.saldoIniziale[anno] = val;
+}
+
+function populateContoSelect(selId, selectedVal, withEmpty) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  const prev = selectedVal !== undefined ? selectedVal : sel.value;
+  sel.innerHTML = withEmpty ? '<option value="">Tutti i conti</option>' : '';
+  getConti().forEach(c=>{
+    const o = document.createElement('option');
+    o.value = c.nome; o.textContent = c.icona + ' ' + c.nome;
+    sel.appendChild(o);
+  });
+  if (prev) sel.value = prev;
+}
+
+// ─── CAMBIO ANNO ─────────────────────────────────────────────────
+function switchAnno(anno) {
+  annoAttivo = parseInt(anno);
+  if (!DB.anni[annoAttivo]) {
+    DB.anni[annoAttivo] = { transazioni: [], budget: {}, saldiMensili: {} };
+  }
+  const now = new Date();
+  selectedMese = (now.getFullYear()===annoAttivo) ? Math.min(now.getMonth()+1,12) : 1;
+  // Genera silenziosamente le transazioni mancanti per le regole attive
+  (DB.global.programmate||[]).forEach(p => generaTransazioniRegola(p, annoAttivo));
+  updateAnnoUI();
+  autoSave();
+  renderPage(currentPage);
+}
+
+function addNewAnno() {
+  const nuovi = anniDisponibili();
+  const prossimo = (nuovi.length ? Math.max(...nuovi) : annoAttivo) + 1;
+  const annoInput = window.prompt(`Anno da aggiungere:`, prossimo);
+  if (!annoInput) return;
+  const y = parseInt(annoInput);
+  if (isNaN(y) || y < 2000 || y > 2100) { toast('⚠️ Anno non valido','error'); return; }
+  if (DB.anni[y]) { toast(`⚠️ L'anno ${y} esiste già`,'error'); return; }
+  DB.anni[y] = { transazioni: [], budget: {}, saldiMensili: {} };
+  autoSave();
+  switchAnno(y);
+  toast(`✅ Anno ${y} creato`, 'success');
+}
+
+function deleteAnno(anno) {
+  anno = parseInt(anno);
+  const txCount = (DB.anni[anno]?.transazioni||[]).length;
+  const msg = txCount
+    ? `Eliminare l'anno ${anno} con ${txCount} transazioni? L'operazione è irreversibile.`
+    : `Eliminare l'anno ${anno}?`;
+  confirm(`Elimina anno ${anno}`, msg, 'Elimina anno', ()=>{
+    delete DB.anni[anno];
+    autoSave();
+    const anni = anniDisponibili();
+    if (anni.length) switchAnno(anni[anni.length-1]);
+    else { annoAttivo = new Date().getFullYear(); updateAnnoUI(); renderPage(currentPage); }
+    toast(`🗑️ Anno ${anno} eliminato`);
+  });
+}
+
+function updateAnnoUI() {
+  document.getElementById('nav-year').textContent = annoAttivo;
+  renderAnnoSwitcher();
+}
+
+function renderAnnoSwitcher() {
+  const anni = anniDisponibili();
+  let html = `<div style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.1)">
+    <div style="font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Anno attivo</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">`;
+  anni.forEach(a => {
+    const active = a === annoAttivo;
+    html += `<button onclick="switchAnno(${a})" style="padding:4px 10px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:${active?'var(--oro)':'rgba(255,255,255,.12)'};color:${active?'#000':'rgba(255,255,255,.8)'};transition:.2s">${a}</button>`;
+  });
+  html += `</div>
+    <div style="display:flex;gap:4px">
+      <button onclick="addNewAnno()" style="flex:1;padding:5px;border-radius:5px;font-size:12px;cursor:pointer;border:1px dashed rgba(255,255,255,.3);background:transparent;color:rgba(255,255,255,.6)" title="Aggiungi anno">＋ Anno</button>
+      <button onclick="deleteAnno(${annoAttivo})" style="padding:5px 8px;border-radius:5px;font-size:12px;cursor:pointer;border:1px solid rgba(192,57,43,.5);background:rgba(192,57,43,.2);color:#ff8a80" title="Elimina anno attivo">🗑️</button>
+    </div>
+  </div>`;
+  document.getElementById('anno-switcher').innerHTML = html;
+}
+
+// ─── ROUTING ─────────────────────────────────────────────────────
+function goto(page) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+  currentPage = page;
+  if (window.innerWidth<900) { document.getElementById('nav').classList.remove('open'); document.getElementById('nav-overlay').classList.remove('open'); }
+  renderPage(page);
+}
+
+function renderPage(page) {
+  if (page==='dashboard')    renderDashboard();
+  else if (page==='transazioni') renderTransazioni();
+  else if (page==='mensile') renderMensile();
+  else if (page==='budget')  renderBudget();
+  else if (page==='programmate') renderProgrammate();
+  else if (page==='categorie') renderCategorie();
+  else if (page==='impostazioni') renderImpostazioni();
+}
+
+function toggleNav() {
+  document.getElementById('nav').classList.toggle('open');
+  document.getElementById('nav-overlay').classList.toggle('open');
+}
+
+// ─── TOAST / CONFIRM ─────────────────────────────────────────────
+function toast(msg, type='') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type; t.textContent = msg;
+  c.appendChild(t); setTimeout(()=>t.remove(), 3200);
+}
+function confirm(title, msg, okLabel, cb) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm-ok-btn').textContent = okLabel||'Elimina';
+  document.getElementById('confirm-backdrop').classList.add('open');
+  confirmCb = cb;
+}
+function confirmAccept() { document.getElementById('confirm-backdrop').classList.remove('open'); if(confirmCb) confirmCb(); confirmCb=null; }
+function confirmReject() { document.getElementById('confirm-backdrop').classList.remove('open'); confirmCb=null; }
+
+// ─── BUSINESS LOGIC ──────────────────────────────────────────────
+function txConfirmed(t) { return t.stato !== 'Programmata'; }
+
+function monthlyTotals(mese) {
+  const tx = txAnno().filter(t=>t.mese===mese && txConfirmed(t));
+  const reddito  = tx.filter(t=>t.tipo==='REDDITO').reduce((s,t)=>s+t.importo,0);
+  const spese    = tx.filter(t=>t.tipo==='SPESE').reduce((s,t)=>s+t.importo,0);
+  const debiti   = tx.filter(t=>t.tipo==='DEBITI').reduce((s,t)=>s+t.importo,0);
+  const investOut= tx.filter(t=>t.tipo==='INVESTIMENTI'&&['PAC - Versamento','Crypto - Acquisto','Trade Republic - Versamento','Altro investimento'].some(c=>t.categoria===c)).reduce((s,t)=>s+t.importo,0);
+  const investIn = tx.filter(t=>t.tipo==='INVESTIMENTI'&&['PAC - Prelievo','Crypto - Vendita','Trade Republic - Prelievo'].some(c=>t.categoria===c)).reduce((s,t)=>s+t.importo,0);
+  return { reddito, spese, debiti, investOut, investIn, investNet: investIn-investOut };
+}
+
+function annualTotals() {
+  let reddito=0,spese=0,debiti=0,investOut=0;
+  for(let m=1;m<=12;m++){const mt=monthlyTotals(m);reddito+=mt.reddito;spese+=mt.spese;debiti+=mt.debiti;investOut+=mt.investOut;}
+  return{reddito,spese,debiti,investOut};
+}
+
+function ccPrevMese(mese) {
+  if (mese<2) return {spese:0,debiti:0};
+  const tx = txAnno().filter(t=>t.mese===mese-1&&t.metodo==='Carta di Credito'&&txConfirmed(t));
+  return { spese:tx.filter(t=>t.tipo==='SPESE').reduce((s,t)=>s+t.importo,0), debiti:tx.filter(t=>t.tipo==='DEBITI').reduce((s,t)=>s+t.importo,0) };
+}
+
+function calcSaldoConto(nomeConto, mese) {
+  let saldoInizio;
+  if (mese===1) {
+    saldoInizio = getSaldoIniziale(nomeConto);
+  } else {
+    saldoInizio = calcSaldoConto(nomeConto, mese-1).calcolato;
+  }
+  const isMainBank = nomeConto === getConti()[0]?.nome; // primo conto = conto principale (banca)
+  const tx = txAnno().filter(t=>t.mese===mese && txConfirmed(t) && t.conto===nomeConto);
+
+  if (isMainBank) {
+    // Logica completa: entrate - spese(no CC) - debiti(no CC) + flussi inv + CC prev
+    const entrate  = tx.filter(t=>t.tipo==='REDDITO').reduce((s,t)=>s+t.importo,0);
+    const spese    = tx.filter(t=>t.tipo==='SPESE'&&t.metodo!=='Carta di Credito').reduce((s,t)=>s+t.importo,0);
+    const debiti   = tx.filter(t=>t.tipo==='DEBITI'&&t.metodo!=='Carta di Credito').reduce((s,t)=>s+t.importo,0);
+    const investOut= tx.filter(t=>t.tipo==='INVESTIMENTI'&&['PAC - Versamento','Crypto - Acquisto','Trade Republic - Versamento','Altro investimento'].some(c=>t.categoria===c)).reduce((s,t)=>s+t.importo,0);
+    const investIn = tx.filter(t=>t.tipo==='INVESTIMENTI'&&['PAC - Prelievo','Crypto - Vendita','Trade Republic - Prelievo'].some(c=>t.categoria===c)).reduce((s,t)=>s+t.importo,0);
+    const cc = ccPrevMese(mese);
+    const calcolato = saldoInizio + entrate - spese - debiti + (investIn-investOut) - cc.spese - cc.debiti;
+    const inserito  = saldiAnno()[nomeConto]?.[mese]?.inserito ?? null;
+    return { saldoInizio, entrate, spese, debiti, investOut, investIn, cc, calcolato, inserito, isMainBank:true };
+  } else {
+    // Conti investimento: saldo iniziale + flussi entrata/uscita su questo conto
+    const flussiIn  = tx.filter(t=>['PAC - Prelievo','Crypto - Vendita','Trade Republic - Prelievo'].some(c=>t.categoria===c)).reduce((s,t)=>s+t.importo,0);
+    const flussiOut = tx.filter(t=>['PAC - Versamento','Crypto - Acquisto','Trade Republic - Versamento','Altro investimento'].some(c=>t.categoria===c)).reduce((s,t)=>s+t.importo,0);
+    const calcolato = saldoInizio + flussiIn - flussiOut;
+    const inserito  = saldiAnno()[nomeConto]?.[mese]?.inserito ?? null;
+    return { saldoInizio, flussiIn, flussiOut, calcolato, inserito, isMainBank:false };
+  }
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────────
+function renderDashboard() {
+  const at = annualTotals();
+  const risparmio = at.reddito - at.spese - at.debiti;
+  const V = DB.global.valuta;
+
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi reddito">
+      <label>💼 Entrate totali</label>
+      <div class="val">${V} ${fmt(at.reddito)}</div>
+      <div class="sub">Anno ${annoAttivo}</div>
+    </div>
+    <div class="kpi spese">
+      <label>💸 Uscite totali</label>
+      <div class="val">${V} ${fmt(at.spese+at.debiti)}</div>
+      <div class="sub">Spese + Debiti</div>
+    </div>
+    <div class="kpi ${risparmio>=0?'investimenti':'spese'}">
+      <label>💰 Risparmio netto</label>
+      <div class="val">${risparmio>=0?'+':''}${V} ${fmt(Math.abs(risparmio))}</div>
+      <div class="sub">${risparmio>=0?'Positivo ✅':'Negativo ⚠️'}</div>
+    </div>
+    <div class="kpi investimenti">
+      <label>📈 Investimenti</label>
+      <div class="val">${V} ${fmt(at.investOut)}</div>
+      <div class="sub">Versato nell'anno</div>
+    </div>`;
+
+  // Grafico mensile
+  const maxVal = Math.max(...Array.from({length:12},(_,i)=>{const mt=monthlyTotals(i+1);return Math.max(mt.reddito,mt.spese+mt.debiti);}),1);
+  let bars='', labels='';
+  for(let m=1;m<=12;m++){
+    const mt=monthlyTotals(m);
+    const h1=(mt.reddito/maxVal*100).toFixed(1), h2=((mt.spese+mt.debiti)/maxVal*100).toFixed(1);
+    bars+=`<div class="month-bar-group"><div class="month-bar" style="height:${h1}%;background:var(--reddito);opacity:.85" title="Entrate ${MESI[m-1]}: ${fmtEur(mt.reddito)}"></div><div class="month-bar" style="height:${h2}%;background:var(--spese);opacity:.85" title="Uscite ${MESI[m-1]}: ${fmtEur(mt.spese+mt.debiti)}"></div></div>`;
+    labels+=`<span style="font-size:11px;color:var(--text2);flex:1;text-align:center">${MESI_SHORT[m-1]}</span>`;
+  }
+  document.getElementById('chart-monthly').innerHTML=`<div class="month-chart">${bars}</div>`;
+  document.getElementById('chart-labels').innerHTML=labels;
+
+  // Spese per gruppo
+  const gruppi={};
+  txAnno().filter(t=>t.tipo==='SPESE'&&txConfirmed(t)).forEach(t=>{const g=getGruppoSpesa(t.categoria);gruppi[g]=(gruppi[g]||0)+t.importo;});
+  const total=Object.values(gruppi).reduce((s,v)=>s+v,0)||1;
+  const colors=['#004561','#C0392B','#7358C3','#16A34A','#D97706','#0891B2','#DB2777'];
+  let donutHtml='<div style="display:flex;flex-direction:column;gap:8px">';
+  Object.entries(gruppi).sort((a,b)=>b[1]-a[1]).slice(0,6).forEach(([g,v],i)=>{
+    const pct=(v/total*100).toFixed(1);
+    donutHtml+=`<div class="bar-row"><div class="bar-label">${g}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colors[i%colors.length]}"></div></div><div class="bar-value" style="color:${colors[i%colors.length]}">${pct}%</div></div>`;
+  });
+  document.getElementById('chart-donut').innerHTML=donutHtml+'</div>';
+
+  // Top categorie
+  const cats={};
+  txAnno().filter(t=>t.tipo==='SPESE'&&txConfirmed(t)).forEach(t=>{cats[t.categoria]=(cats[t.categoria]||0)+t.importo;});
+  const topCats=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxCat=topCats[0]?.[1]||1;
+  document.getElementById('chart-top-cat').innerHTML=topCats.map(([c,v])=>`<div class="bar-row"><div class="bar-label">${c}</div><div class="bar-track"><div class="bar-fill" style="width:${(v/maxCat*100).toFixed(1)}%;background:var(--spese)"></div></div><div class="bar-value">${V} ${fmt(v)}</div></div>`).join('')||'<p style="color:var(--text2)">Nessun dato</p>';
+
+  // Patrimonio
+  const mesePat=Math.min(selectedMese,12);
+  let patrimonioHtml='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  getConti().forEach(c=>{
+    const sb=calcSaldoConto(c.nome,mesePat);
+    patrimonioHtml+=`<div style="padding:10px;background:#F8FAFC;border-radius:8px"><div style="font-size:12px;color:var(--text2);margin-bottom:4px">${c.icona} ${c.nome}</div><div style="font-size:18px;font-weight:600;color:var(--reddito)">${V} ${fmt(sb.inserito??sb.calcolato)}</div></div>`;
+  });
+  document.getElementById('patrimonio-box').innerHTML=patrimonioHtml+'</div>';
+
+  // Saldi mensili
+  document.getElementById('saldi-head').innerHTML=`<tr><th>Mese</th><th style="text-align:right">Entrate</th><th style="text-align:right">Spese</th><th style="text-align:right">Debiti</th><th style="text-align:right">Saldo ${getConti()[0]?.nome||'Banca'}</th><th style="text-align:right">Risparmio</th></tr>`;
+  const mainConto=getConti()[0]?.nome||'Banca';
+  let sbody='';
+  for(let m=1;m<=12;m++){
+    const mt=monthlyTotals(m);
+    const sb=calcSaldoConto(mainConto,m);
+    const hasTx=txAnno().some(t=>t.mese===m);
+    if(!hasTx) continue;
+    const risp=mt.reddito-mt.spese-mt.debiti;
+    sbody+=`<tr><td><strong>${MESI[m-1]}</strong></td><td class="td-num amt-in">${V} ${fmt(mt.reddito)}</td><td class="td-num amt-out">${V} ${fmt(mt.spese)}</td><td class="td-num amt-debt">${V} ${fmt(mt.debiti)}</td><td class="td-num">${V} ${fmt(sb.inserito??sb.calcolato)}</td><td class="td-num ${risp>=0?'amt-in':'amt-out'}">${risp>=0?'+':''}${V} ${fmt(Math.abs(risp))}</td></tr>`;
+  }
+  document.getElementById('saldi-body').innerHTML=sbody||'<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text2)">Nessun dato per questo anno</td></tr>';
+}
+
+// ─── TRANSAZIONI ─────────────────────────────────────────────────
+function renderTransazioni() {
+  const catSel=document.getElementById('f-cat'), curCat=catSel.value;
+  catSel.innerHTML='<option value="">Tutte le categorie</option>';
+  categorieFlat().forEach(({cat})=>{const o=document.createElement('option');o.value=cat;o.textContent=cat;catSel.appendChild(o);});
+  catSel.value=curCat;
+  populateContoSelect('f-conto',null,true);
+
+  const fMese=document.getElementById('f-mese').value, fTipo=document.getElementById('f-tipo').value;
+  const fCat=document.getElementById('f-cat').value, fConto=document.getElementById('f-conto').value;
+  const fStato=document.getElementById('f-stato').value, fSearch=document.getElementById('f-search').value.toLowerCase();
+
+  let txs=[...txAnno()];
+  if(fMese) txs=txs.filter(t=>t.mese==fMese);
+  if(fTipo) txs=txs.filter(t=>t.tipo===fTipo);
+  if(fCat)  txs=txs.filter(t=>t.categoria===fCat);
+  if(fConto) txs=txs.filter(t=>t.conto===fConto);
+  if(fStato) txs=txs.filter(t=>t.stato===fStato);
+  if(fSearch) txs=txs.filter(t=>(t.descrizione+t.categoria+t.note).toLowerCase().includes(fSearch));
+  txs.sort((a,b)=>b.data.localeCompare(a.data));
+
+  const conf=txs.filter(txConfirmed);
+  const V=DB.global.valuta;
+  document.getElementById('trans-summary').innerHTML=`
+    <span style="font-size:13px;padding:5px 10px;background:#EFF6FF;color:var(--reddito);border-radius:6px;font-weight:500">💼 ${V} ${fmt(conf.filter(t=>t.tipo==='REDDITO').reduce((s,t)=>s+t.importo,0))}</span>
+    <span style="font-size:13px;padding:5px 10px;background:#FEF2F2;color:var(--spese);border-radius:6px;font-weight:500">💸 ${V} ${fmt(conf.filter(t=>t.tipo==='SPESE').reduce((s,t)=>s+t.importo,0))}</span>
+    <span style="font-size:13px;padding:5px 10px;background:#F5F3FF;color:var(--debiti);border-radius:6px;font-weight:500">💳 ${V} ${fmt(conf.filter(t=>t.tipo==='DEBITI').reduce((s,t)=>s+t.importo,0))}</span>
+    <span style="font-size:13px;padding:5px 10px;background:#F0FDF4;color:var(--investimenti);border-radius:6px;font-weight:500">📈 ${V} ${fmt(conf.filter(t=>t.tipo==='INVESTIMENTI').reduce((s,t)=>s+t.importo,0))}</span>
+    <span style="font-size:13px;padding:5px 10px;background:#F8FAFC;border-radius:6px;color:var(--text2)">${txs.length} transazioni</span>`;
+
+  const tbody=document.getElementById('trans-tbody');
+  if(!txs.length){tbody.innerHTML='';document.getElementById('trans-empty').style.display='block';return;}
+  document.getElementById('trans-empty').style.display='none';
+  const amtClass={REDDITO:'amt-in',SPESE:'amt-out',DEBITI:'amt-debt',INVESTIMENTI:'amt-inv'};
+  const amtSign={REDDITO:'+',SPESE:'-',DEBITI:'-',INVESTIMENTI:'±'};
+  tbody.innerHTML=txs.map(t=>`<tr style="${t.stato==='Programmata'?'opacity:.6':''}">
+    <td class="td-date">${formatDateIt(t.data)}</td>
+    <td><span class="badge badge-${t.tipo}">${t.tipo.slice(0,3)}</span></td>
+    <td>${t.categoria}</td><td>${t.descrizione}</td>
+    <td style="font-size:13px;color:var(--text2)">${t.metodo||'—'}</td>
+    <td style="font-size:13px;color:var(--text2)">${t.conto}</td>
+    <td class="td-num ${amtClass[t.tipo]}">${amtSign[t.tipo]}${V} ${fmt(t.importo)}</td>
+    <td><span class="stato stato-${t.stato}">${t.stato}</span></td>
+    <td style="font-size:13px;color:var(--text2);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.note||'—'}</td>
+    <td><button class="btn btn-icon btn-small" onclick="editTransaction('${t.id}')">✏️</button><button class="btn btn-icon btn-small" onclick="deleteTransaction('${t.id}')">🗑️</button></td>
+  </tr>`).join('');
+}
+
+function formatDateIt(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`;}
+
+// ─── FORM TRANSAZIONE ────────────────────────────────────────────
+function openForm(id) {
+  editingId=id||null;
+  document.getElementById('form-title').textContent=id?'✏️ Modifica Transazione':'➕ Nuova Transazione';
+  populateContoSelect('f-fconto');
+  if(id){
+    const t=txAnno().find(x=>x.id===id);
+    document.getElementById('f-data').value=t.data;
+    document.getElementById('f-ftipo').value=t.tipo;
+    updateCatSelect();
+    document.getElementById('f-fcat').value=t.categoria;
+    document.getElementById('f-importo').value=t.importo;
+    document.getElementById('f-desc').value=t.descrizione;
+    document.getElementById('f-metodo').value=t.metodo||'';
+    document.getElementById('f-fconto').value=t.conto;
+    document.getElementById('f-fstato').value=t.stato;
+    document.getElementById('f-note').value=t.note||'';
+  } else {
+    const now=new Date();
+    const defaultDate=`${annoAttivo}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    document.getElementById('f-data').value=defaultDate;
+    document.getElementById('f-ftipo').value='';
+    document.getElementById('f-fcat').innerHTML='<option value="">-- Seleziona tipo prima --</option>';
+    document.getElementById('f-importo').value='';
+    document.getElementById('f-desc').value='';
+    document.getElementById('f-metodo').value='';
+    document.getElementById('f-fconto').value=getConti()[0]?.nome||'';
+    document.getElementById('f-fstato').value='Confermata';
+    document.getElementById('f-note').value='';
+  }
+  document.getElementById('form-backdrop').classList.add('open');
+  document.getElementById('f-desc').focus();
+}
+function closeForm(){document.getElementById('form-backdrop').classList.remove('open');}
+
+function updateCatSelect(){
+  const tipo=document.getElementById('f-ftipo').value, sel=document.getElementById('f-fcat');
+  sel.innerHTML='<option value="">-- Seleziona categoria --</option>';
+  if(!tipo) return;
+  const cats=DB.global.categorie[tipo]; if(!cats) return;
+  for(const[gruppo,arr] of Object.entries(cats)){
+    if(Object.keys(cats).length>1){const og=document.createElement('optgroup');og.label=gruppo;arr.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;og.appendChild(o);});sel.appendChild(og);}
+    else arr.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+  }
+}
+
+function saveTransaction(){
+  const data=document.getElementById('f-data').value, tipo=document.getElementById('f-ftipo').value;
+  const cat=document.getElementById('f-fcat').value, importo=parseFloat(document.getElementById('f-importo').value);
+  const desc=document.getElementById('f-desc').value.trim();
+  if(!data||!tipo||!cat||!desc||isNaN(importo)||importo<=0){toast('⚠️ Compila tutti i campi obbligatori','error');return;}
+  const annoTx=parseInt(data.split('-')[0]);
+  if(annoTx!==annoAttivo){toast(`⚠️ La data deve essere nell'anno ${annoAttivo}. Cambia anno attivo dalla sidebar.`,'error');return;}
+  const mese=parseInt(data.split('-')[1]);
+  const t={id:editingId||uid(),data,mese,tipo,categoria:cat,descrizione:desc,importo,metodo:document.getElementById('f-metodo').value,conto:document.getElementById('f-fconto').value,note:document.getElementById('f-note').value.trim(),stato:document.getElementById('f-fstato').value};
+  if(editingId){const idx=annoData().transazioni.findIndex(x=>x.id===editingId);annoData().transazioni[idx]=t;toast('✅ Transazione aggiornata','success');}
+  else{annoData().transazioni.push(t);toast('✅ Transazione aggiunta','success');}
+  closeForm();autoSave();renderPage(currentPage);
+}
+function editTransaction(id){openForm(id);}
+function deleteTransaction(id){
+  const t=txAnno().find(x=>x.id===id);
+  confirm('Elimina transazione',`Eliminare "${t.descrizione}" del ${formatDateIt(t.data)}?`,'Elimina',()=>{
+    annoData().transazioni=annoData().transazioni.filter(x=>x.id!==id);autoSave();renderPage(currentPage);toast('🗑️ Transazione eliminata');
+  });
+}
+
+// ─── MENSILE ─────────────────────────────────────────────────────
+function renderMensile(){
+  document.getElementById('mese-tabs').innerHTML=MESI.map((m,i)=>`<div class="mese-tab ${i+1===selectedMese?'active':''}" onclick="selectMese(${i+1})">${m}</div>`).join('');
+  document.getElementById('mensile-title').textContent=`${MESI[selectedMese-1]} ${annoAttivo}`;
+  renderMeseSections(selectedMese);
+}
+function selectMese(m){selectedMese=m;renderMensile();}
+
+function renderMeseSections(mese){
+  const V=DB.global.valuta;
+  const tx=txAnno().filter(t=>t.mese===mese&&txConfirmed(t));
+  const sections=[{tipo:'REDDITO',label:'💼 Reddito',cls:'reddito'},{tipo:'SPESE',label:'💸 Spese',cls:'spese'},{tipo:'DEBITI',label:'💳 Debiti',cls:'debiti'},{tipo:'INVESTIMENTI',label:'📈 Investimenti',cls:'investimenti'}];
+  let html='';
+  for(const sec of sections){
+    const secTx=tx.filter(t=>t.tipo===sec.tipo);
+    const bycat={};
+    allCategorie(sec.tipo).forEach(c=>{bycat[c]=0;});
+    secTx.forEach(t=>{bycat[t.categoria]=(bycat[t.categoria]||0)+t.importo;});
+    const filtered=Object.entries(bycat).filter(([,v])=>v>0);
+    const total=filtered.reduce((s,[,v])=>s+v,0);
+    let rows=filtered.map(([cat,val])=>{
+      const budget=budgetAnno()[cat]?.[mese]||0;
+      const diff=budget?val-budget:null;
+      return`<div class="mensile-row"><div class="cat" title="${cat}">${cat}</div><div class="num">${budget?fmt(budget,0):'—'}</div><div class="num">${fmt(val)}</div><div class="num ${diff===null?'':diff>0?'diff-neg':'diff-pos'}">${diff===null?'—':(diff>0?'+':'')+fmt(diff)}</div></div>`;
+    }).join('');
+    if(!rows) rows=`<div style="padding:12px;color:var(--text2);font-size:13px;text-align:center">Nessuna transazione</div>`;
+    html+=`<div class="mensile-section"><div class="mensile-header ${sec.cls}">${sec.label}</div><div style="display:grid;grid-template-columns:1fr 60px 60px 60px;gap:4px;padding:6px 12px 2px;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em"><div>Categoria</div><div style="text-align:right">Budget</div><div style="text-align:right">Effettivo</div><div style="text-align:right">Diff.</div></div><div class="mensile-body">${rows}</div><div class="mensile-row total"><div class="cat">TOTALE</div><div class="num">—</div><div class="num">${fmt(total)}</div><div class="num">—</div></div></div>`;
+  }
+  document.getElementById('mensile-grid').innerHTML=html;
+
+  // Quadratura per tutti i conti
+  let quadHtml='';
+  getConti().forEach(conto=>{
+    const sb=calcSaldoConto(conto.nome,mese);
+    const ok=sb.inserito!==null?Math.abs(sb.calcolato-sb.inserito)<0.02:null;
+    let rows='';
+    if(sb.isMainBank){
+      rows=`<div class="quad-row"><span>Saldo inizio</span><span>${V} ${fmt(sb.saldoInizio)}</span></div>
+        <div class="quad-row"><span>+ Entrate</span><span>${V} ${fmt(sb.entrate)}</span></div>
+        <div class="quad-row"><span>− Spese (no CC)</span><span>−${V} ${fmt(sb.spese)}</span></div>
+        <div class="quad-row"><span>− Debiti (no CC)</span><span>−${V} ${fmt(sb.debiti)}</span></div>
+        <div class="quad-row"><span>± Flusso inv.</span><span>${V} ${fmt(sb.investIn-sb.investOut)}</span></div>
+        <div class="quad-row"><span>CC mese prec.</span><span>−${V} ${fmt(sb.cc.spese+sb.cc.debiti)}</span></div>`;
+    } else {
+      rows=`<div class="quad-row"><span>Saldo inizio</span><span>${V} ${fmt(sb.saldoInizio)}</span></div>
+        <div class="quad-row"><span>+ Entrate</span><span>${V} ${fmt(sb.flussiIn)}</span></div>
+        <div class="quad-row"><span>− Uscite</span><span>−${V} ${fmt(sb.flussiOut)}</span></div>`;
+    }
+    quadHtml+=`<div class="quad-conto"><div class="quad-conto-title">${conto.icona} ${conto.nome}</div>${rows}
+      <div class="quad-row" style="font-weight:600"><span>Calcolato</span><span>${V} ${fmt(sb.calcolato)}</span></div>
+      <div class="quad-row" style="font-weight:600"><span>Inserito</span>
+        <input type="number" step="0.01" value="${sb.inserito??''}" style="width:90px;text-align:right;padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:13px" onchange="setSaldoInserito('${conto.nome}',${mese},this.value)">
+      </div>
+      <div class="quad-status">${sb.inserito!==null?(ok?'✅':'❌'):'⏳'}</div>
+    </div>`;
+  });
+  document.getElementById('quad-grid').innerHTML=quadHtml;
+}
+
+function setSaldoInserito(conto,mese,val){
+  const sm=saldiAnno(); if(!sm[conto])sm[conto]={};if(!sm[conto][mese])sm[conto][mese]={};
+  sm[conto][mese].inserito=val?parseFloat(val):null;
+  autoSave();renderMeseSections(mese);
+}
+
+// ─── BUDGET ──────────────────────────────────────────────────────
+function renderBudget(){
+  const table=document.getElementById('budget-table');
+  let html='<thead><tr><th>Categoria</th>';
+  MESI_SHORT.forEach(m=>html+=`<th>${m}</th>`);
+  html+='<th>Anno</th></tr></thead><tbody>';
+  for(const sec of [{tipo:'SPESE',label:'SPESE'},{tipo:'REDDITO',label:'REDDITO'},{tipo:'DEBITI',label:'DEBITI'}]){
+    for(const[gruppo,arr] of Object.entries(DB.global.categorie[sec.tipo])){
+      html+=`<tr class="budget-section-header"><td colspan="14">▸ ${sec.label} — ${gruppo}</td></tr>`;
+      arr.forEach(cat=>{
+        html+=`<tr><td>${cat}</td>`;
+        let annual=0;
+        for(let m=1;m<=12;m++){const v=budgetAnno()[cat]?.[m]||'';annual+=parseFloat(v)||0;html+=`<td><input type="number" step="1" min="0" value="${v}" data-cat="${cat}" data-mese="${m}" onchange="updateBudget(this)"></td>`;}
+        html+=`<td style="font-weight:500">${annual?fmt(annual,0):'—'}</td></tr>`;
+      });
+    }
+  }
+  table.innerHTML=html+'</tbody>';
+}
+function updateBudget(inp){
+  const cat=inp.dataset.cat, mese=parseInt(inp.dataset.mese), val=parseFloat(inp.value)||0;
+  if(!budgetAnno()[cat])budgetAnno()[cat]={};
+  budgetAnno()[cat][mese]=val;
+}
+function saveBudget(){autoSave();toast('💾 Budget salvato','success');}
+
+// ─── PROGRAMMATE — generazione automatica ────────────────────────
+
+// Calcola tutte le date di scadenza di una regola nell'anno dato
+function calcolaScadenzeAnno(p, anno) {
+  const date = [];
+  const inizio = new Date(p.dataInizio);
+  const fine   = p.dataFine ? new Date(p.dataFine) : new Date(anno, 11, 31);
+  const inizioAnno = new Date(anno, 0, 1);
+  const fineAnno   = new Date(anno, 11, 31);
+
+  // Funzione per aggiungere una data solo se cade nell'anno e nel range
+  const aggiungi = d => {
+    if (d >= inizioAnno && d <= fineAnno && d >= inizio && d <= fine)
+      date.push(new Date(d));
+  };
+
+  const periodicita = p.periodicita;
+  if (periodicita === 'Una volta sola') {
+    aggiungi(new Date(p.dataInizio));
+    return date;
+  }
+
+  // Determina passo in mesi (o giorni per settimanale/bi-mensile)
+  const stepMesi = { Mensile:1, Bimensile:2, Trimestrale:3, Semestrale:6, Annuale:12 }[periodicita];
+  const stepGiorni = periodicita === 'Settimanale' ? 7 : periodicita === 'Bi-mensile' ? 14 : null;
+
+  if (stepGiorni) {
+    // Iterazione per giorni
+    let cur = new Date(inizio);
+    while (cur <= fineAnno) { aggiungi(new Date(cur)); cur.setDate(cur.getDate()+stepGiorni); }
+  } else if (stepMesi) {
+    // Iterazione per mesi — usa il giorno configurato o il giorno di inizio
+    const giorno = p.giornoMese || inizio.getDate();
+    // Trova il primo mese della regola che potrebbe cadere nell'anno
+    let m = inizio.getMonth(), y = inizio.getFullYear();
+    while (new Date(y, m, giorno) <= fineAnno) {
+      aggiungi(new Date(y, m, giorno));
+      m += stepMesi;
+      if (m >= 12) { y += Math.floor(m/12); m = m % 12; }
+    }
+  }
+  return date;
+}
+
+// Genera le transazioni "Programmata" per una regola nell'anno attivo
+// Evita duplicati controllando l'id della regola + data
+function generaTransazioniRegola(p, anno) {
+  const scadenze = calcolaScadenzeAnno(p, anno);
+  const txEsistenti = annoData().transazioni;
+  let aggiunte = 0;
+
+  scadenze.forEach(d => {
+    const dataStr = d.toISOString().slice(0,10);
+    const mese = d.getMonth() + 1;
+    // Controlla se esiste già una transazione programmata per questa regola+data
+    const esisteGia = txEsistenti.some(t =>
+      t._regolaId === p.id && t.data === dataStr && t.stato === 'Programmata'
+    );
+    if (!esisteGia) {
+      txEsistenti.push({
+        id: uid(),
+        _regolaId: p.id,   // collega alla regola per deduplicazione futura
+        data: dataStr,
+        mese,
+        tipo: p.tipo,
+        categoria: p.categoria,
+        descrizione: p.descrizione,
+        importo: p.importo,
+        metodo: p.metodo || '',
+        conto: p.conto,
+        note: 'Generata automaticamente',
+        stato: 'Programmata'
+      });
+      aggiunte++;
+    }
+  });
+  return aggiunte;
+}
+
+// Genera/aggiorna tutte le regole per l'anno attivo
+function generaTutteLeRegole() {
+  const prog = DB.global.programmate || [];
+  if (!prog.length) { toast('⚠️ Nessuna regola configurata', 'error'); return; }
+  let totale = 0;
+  prog.forEach(p => { totale += generaTransazioniRegola(p, annoAttivo); });
+  autoSave();
+  renderProgrammate();
+  if (totale > 0) toast(`✅ ${totale} transazione/i generate per il ${annoAttivo}`, 'success');
+  else toast('ℹ️ Nessuna nuova transazione da generare (già tutte presenti)', '');
+}
+
+// Confirma una transazione Programmata → Confermata
+function confermaTx(id) {
+  const tx = txAnno().find(t => t.id === id);
+  if (!tx) return;
+  tx.stato = 'Confermata';
+  // Se era "Da confermare" la data è già passata — lascia la data originale
+  autoSave();
+  renderProgrammate();
+  renderPage(currentPage);
+  toast(`✅ "${tx.descrizione}" confermata e conteggiata`, 'success');
+}
+
+function renderProgrammate() {
+  // Aggiorna il label del bottone genera
+  const ag = document.getElementById('anno-genera');
+  if (ag) ag.textContent = annoAttivo;
+
+  const tbody = document.getElementById('prog-tbody');
+  const prog = DB.global.programmate || [];
+  const V = DB.global.valuta;
+  const oggi = new Date();
+  const todayStr = oggi.toISOString().slice(0,10);
+
+  if (!prog.length) {
+    tbody.innerHTML = '';
+    document.getElementById('prog-empty').style.display = 'block';
+    return;
+  }
+  document.getElementById('prog-empty').style.display = 'none';
+
+  // Per ogni regola mostra la regola + le sue transazioni nell'anno attivo
+  let html = '';
+  prog.forEach(p => {
+    const txRegola = txAnno()
+      .filter(t => t._regolaId === p.id)
+      .sort((a,b) => a.data.localeCompare(b.data));
+
+    const nConf = txRegola.filter(t => t.stato === 'Confermata').length;
+    const nProg = txRegola.filter(t => t.stato === 'Programmata' || t.stato === 'Da confermare').length;
+
+    // Riga regola
+    html += `<tr style="background:#F8FAFC;border-top:2px solid var(--border)">
+      <td style="font-weight:600">${p.descrizione}</td>
+      <td>${p.categoria}</td>
+      <td><span class="badge badge-${p.tipo}">${p.tipo.slice(0,3)}</span></td>
+      <td class="td-num" style="font-weight:600">${V} ${fmt(p.importo)}</td>
+      <td>${p.conto}</td>
+      <td>${p.periodicita}</td>
+      <td style="font-size:13px;color:var(--text2)">${p.dataInizio} → ${p.dataFine||'∞'}</td>
+      <td style="font-size:13px">
+        <span style="color:var(--success)">✅ ${nConf}</span>
+        <span style="color:var(--text2);margin-left:6px">⏳ ${nProg}</span>
+      </td>
+      <td>
+        <button class="btn btn-icon btn-small" onclick="editProgRule('${p.id}')" title="Modifica regola">✏️</button>
+        <button class="btn btn-icon btn-small" onclick="deleteProgRule('${p.id}')" title="Elimina regola">🗑️</button>
+      </td>
+    </tr>`;
+
+    // Righe transazioni generate (solo anno attivo, max 12 per non affollare)
+    if (txRegola.length === 0) {
+      html += `<tr><td colspan="9" style="padding:6px 14px 10px;font-size:13px;color:var(--text2);font-style:italic">
+        Nessuna transazione generata — clicca "Genera transazioni" per crearle
+      </td></tr>`;
+    } else {
+      txRegola.forEach(t => {
+        const passata = t.data <= todayStr;
+        const statoLabel = t.stato === 'Confermata'
+          ? `<span class="stato stato-Confermata">✅ Confermata</span>`
+          : passata
+            ? `<span class="stato stato-Da\ confermare" style="background:#FEE2E2;color:var(--danger)">❌ Da confermare</span>`
+            : `<span class="stato stato-Programmata">⏳ Programmata</span>`;
+        const btnConferma = t.stato !== 'Confermata'
+          ? `<button class="btn btn-small" style="background:#DCFCE7;color:#166534;min-height:32px" onclick="confermaTx('${t.id}')" title="Conferma pagamento">✓ Pagata</button>`
+          : '';
+        html += `<tr style="font-size:13px;${t.stato==='Confermata'?'opacity:.6':''}">
+          <td style="padding-left:28px;color:var(--text2)">↳ ${formatDateIt(t.data)}</td>
+          <td>${t.categoria}</td>
+          <td></td>
+          <td class="td-num">${V} ${fmt(t.importo)}</td>
+          <td>${t.conto}</td>
+          <td></td>
+          <td></td>
+          <td>${statoLabel}</td>
+          <td>${btnConferma}<button class="btn btn-icon btn-small" onclick="deleteTransaction('${t.id}')" title="Elimina questa occorrenza">🗑️</button></td>
+        </tr>`;
+      });
+    }
+  });
+  tbody.innerHTML = html;
+}
+
+function openProgForm(id){
+  editingProgId=id||null;
+  document.getElementById('prog-form-title').textContent=id?'✏️ Modifica Regola':'🔁 Nuova Spesa Programmata';
+  populateContoSelect('pf-conto');
+  if(id){
+    const p=DB.global.programmate.find(x=>x.id===id);
+    document.getElementById('pf-desc').value=p.descrizione;document.getElementById('pf-tipo').value=p.tipo;updateProgCatSelect();
+    document.getElementById('pf-cat').value=p.categoria;document.getElementById('pf-importo').value=p.importo;
+    document.getElementById('pf-conto').value=p.conto;document.getElementById('pf-periodicita').value=p.periodicita;
+    document.getElementById('pf-inizio').value=p.dataInizio;document.getElementById('pf-giorno').value=p.giornoMese||'';
+    document.getElementById('pf-fine').value=p.dataFine||'';
+  } else {
+    ['pf-desc','pf-importo','pf-giorno','pf-fine'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('pf-tipo').value='';document.getElementById('pf-cat').innerHTML='<option value="">--</option>';
+    document.getElementById('pf-inizio').value=`${annoAttivo}-01-01`;
+  }
+  document.getElementById('prog-backdrop').classList.add('open');
+}
+function closeProgForm(){document.getElementById('prog-backdrop').classList.remove('open');}
+function updateProgCatSelect(){
+  const tipo=document.getElementById('pf-tipo').value, sel=document.getElementById('pf-cat');
+  sel.innerHTML='<option value="">--</option>';
+  if(!tipo)return;
+  allCategorie(tipo).forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+}
+function saveProgRule(){
+  const desc=document.getElementById('pf-desc').value.trim(), tipo=document.getElementById('pf-tipo').value;
+  const cat=document.getElementById('pf-cat').value, importo=parseFloat(document.getElementById('pf-importo').value);
+  if(!desc||!tipo||!cat||isNaN(importo)||importo<=0){toast('⚠️ Compila tutti i campi obbligatori','error');return;}
+  const p={id:editingProgId||pidx(),descrizione:desc,tipo,categoria:cat,importo,
+    conto:document.getElementById('pf-conto').value,
+    periodicita:document.getElementById('pf-periodicita').value,
+    dataInizio:document.getElementById('pf-inizio').value,
+    giornoMese:parseInt(document.getElementById('pf-giorno').value)||null,
+    dataFine:document.getElementById('pf-fine').value||null};
+  if(!DB.global.programmate)DB.global.programmate=[];
+  if(editingProgId){const idx=DB.global.programmate.findIndex(x=>x.id===editingProgId);DB.global.programmate[idx]=p;toast('✅ Regola aggiornata','success');}
+  else{DB.global.programmate.push(p);toast('✅ Regola aggiunta','success');}
+  closeProgForm();
+  // Genera subito le transazioni per la nuova/modificata regola
+  const n = generaTransazioniRegola(p, annoAttivo);
+  if (n > 0) toast(`+ ${n} transazione/i generate per ${annoAttivo}`, 'success');
+  autoSave();renderProgrammate();
+}
+function editProgRule(id){openProgForm(id);}
+function deleteProgRule(id){
+  const p=DB.global.programmate.find(x=>x.id===id);
+  const nTx = txAnno().filter(t=>t._regolaId===id && t.stato==='Programmata').length;
+  const msg = nTx
+    ? `Eliminare la regola "${p.descrizione}"? Verranno eliminate anche ${nTx} transazione/i Programmate non ancora confermate.`
+    : `Eliminare la regola "${p.descrizione}"?`;
+  confirm('Elimina regola', msg,'Elimina',()=>{
+    DB.global.programmate=DB.global.programmate.filter(x=>x.id!==id);
+    // Rimuovi solo le transazioni Programmate (non quelle già confermate)
+    annoData().transazioni = annoData().transazioni.filter(t=>!(t._regolaId===id && t.stato==='Programmata'));
+    autoSave();renderProgrammate();toast('🗑️ Regola eliminata');
+  });
+}
+
+// ─── CATEGORIE ───────────────────────────────────────────────────
+function renderCategorie(){
+  const configs=[
+    {tipo:'SPESE',label:'💸 Spese',cls:'spese'},
+    {tipo:'REDDITO',label:'💼 Reddito',cls:'reddito'},
+    {tipo:'DEBITI',label:'💳 Debiti',cls:'debiti'},
+    {tipo:'INVESTIMENTI',label:'📈 Investimenti',cls:'investimenti'}
+  ];
+  document.getElementById('cat-grid').innerHTML=configs.map(cfg=>{
+    const cats=DB.global.categorie[cfg.tipo];
+    const gruppi=Object.keys(cats);
+    const hasGroups=gruppi.length>1;
+    let items='';
+    for(const[gruppo,arr] of Object.entries(cats)){
+      if(hasGroups)items+=`<div style="padding:8px 16px 4px;font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase">${gruppo}</div>`;
+      items+=arr.map(c=>`<div class="cat-item"><span>${c}</span><button onclick="deleteCat('${cfg.tipo}','${gruppo}','${c}')" title="Elimina">×</button></div>`).join('');
+    }
+    // Form aggiunta con selezione gruppo (solo per SPESE che ha più gruppi)
+    let addForm = '';
+    if (hasGroups) {
+      const optsGruppo = gruppi.map(g=>`<option value="${g}">${g}</option>`).join('');
+      addForm = `<div class="cat-add" style="flex-wrap:wrap;gap:6px">
+        <select id="cat-gruppo-${cfg.tipo}" style="padding:7px 8px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;outline:none;min-height:40px">
+          ${optsGruppo}
+        </select>
+        <input type="text" id="cat-input-${cfg.tipo}" placeholder="Nome categoria..." style="flex:1;min-width:100px" onkeypress="if(event.key==='Enter')addCatConGruppo('${cfg.tipo}')">
+        <button class="btn btn-primary btn-small" onclick="addCatConGruppo('${cfg.tipo}')">＋</button>
+      </div>`;
+    } else {
+      const firstGroup=gruppi[0];
+      addForm = `<div class="cat-add">
+        <input type="text" id="cat-input-${cfg.tipo}" placeholder="Nuova categoria..." onkeypress="if(event.key==='Enter')addCat('${cfg.tipo}','${firstGroup}')">
+        <button class="btn btn-primary btn-small" onclick="addCat('${cfg.tipo}','${firstGroup}')">＋</button>
+      </div>`;
+    }
+    return`<div class="cat-group-card"><div class="cat-group-header ${cfg.cls}"><span>${cfg.label}</span><span style="font-size:12px;opacity:.7">${Object.values(cats).flat().length} cat.</span></div>${items}${addForm}</div>`;
+  }).join('');
+}
+
+// Per SPESE (multi-gruppo): legge la select del gruppo
+function addCatConGruppo(tipo) {
+  const sel = document.getElementById('cat-gruppo-'+tipo);
+  const gruppo = sel ? sel.value : Object.keys(DB.global.categorie[tipo])[0];
+  addCat(tipo, gruppo);
+}
+
+function addCat(tipo,gruppo){
+  const inp=document.getElementById('cat-input-'+tipo), nome=inp.value.trim();
+  if(!nome){toast('⚠️ Inserisci un nome','error');return;}
+  if(!DB.global.categorie[tipo][gruppo])DB.global.categorie[tipo][gruppo]=[];
+  // Controlla duplicati in tutti i gruppi del tipo
+  const tutteLeCat = Object.values(DB.global.categorie[tipo]).flat();
+  if(tutteLeCat.includes(nome)){toast('⚠️ Categoria già esistente in questo tipo','error');return;}
+  DB.global.categorie[tipo][gruppo].push(nome);inp.value='';autoSave();renderCategorie();toast(`✅ "${nome}" aggiunta al gruppo ${gruppo}`,'success');
+}
+function deleteCat(tipo,gruppo,cat){
+  confirm('Elimina categoria',`Eliminare "${cat}"? Le transazioni esistenti non saranno modificate.`,'Elimina',()=>{DB.global.categorie[tipo][gruppo]=DB.global.categorie[tipo][gruppo].filter(c=>c!==cat);autoSave();renderCategorie();toast('🗑️ Categoria eliminata');});
+}
+
+// ─── IMPOSTAZIONI ────────────────────────────────────────────────
+function renderImpostazioni(){
+  document.getElementById('s-nome').value=DB.global.nome;
+  document.getElementById('s-valuta').value=DB.global.valuta;
+  renderContiList();
+}
+
+function renderContiList(){
+  const conti=getConti();
+  let html='';
+  if(!conti.length){html='<p style="color:var(--text2);font-size:14px;padding:8px 0">Nessun conto configurato.</p>';}
+  else{
+    html='<div><div style="display:grid;grid-template-columns:44px 1fr 130px 36px 36px;gap:8px;padding:4px 0;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:500"><span>Icona</span><span>Nome</span><span>Saldo inizio '+annoAttivo+'</span><span></span><span></span></div>';
+    conti.forEach((c,i)=>{
+      const si=typeof c.saldoIniziale==='object'?c.saldoIniziale[annoAttivo]??0:c.saldoIniziale??0;
+      html+=`<div style="display:grid;grid-template-columns:44px 1fr 130px 36px 36px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+        <input type="text" value="${c.icona}" maxlength="4" style="width:44px;padding:6px;border:1px solid var(--border);border-radius:6px;font-size:18px;text-align:center;outline:none;font-family:inherit" onchange="updateContoField(${i},'icona',this.value)">
+        <input type="text" value="${c.nome}" style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:15px;font-family:inherit;outline:none;min-height:40px;width:100%" onchange="renameContoInTransazioni('${c.nome}',this.value,${i})">
+        <input type="number" step="0.01" value="${si}" style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:15px;font-family:inherit;outline:none;min-height:40px;width:100%;text-align:right" onchange="updateSaldoInizialeInput(${i},this.value)">
+        <button class="btn btn-icon btn-small" onclick="moveContoUp(${i})" ${i===0?'disabled':''} title="Sposta su">↑</button>
+        <button class="btn btn-icon btn-small" style="color:var(--danger)" onclick="deleteContoAt(${i})" title="Elimina">×</button>
+      </div>`;
+    });
+    html+='</div>';
+  }
+  document.getElementById('conti-list').innerHTML=html;
+}
+
+function updateContoField(idx,field,value){if(DB.global.conti[idx])DB.global.conti[idx][field]=value;autoSave();}
+function updateSaldoInizialeInput(idx,val){
+  const c=DB.global.conti[idx]; if(!c)return;
+  if(typeof c.saldoIniziale!=='object')c.saldoIniziale={};
+  c.saldoIniziale[annoAttivo]=parseFloat(val)||0;autoSave();
+}
+function renameContoInTransazioni(vecchioNome,nuovoNome,idx){
+  nuovoNome=nuovoNome.trim();
+  if(!nuovoNome){toast('⚠️ Il nome non può essere vuoto','error');return;}
+  if(getConti().some((c,i)=>i!==idx&&c.nome.toLowerCase()===nuovoNome.toLowerCase())){toast('⚠️ Nome già in uso','error');return;}
+  // Rinomina in tutte le transazioni di tutti gli anni
+  Object.values(DB.anni).forEach(anno=>{
+    anno.transazioni.forEach(t=>{if(t.conto===vecchioNome)t.conto=nuovoNome;});
+  });
+  // Rinomina nei saldiMensili
+  Object.values(DB.anni).forEach(anno=>{
+    if(anno.saldiMensili[vecchioNome]){anno.saldiMensili[nuovoNome]=anno.saldiMensili[vecchioNome];delete anno.saldiMensili[vecchioNome];}
+  });
+  DB.global.conti[idx].nome=nuovoNome;
+  autoSave();toast(`✅ Conto rinominato in "${nuovoNome}"`, 'success');
+}
+function moveContoUp(idx){
+  if(idx===0)return;const arr=DB.global.conti;[arr[idx-1],arr[idx]]=[arr[idx],arr[idx-1]];autoSave();renderContiList();
+}
+function addConto(){
+  const icona=document.getElementById('new-conto-icona').value.trim()||'🏦';
+  const nome=document.getElementById('new-conto-nome').value.trim();
+  const saldo=parseFloat(document.getElementById('new-conto-saldo').value)||0;
+  if(!nome){toast('⚠️ Inserisci il nome del conto','error');return;}
+  if(getConti().some(c=>c.nome.toLowerCase()===nome.toLowerCase())){toast('⚠️ Esiste già un conto con questo nome','error');return;}
+  DB.global.conti.push({nome,icona,saldoIniziale:{[annoAttivo]:saldo}});
+  document.getElementById('new-conto-icona').value='';document.getElementById('new-conto-nome').value='';document.getElementById('new-conto-saldo').value='';
+  autoSave();renderContiList();toast('✅ Conto aggiunto','success');
+}
+function deleteContoAt(idx){
+  const c=DB.global.conti[idx];
+  const count=Object.values(DB.anni).reduce((s,a)=>s+a.transazioni.filter(t=>t.conto===c.nome).length,0);
+  const msg=count?`Il conto "${c.nome}" è usato in ${count} transazioni. Eliminarlo? Le transazioni manterranno il nome conto.`:`Eliminare il conto "${c.nome}"?`;
+  confirm('Elimina conto',msg,'Elimina',()=>{DB.global.conti.splice(idx,1);autoSave();renderContiList();toast('🗑️ Conto eliminato');});
+}
+
+function saveSettings(){
+  DB.global.nome=document.getElementById('s-nome').value.trim()||'Utente';
+  DB.global.valuta=document.getElementById('s-valuta').value.trim()||'€';
+  document.getElementById('nav-user').textContent='👤 '+DB.global.nome;
+  autoSave();toast('✅ Impostazioni salvate','success');
+}
+
+// ─── EXPORT / IMPORT ─────────────────────────────────────────────
+function exportData(){
+  const blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`finanze_multiannio_${new Date().toISOString().slice(0,10)}.json`;a.click();
+  toast('📤 File JSON esportato','success');
+}
+function importData(event){
+  const file=event.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data.global||!data.anni) throw new Error('Formato non valido');
+      DB=data;
+      const anni=anniDisponibili();annoAttivo=anni.length?anni[anni.length-1]:new Date().getFullYear();
+      autoSave();updateAnnoUI();
+      document.getElementById('nav-user').textContent='👤 '+DB.global.nome;
+      renderPage(currentPage);toast('✅ Dati importati','success');
+    }catch(err){toast('❌ Errore: formato non valido','error');}
+  };
+  reader.readAsText(file);event.target.value='';
+}
+
+// ─── AUTO-SAVE ───────────────────────────────────────────────────
+function autoSave(){
+  try{sessionStorage.setItem('finanze_db',JSON.stringify(DB));}catch(e){}
+}
+function loadFromSession(){
+  try{const s=sessionStorage.getItem('finanze_db');if(s)DB=JSON.parse(s);}catch(e){}
+  migrateDB();
+}
+
+// ─── MIGRAZIONE vecchio formato → nuovo ──────────────────────────
+function migrateDB(){
+  // Se il DB ha ancora la struttura vecchia (settings + transazioni flat), migra
+  if(DB.settings && !DB.global){
+    const old=DB;
+    DB={
+      global:{
+        nome:old.settings.nome||'Andrea',
+        valuta:old.settings.valuta||'€',
+        categorie:old.categorie||DEFAULT_DB.global.categorie,
+        conti:(old.settings.conti||[]).map(c=>({
+          nome:c.nome, icona:c.icona,
+          saldoIniziale:{[old.settings.anno||2026]: typeof c.saldoIniziale==='number'?c.saldoIniziale:0}
+        })),
+        programmate:old.programmate||[]
+      },
+      anni:{
+        [old.settings.anno||2026]:{
+          transazioni:old.transazioni||[],
+          budget:old.budget||{},
+          saldiMensili:old.saldiMensili||{}
+        }
+      }
+    };
+    // Vecchio saldiIniziali flat (primissima versione)
+    if(old.settings.saldiIniziali && DB.global.conti.length===0){
+      const si=old.settings.saldiIniziali, y=old.settings.anno||2026;
+      DB.global.conti=[
+        {nome:'Banca',icona:'🏦',saldoIniziale:{[y]:si.Banca||0}},
+        {nome:'Crypto',icona:'₿',saldoIniziale:{[y]:si.Crypto||0}},
+        {nome:'PAC',icona:'📈',saldoIniziale:{[y]:si.PAC||0}},
+        {nome:'Trade Republic',icona:'🟢',saldoIniziale:{[y]:si['Trade Republic']||0}}
+      ];
+    }
+  }
+  if(!DB.global)DB=JSON.parse(JSON.stringify(DEFAULT_DB));
+  if(!DB.anni)DB.anni={};
+}
+
+// ─── INIT ────────────────────────────────────────────────────────
+function init(){
+  loadFromSession();
+  const anni=anniDisponibili();
+  annoAttivo=anni.length?anni[anni.length-1]:2026;
+  const now=new Date();
+  selectedMese=(now.getFullYear()===annoAttivo)?Math.min(now.getMonth()+1,12):1;
+  document.getElementById('nav-user').textContent='👤 '+DB.global.nome;
+  // Genera silenziosamente le transazioni mancanti per l'anno attivo
+  (DB.global.programmate||[]).forEach(p => generaTransazioniRegola(p, annoAttivo));
+  updateAnnoUI();
+  renderDashboard();
+}
+init();
+</script>
+</body>
+</html>

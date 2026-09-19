@@ -1,0 +1,110 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎯 Budget — Finanze Personali</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<button id="nav-toggle" onclick="toggleNav()">☰</button>
+<div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
+
+<nav id="nav">
+  <div class="nav-logo">
+    <h1>💰 Finanze<br><span id="nav-year">—</span></h1>
+    <span>Personali</span>
+  </div>
+  <div id="anno-switcher"></div>
+  <div class="nav-links">
+    <div class="nav-section">Overview</div>
+    <a class="nav-link" href="dashboard.html" data-page="dashboard"><span class="icon">📊</span> Dashboard</a>
+    <a class="nav-link" href="transazioni.html" data-page="transazioni"><span class="icon">💸</span> Transazioni</a>
+    <a class="nav-link" href="report.html" data-page="report"><span class="icon">📈</span> Report</a>
+    <div class="nav-section">Mensile</div>
+    <a class="nav-link" href="mensile.html" data-page="mensile"><span class="icon">📅</span> Mese Corrente</a>
+    <div class="nav-section">Gestione</div>
+    <a class="nav-link" href="budget.html" data-page="budget"><span class="icon">🎯</span> Budget</a>
+    <a class="nav-link" href="programmate.html" data-page="programmate"><span class="icon">🔁</span> Spese Programmate</a>
+    <a class="nav-link" href="categorie.html" data-page="categorie"><span class="icon">🏷️</span> Categorie</a>
+    <a class="nav-link" href="impostazioni.html" data-page="impostazioni"><span class="icon">⚙️</span> Impostazioni</a>
+    <a class="nav-link" href="personalizzazioni.html" data-page="personalizzazioni"><span class="icon">🎨</span> Personalizzazioni</a>
+  </div>
+  <div class="nav-user" id="nav-user">👤 —</div>
+</nav>
+
+<main id="main">
+  <div class="page-header">
+    <h2>Budget Annuale</h2>
+    <p>Pianifica le spese mensili per categoria</p>
+  </div>
+  <div class="card card-pad">
+    <div class="table-wrap"><table class="budget-table" id="budget-table"></table></div>
+  </div>
+  <div style="margin-top:16px;text-align:right">
+    <button class="btn btn-primary" onclick="saveBudget()">💾 Salva Budget</button>
+  </div>
+</main>
+
+<div id="confirm-backdrop">
+  <div id="confirm-box">
+    <h4 id="confirm-title">Conferma</h4>
+    <p id="confirm-msg"></p>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="confirmReject()">Annulla</button>
+      <button class="btn btn-danger" id="confirm-ok-btn" onclick="confirmAccept()">Elimina</button>
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<script src="db.js"></script>
+<script>
+const PAGE_ID = 'budget';
+
+function renderCurrentPage() { renderBudget(); }
+
+function renderBudget() {
+  const table = document.getElementById('budget-table');
+  let html = '<thead><tr><th>Categoria</th>';
+  MESI_SHORT.forEach(m => html += `<th>${m}</th>`);
+  html += '<th>Anno</th></tr></thead><tbody>';
+  for (const sec of [{tipo:'SPESE',label:'SPESE'},{tipo:'REDDITO',label:'REDDITO'},{tipo:'DEBITI',label:'DEBITI'}]) {
+    for (const [gruppo, arr] of Object.entries(DB.global.categorie[sec.tipo])) {
+      html += `<tr class="budget-section-header"><td colspan="14">▸ ${sec.label} — ${gruppo}</td></tr>`;
+      arr.forEach(cat => {
+        html += `<tr><td>${cat}</td>`;
+        let annual = 0;
+        for (let m = 1; m <= 12; m++) {
+          const v = budgetAnno()[cat]?.[m] || '';
+          annual += parseFloat(v) || 0;
+          html += `<td><input type="number" step="1" min="0" value="${v}" data-cat="${cat}" data-mese="${m}" onchange="updateBudget(this)"></td>`;
+        }
+        html += `<td style="font-weight:500">${annual ? fmt(annual,0) : '—'}</td></tr>`;
+      });
+    }
+  }
+  table.innerHTML = html + '</tbody>';
+}
+
+function updateBudget(inp) {
+  const cat  = inp.dataset.cat;
+  const mese = parseInt(inp.dataset.mese);
+  const val  = parseFloat(inp.value) || 0;
+  if (!budgetAnno()[cat]) budgetAnno()[cat] = {};
+  budgetAnno()[cat][mese] = val;
+}
+
+function saveBudget() { autoSave(); toast('💾 Budget salvato','success'); }
+
+// INIT
+initDB();
+document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+document.querySelector(`[data-page="${PAGE_ID}"]`).classList.add('active');
+updateAnnoUI();
+renderBudget();
+</script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚙️ Impostazioni — Finanze Personali</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<button id="nav-toggle" onclick="toggleNav()">☰</button>
+<div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
+
+<nav id="nav">
+  <div class="nav-logo">
+    <h1>💰 Finanze<br><span id="nav-year">—</span></h1>
+    <span>Personali</span>
+  </div>
+  <div id="anno-switcher"></div>
+  <div class="nav-links">
+    <div class="nav-section">Overview</div>
+    <a class="nav-link" href="dashboard.html" data-page="dashboard"><span class="icon">📊</span> Dashboard</a>
+    <a class="nav-link" href="transazioni.html" data-page="transazioni"><span class="icon">💸</span> Transazioni</a>
+    <a class="nav-link" href="report.html" data-page="report"><span class="icon">📈</span> Report</a>
+    <div class="nav-section">Mensile</div>
+    <a class="nav-link" href="mensile.html" data-page="mensile"><span class="icon">📅</span> Mese Corrente</a>
+    <div class="nav-section">Gestione</div>
+    <a class="nav-link" href="budget.html" data-page="budget"><span class="icon">🎯</span> Budget</a>
+    <a class="nav-link" href="programmate.html" data-page="programmate"><span class="icon">🔁</span> Spese Programmate</a>
+    <a class="nav-link" href="categorie.html" data-page="categorie"><span class="icon">🏷️</span> Categorie</a>
+    <a class="nav-link" href="impostazioni.html" data-page="impostazioni"><span class="icon">⚙️</span> Impostazioni</a>
+    <a class="nav-link" href="personalizzazioni.html" data-page="personalizzazioni"><span class="icon">🎨</span> Personalizzazioni</a>
+  </div>
+  <div class="nav-user" id="nav-user">👤 —</div>
+</nav>
+
+<main id="main">
+  <div class="page-header">
+    <h2>Impostazioni</h2>
+    <p>Configurazione generale dell'app</p>
+  </div>
+  <div class="settings-grid">
+    <div class="settings-section">
+      <h3>👤 Profilo</h3>
+      <div class="setting-row"><label>Nome</label><input id="s-nome" type="text" value="Andrea"></div>
+      <div class="setting-row"><label>Valuta</label><input id="s-valuta" type="text" value="€"></div>
+    </div>
+    <div class="settings-section" id="conti-section">
+      <h3>🏦 Conti &amp; Saldi Iniziali</h3>
+      <div id="conti-list"></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:10px">Aggiungi nuovo conto:</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <input type="text" id="new-conto-icona" placeholder="🏦" style="width:52px;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:18px;text-align:center;outline:none">
+          <input type="color" id="new-conto-colore" value="#004561" title="Colore conto" style="width:44px;height:44px;border:1px solid var(--border);border-radius:8px;cursor:pointer;padding:2px">
+          <input type="text" id="new-conto-nome" placeholder="Nome conto..." style="flex:1;min-width:120px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;min-height:44px">
+          <input type="number" id="new-conto-saldo" placeholder="Saldo iniziale" step="0.01" style="width:130px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;min-height:44px">
+          <select id="new-conto-tipo" title="Tipo di conto" style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none;min-height:44px">
+            <option value="banca">🏦 Bancario</option>
+            <option value="investimenti">📈 Investimenti</option>
+            <option value="entrambi">🔀 Entrambi</option>
+          </select>
+          <button class="btn btn-primary" onclick="addConto()">＋ Aggiungi</button>
+        </div>
+      </div>
+    </div>
+    <div class="settings-section" style="grid-column:1/-1">
+      <h3>💳 Metodi di Pagamento</h3>
+      <div id="metodi-list"></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center">
+        <input type="text" id="new-metodo-nome" placeholder="Nuovo metodo..." style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;min-height:44px">
+        <button class="btn btn-primary" onclick="addMetodo()">＋ Aggiungi</button>
+      </div>
+    </div>
+    <div class="settings-section" style="grid-column:1/-1">
+      <h3>📥 Importa / Esporta dati</h3>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <button class="btn btn-secondary" onclick="exportData()">📤 Esporta JSON</button>
+        <label class="btn btn-secondary" style="cursor:pointer">
+          📥 Importa JSON <input type="file" accept=".json" style="display:none" onchange="importData(event)">
+        </label>
+      </div>
+      <p style="font-size:13px;color:var(--text2);margin-top:12px">I dati sono salvati nel localStorage del browser. Usa Esporta/Importa per backup o trasferimento.</p>
+    </div>
+  </div>
+  <div style="margin-top:16px;text-align:right">
+    <button class="btn btn-primary" onclick="saveSettings()">💾 Salva Impostazioni</button>
+  </div>
+</main>
+
+<div id="confirm-backdrop">
+  <div id="confirm-box">
+    <h4 id="confirm-title">Conferma</h4>
+    <p id="confirm-msg"></p>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="confirmReject()">Annulla</button>
+      <button class="btn btn-danger" id="confirm-ok-btn" onclick="confirmAccept()">Elimina</button>
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<script src="db.js"></script>
+<script>
+const PAGE_ID = 'impostazioni';
+
+function renderCurrentPage() { renderImpostazioni(); }
+
+function renderImpostazioni() {
+  document.getElementById('s-nome').value   = DB.global.nome;
+  document.getElementById('s-valuta').value = DB.global.valuta;
+  renderContiList();
+  renderMetodiList();
+}
+
+function renderContiList() {
+  const conti = getConti();
+  let html = '';
+  if (!conti.length) {
+    html = '<p style="color:var(--text2);font-size:14px;padding:8px 0">Nessun conto configurato.</p>';
+  } else {
+    html = `<div><div style="display:grid;grid-template-columns:44px 32px 1fr 120px 110px 36px 36px;gap:8px;padding:4px 0;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:500">
+      <span>Icona</span><span>Col.</span><span>Nome</span><span>Saldo inizio ${annoAttivo}</span><span>Tipo</span><span></span><span></span>
+    </div>`;
+    conti.forEach((c, i) => {
+      const si = typeof c.saldoIniziale === 'object' ? c.saldoIniziale[annoAttivo] ?? 0 : c.saldoIniziale ?? 0;
+      const tipoVal = c.tipo || (i === 0 ? 'banca' : 'investimenti');
+      const colore = c.colore || '#004561';
+      html += `<div style="display:grid;grid-template-columns:44px 32px 1fr 120px 110px 36px 36px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+        <input type="text" value="${c.icona}" maxlength="4" style="width:44px;padding:6px;border:1px solid var(--border);border-radius:6px;font-size:18px;text-align:center;outline:none;font-family:inherit" onchange="updateContoField(${i},'icona',this.value)">
+        <input type="color" value="${colore}" title="Colore conto" style="width:32px;height:32px;border:1px solid var(--border);border-radius:6px;cursor:pointer;padding:2px" onchange="updateContoField(${i},'colore',this.value)">
+        <input type="text" value="${c.nome}" style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:15px;font-family:inherit;outline:none;min-height:40px;width:100%" onchange="renameContoInTransazioni('${c.nome}',this.value,${i})">
+        <input type="number" step="0.01" value="${si}" style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:15px;font-family:inherit;outline:none;min-height:40px;width:100%;text-align:right" onchange="updateSaldoInizialeInput(${i},this.value)">
+        <select title="Tipo conto" onchange="updateContoField(${i},'tipo',this.value)" style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none;min-height:36px;width:100%">
+          <option value="banca" ${tipoVal==='banca'?'selected':''}>🏦 Banca</option>
+          <option value="investimenti" ${tipoVal==='investimenti'?'selected':''}>📈 Invest.</option>
+          <option value="entrambi" ${tipoVal==='entrambi'?'selected':''}>🔀 Entrambi</option>
+        </select>
+        <button class="btn btn-icon btn-small" onclick="moveContoUp(${i})" ${i===0?'disabled':''} title="Sposta su">↑</button>
+        <button class="btn btn-icon btn-small" style="color:var(--danger)" onclick="deleteContoAt(${i})" title="Elimina">×</button>
+      </div>`;
+    });
+    html += '</div>';
+  }
+  document.getElementById('conti-list').innerHTML = html;
+}
+
+function updateContoField(idx, field, value) {
+  if (DB.global.conti[idx]) DB.global.conti[idx][field] = value;
+  autoSave();
+}
+
+function updateSaldoInizialeInput(idx, val) {
+  const c = DB.global.conti[idx]; if (!c) return;
+  if (typeof c.saldoIniziale !== 'object') c.saldoIniziale = {};
+  c.saldoIniziale[annoAttivo] = parseFloat(val) || 0;
+  autoSave();
+}
+
+function renameContoInTransazioni(vecchioNome, nuovoNome, idx) {
+  nuovoNome = nuovoNome.trim();
+  if (!nuovoNome) { toast('⚠️ Il nome non può essere vuoto','error'); return; }
+  if (getConti().some((c,i) => i !== idx && c.nome.toLowerCase() === nuovoNome.toLowerCase())) { toast('⚠️ Nome già in uso','error'); return; }
+  Object.values(DB.anni).forEach(anno => {
+    anno.transazioni.forEach(t => { if (t.conto === vecchioNome) t.conto = nuovoNome; });
+  });
+  Object.values(DB.anni).forEach(anno => {
+    if (anno.saldiMensili[vecchioNome]) { anno.saldiMensili[nuovoNome] = anno.saldiMensili[vecchioNome]; delete anno.saldiMensili[vecchioNome]; }
+  });
+  DB.global.conti[idx].nome = nuovoNome;
+  autoSave(); toast(`✅ Conto rinominato in "${nuovoNome}"`, 'success');
+}
+
+function moveContoUp(idx) {
+  if (idx === 0) return;
+  const arr = DB.global.conti;
+  [arr[idx-1], arr[idx]] = [arr[idx], arr[idx-1]];
+  autoSave(); renderContiList();
+}
+
+function addConto() {
+  const icona = document.getElementById('new-conto-icona').value.trim() || '🏦';
+  const nome  = document.getElementById('new-conto-nome').value.trim();
+  const saldo = parseFloat(document.getElementById('new-conto-saldo').value) || 0;
+  const tipo   = document.getElementById('new-conto-tipo').value || 'banca';
+  const colore = document.getElementById('new-conto-colore').value || '#004561';
+  if (!nome) { toast('⚠️ Inserisci il nome del conto','error'); return; }
+  if (getConti().some(c => c.nome.toLowerCase() === nome.toLowerCase())) { toast('⚠️ Esiste già un conto con questo nome','error'); return; }
+  DB.global.conti.push({nome, icona, tipo, colore, saldoIniziale: {[annoAttivo]: saldo}});
+  document.getElementById('new-conto-icona').value = '';
+  document.getElementById('new-conto-nome').value  = '';
+  document.getElementById('new-conto-saldo').value = '';
+  autoSave(); renderContiList(); toast('✅ Conto aggiunto','success');
+}
+
+function deleteContoAt(idx) {
+  const c     = DB.global.conti[idx];
+  const count = Object.values(DB.anni).reduce((s,a) => s + a.transazioni.filter(t => t.conto === c.nome).length, 0);
+  const msg   = count
+    ? `Il conto "${c.nome}" è usato in ${count} transazioni. Eliminarlo?`
+    : `Eliminare il conto "${c.nome}"?`;
+  showConfirm('Elimina conto', msg, 'Elimina', () => {
+    DB.global.conti.splice(idx, 1);
+    autoSave(); renderContiList(); toast('🗑️ Conto eliminato');
+  });
+}
+
+function renderMetodiList() {
+  const metodi = getMetodi();
+  let html = '';
+  if (!metodi.length) {
+    html = '<p style="color:var(--text2);font-size:14px;padding:8px 0">Nessun metodo configurato.</p>';
+  } else {
+    html = '<div style="display:flex;flex-wrap:wrap;gap:8px;padding:4px 0">';
+    metodi.forEach((m, i) => {
+      html += `<div style="display:flex;align-items:center;gap:6px;background:var(--surface2);padding:6px 10px;border-radius:8px;border:1px solid var(--border)">
+        <input type="text" value="${m}" style="border:none;background:transparent;font-size:14px;font-family:inherit;outline:none;min-width:80px;max-width:160px" onchange="renameMetodo(${i},this.value)">
+        <button class="btn btn-icon btn-small" style="color:var(--danger);padding:0 4px;min-width:20px" onclick="deleteMetodoAt(${i})" title="Elimina">×</button>
+      </div>`;
+    });
+    html += '</div>';
+  }
+  document.getElementById('metodi-list').innerHTML = html;
+}
+
+function addMetodo() {
+  const nome = document.getElementById('new-metodo-nome').value.trim();
+  if (!nome) { toast('⚠️ Inserisci il nome del metodo','error'); return; }
+  if (getMetodi().some(m => m.toLowerCase() === nome.toLowerCase())) { toast('⚠️ Metodo già presente','error'); return; }
+  if (!DB.global.metodi) DB.global.metodi = [];
+  DB.global.metodi.push(nome);
+  document.getElementById('new-metodo-nome').value = '';
+  autoSave(); renderMetodiList(); toast('✅ Metodo aggiunto','success');
+}
+
+function renameMetodo(idx, val) {
+  val = val.trim();
+  if (!val) { toast('⚠️ Il nome non può essere vuoto','error'); renderMetodiList(); return; }
+  if (getMetodi().some((m,i) => i !== idx && m.toLowerCase() === val.toLowerCase())) { toast('⚠️ Metodo già presente','error'); renderMetodiList(); return; }
+  const old = DB.global.metodi[idx];
+  DB.global.metodi[idx] = val;
+  Object.values(DB.anni).forEach(anno => anno.transazioni.forEach(t => { if (t.metodo === old) t.metodo = val; }));
+  autoSave(); toast(`✅ Metodo rinominato in "${val}"`, 'success');
+}
+
+function deleteMetodoAt(idx) {
+  const m = DB.global.metodi[idx];
+  const count = Object.values(DB.anni).reduce((s,a) => s + a.transazioni.filter(t => t.metodo === m).length, 0);
+  const msg = count
+    ? `Il metodo "${m}" è usato in ${count} transazioni. Eliminarlo? Le transazioni manterranno il valore attuale.`
+    : `Eliminare il metodo "${m}"?`;
+  showConfirm('Elimina metodo', msg, 'Elimina', () => {
+    DB.global.metodi.splice(idx, 1);
+    autoSave(); renderMetodiList(); toast('🗑️ Metodo eliminato');
+  });
+}
+
+function saveSettings() {
+  DB.global.nome   = document.getElementById('s-nome').value.trim() || 'Utente';
+  DB.global.valuta = document.getElementById('s-valuta').value.trim() || '€';
+  document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+  autoSave(); toast('✅ Impostazioni salvate','success');
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(DB, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `finanze_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  toast('📤 File JSON esportato','success');
+}
+
+function importData(event) {
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      // Accetta sia nuovo formato (global+anni) che vecchio (settings+transazioni)
+      if (!data.global && !data.settings && !data.anni && !data.transazioni)
+        throw new Error('Formato non valido');
+      DB = data;
+      migrateDB(); // Migra il vecchio formato se necessario
+      if (!DB.global || !DB.anni) throw new Error('Formato non valido dopo migrazione');
+      // Re-bucket: sposta le transazioni nell'anno corretto in base al campo "data"
+      // (necessario se erano tutte in un unico bucket, es. anni["2026"] con date del 2025)
+      Object.keys(DB.anni).forEach(annoStr => {
+        const bucket = DB.anni[annoStr];
+        const daRimuovere = [];
+        (bucket.transazioni || []).forEach((t, idx) => {
+          if (!t.data) return;
+          const txAnno = parseInt(t.data.slice(0, 4));
+          if (txAnno !== parseInt(annoStr)) {
+            daRimuovere.push(idx);
+            if (!DB.anni[txAnno]) DB.anni[txAnno] = { transazioni: [], budget: {}, saldiMensili: {} };
+            t.mese = parseInt(t.data.slice(5, 7)) || parseInt(t.mese) || 1;
+            t.importo = parseFloat(t.importo) || 0;
+            DB.anni[txAnno].transazioni.push(t);
+          } else {
+            t.mese = parseInt(t.data.slice(5, 7)) || parseInt(t.mese) || 1;
+            t.importo = parseFloat(t.importo) || 0;
+          }
+        });
+        // Rimuove in ordine inverso per non sfasare gli indici
+        daRimuovere.reverse().forEach(i => bucket.transazioni.splice(i, 1));
+      });
+      // Rimuovi bucket anni rimasti vuoti dopo il re-bucketing
+      Object.keys(DB.anni).forEach(annoStr => {
+        const b = DB.anni[annoStr];
+        if ((b.transazioni||[]).length === 0 && Object.keys(b.budget||{}).length === 0 && Object.keys(b.saldiMensili||{}).length === 0)
+          delete DB.anni[annoStr];
+      });
+      const anni = anniDisponibili();
+      annoAttivo = anni.length ? anni[anni.length-1] : new Date().getFullYear();
+      autoSave(); updateAnnoUI();
+      document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+      renderCurrentPage();
+      toast(`✅ Dati importati (${anni.length} ann${anni.length === 1 ? 'o' : 'i'}: ${anni.join(', ')})`, 'success');
+    } catch(err) { toast('❌ Errore importazione: ' + err.message, 'error'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// INIT
+initDB();
+document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+document.querySelector(`[data-page="${PAGE_ID}"]`).classList.add('active');
+updateAnnoUI();
+renderImpostazioni();
+</script>
+</body>
+</html>

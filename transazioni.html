@@ -1,0 +1,570 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💸 Transazioni — Finanze Personali</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+.cat-suggestion{padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid var(--border);font-size:13px}
+.cat-suggestion:last-child{border-bottom:none}
+.cat-suggestion:hover{background:var(--surface2)}
+#bulk-bar{position:sticky;bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.12);padding:10px 16px;display:none;align-items:center;gap:10px;z-index:50;margin-top:12px}
+.tx-check{width:16px;height:16px;cursor:pointer;accent-color:var(--reddito)}
+</style>
+</head>
+<body>
+
+<button id="nav-toggle" onclick="toggleNav()">☰</button>
+<div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
+
+<nav id="nav">
+  <div class="nav-logo">
+    <h1>💰 Finanze<br><span id="nav-year">—</span></h1>
+    <span>Personali</span>
+  </div>
+  <div id="anno-switcher"></div>
+  <div class="nav-links">
+    <div class="nav-section">Overview</div>
+    <a class="nav-link" href="dashboard.html" data-page="dashboard"><span class="icon">📊</span> Dashboard</a>
+    <a class="nav-link" href="transazioni.html" data-page="transazioni"><span class="icon">💸</span> Transazioni</a>
+    <a class="nav-link" href="report.html" data-page="report"><span class="icon">📈</span> Report</a>
+    <div class="nav-section">Mensile</div>
+    <a class="nav-link" href="mensile.html" data-page="mensile"><span class="icon">📅</span> Mese Corrente</a>
+    <div class="nav-section">Gestione</div>
+    <a class="nav-link" href="budget.html" data-page="budget"><span class="icon">🎯</span> Budget</a>
+    <a class="nav-link" href="programmate.html" data-page="programmate"><span class="icon">🔁</span> Spese Programmate</a>
+    <a class="nav-link" href="categorie.html" data-page="categorie"><span class="icon">🏷️</span> Categorie</a>
+    <a class="nav-link" href="impostazioni.html" data-page="impostazioni"><span class="icon">⚙️</span> Impostazioni</a>
+    <a class="nav-link" href="personalizzazioni.html" data-page="personalizzazioni"><span class="icon">🎨</span> Personalizzazioni</a>
+  </div>
+  <div class="nav-user" id="nav-user">👤 —</div>
+</nav>
+
+<main id="main">
+  <div class="page-header">
+    <h2>Transazioni</h2>
+    <p>Tutti i movimenti dell'anno</p>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+    <div class="filters" id="filters-trans">
+      <div style="display:flex;align-items:center;gap:4px">
+        <label style="font-size:12px;color:var(--text2);white-space:nowrap">Dal</label>
+        <input type="date" id="f-data-da" onchange="renderTransazioni()" style="font-size:13px;padding:5px 8px;border:1px solid var(--border);border-radius:8px;font-family:inherit">
+        <label style="font-size:12px;color:var(--text2);white-space:nowrap">Al</label>
+        <input type="date" id="f-data-a" onchange="renderTransazioni()" style="font-size:13px;padding:5px 8px;border:1px solid var(--border);border-radius:8px;font-family:inherit">
+        <button onclick="document.getElementById('f-data-da').value='';document.getElementById('f-data-a').value='';renderTransazioni()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:8px;background:transparent;cursor:pointer;color:var(--text2)" title="Azzera periodo">✕</button>
+      </div>
+      <div>
+        <select id="f-mese" onchange="renderTransazioni()">
+          <option value="">Tutti i mesi</option>
+          <option value="1">Gennaio</option><option value="2">Febbraio</option>
+          <option value="3">Marzo</option><option value="4">Aprile</option>
+          <option value="5">Maggio</option><option value="6">Giugno</option>
+          <option value="7">Luglio</option><option value="8">Agosto</option>
+          <option value="9">Settembre</option><option value="10">Ottobre</option>
+          <option value="11">Novembre</option><option value="12">Dicembre</option>
+        </select>
+      </div>
+      <div>
+        <select id="f-tipo" onchange="renderTransazioni()">
+          <option value="">Tutti i tipi</option>
+          <option>SPESE</option><option>REDDITO</option>
+          <option>DEBITI</option><option>INVESTIMENTI</option><option>GIROCONTO</option>
+        </select>
+      </div>
+      <div><select id="f-cat" onchange="renderTransazioni()"><option value="">Tutte le categorie</option></select></div>
+      <div><select id="f-conto" onchange="renderTransazioni()"><option value="">Tutti i conti</option></select></div>
+      <div>
+        <select id="f-stato" onchange="renderTransazioni()">
+          <option value="">Tutti gli stati</option>
+          <option>Confermata</option><option>Da confermare</option><option>Programmata</option>
+        </select>
+      </div>
+      <div><input type="text" id="f-search" placeholder="🔍 Cerca..." oninput="renderTransazioni()" style="width:160px"></div>
+    </div>
+    <button class="btn btn-primary" onclick="openForm()">＋ Aggiungi</button>
+  </div>
+  <div id="trans-summary" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px"></div>
+  <div id="bulk-bar">
+    <span id="bulk-count" style="font-size:13px;font-weight:600;flex:1"></span>
+    <button class="btn btn-secondary btn-small" onclick="bulkConferma()">✓ Conferma</button>
+    <button class="btn btn-danger btn-small" onclick="bulkElimina()">🗑️ Elimina</button>
+    <button class="btn btn-secondary btn-small" onclick="deselectAll()">✕ Deseleziona</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:32px"><input type="checkbox" class="tx-check" id="select-all" title="Seleziona tutti" onchange="toggleSelectAll(this)"></th>
+          <th id="th-data" onclick="toggleSort()" style="cursor:pointer;user-select:none">Data <span id="sort-icon">↓</span></th>
+          <th>Tipo</th><th>Categoria</th><th>Descrizione</th>
+          <th>Metodo</th><th>Conto</th><th style="text-align:right">Importo</th>
+          <th>Stato</th><th>Note</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="trans-tbody"></tbody>
+    </table>
+  </div>
+  <div id="trans-empty" class="empty" style="display:none">
+    <div class="icon">📭</div>
+    <p>Nessuna transazione trovata</p>
+  </div>
+</main>
+
+<!-- FORM TRANSAZIONE -->
+<div class="form-modal-backdrop" id="form-backdrop">
+  <div class="form-modal">
+    <h3 id="form-title">➕ Nuova Transazione</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Data *</label>
+        <input type="date" id="f-data" required>
+      </div>
+      <div class="form-group">
+        <label>Tipo *</label>
+        <select id="f-ftipo" onchange="updateCatSelect()" required>
+          <option value="">-- Seleziona --</option>
+          <option>SPESE</option><option>REDDITO</option>
+          <option>DEBITI</option><option>INVESTIMENTI</option><option>GIROCONTO</option>
+        </select>
+      </div>
+      <div class="form-group" id="fg-cat">
+        <label>Categoria *</label>
+        <div id="splits-container"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <button type="button" onclick="addSplit()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;color:var(--text2)">＋ Dividi</button>
+          <span id="splits-remainder" style="display:none;font-size:12px;font-weight:500"></span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Importo (€) *</label>
+        <input type="number" id="f-importo" step="0.01" min="0.01" required oninput="updateSplitRemainder()">
+      </div>
+      <div class="form-group full" style="position:relative">
+        <label>Descrizione *</label>
+        <input type="text" id="f-desc" required placeholder="es. Esselunga, Bar..." oninput="suggerisciCategoria()" autocomplete="off">
+        <div id="cat-suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);z-index:200;max-height:200px;overflow-y:auto"></div>
+      </div>
+      <div class="form-group">
+        <label>Metodo pagamento</label>
+        <select id="f-metodo"></select>
+      </div>
+      <div class="form-group">
+        <label>Conto</label>
+        <select id="f-fconto"></select>
+      </div>
+      <div class="form-group" id="fg-conto-invest" style="display:none">
+        <label>Conto investimento *</label>
+        <select id="f-conto-invest"></select>
+      </div>
+      <div class="form-group" id="fg-conto-dest" style="display:none">
+        <label>A conto *</label>
+        <select id="f-conto-dest"></select>
+      </div>
+      <div class="form-group">
+        <label>Stato</label>
+        <select id="f-fstato">
+          <option>Confermata</option><option>Da confermare</option><option>Programmata</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Note</label>
+        <textarea id="f-note" placeholder="Note opzionali..."></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeForm()">Annulla</button>
+      <button class="btn btn-primary" onclick="saveTransaction()">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirm-backdrop">
+  <div id="confirm-box">
+    <h4 id="confirm-title">Conferma</h4>
+    <p id="confirm-msg"></p>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="confirmReject()">Annulla</button>
+      <button class="btn btn-danger" id="confirm-ok-btn" onclick="confirmAccept()">Elimina</button>
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<script src="db.js"></script>
+<script>
+const PAGE_ID = 'transazioni';
+let sortDir = 'desc';
+let selectedIds = new Set();
+let _txsRendered = 0;
+
+function toggleSort() {
+  sortDir = sortDir === 'desc' ? 'asc' : 'desc';
+  document.getElementById('sort-icon').textContent = sortDir === 'desc' ? '↓' : '↑';
+  renderTransazioni();
+}
+
+function renderCurrentPage() { renderTransazioni(); }
+
+function renderTransazioni() {
+  const catSel = document.getElementById('f-cat'), curCat = catSel.value;
+  catSel.innerHTML = '<option value="">Tutte le categorie</option>';
+  categorieFlat().forEach(({cat}) => { const o = document.createElement('option'); o.value = cat; o.textContent = cat; catSel.appendChild(o); });
+  catSel.value = curCat;
+  populateContoSelect('f-conto', null, true);
+
+  const fMese   = document.getElementById('f-mese').value;
+  const fTipo   = document.getElementById('f-tipo').value;
+  const fCat    = document.getElementById('f-cat').value;
+  const fConto  = document.getElementById('f-conto').value;
+  const fStato  = document.getElementById('f-stato').value;
+  const fSearch = document.getElementById('f-search').value.toLowerCase();
+  const fDa     = document.getElementById('f-data-da').value;
+  const fA      = document.getElementById('f-data-a').value;
+
+  let txs = [...txAnno()];
+  if (fDa)     txs = txs.filter(t => t.data >= fDa);
+  if (fA)      txs = txs.filter(t => t.data <= fA);
+  if (fMese)   txs = txs.filter(t => t.mese == fMese);
+  if (fTipo)   txs = txs.filter(t => t.tipo === fTipo);
+  if (fCat)    txs = txs.filter(t => t.categoria === fCat || (t.splits && t.splits.some(s => s.categoria === fCat)));
+  if (fConto)  txs = txs.filter(t => t.conto === fConto);
+  if (fStato)  txs = txs.filter(t => t.stato === fStato);
+  if (fSearch) txs = txs.filter(t => { const cats = t.splits ? t.splits.map(s=>s.categoria).join(' ') : (t.categoria||''); return (t.descrizione+cats+(t.note||'')).toLowerCase().includes(fSearch); });
+  txs.sort((a,b) => sortDir === 'desc' ? b.data.localeCompare(a.data) : a.data.localeCompare(b.data));
+
+  const conf = txs.filter(txConfirmed);
+  const V = DB.global.valuta;
+  document.getElementById('trans-summary').innerHTML = `
+    <span style="font-size:13px;padding:5px 10px;background:#EFF6FF;color:var(--reddito);border-radius:6px;font-weight:500">💼 ${V} ${fmt(conf.filter(t=>t.tipo==='REDDITO').reduce((s,t)=>s+t.importo,0))}</span>
+    <span style="font-size:13px;padding:5px 10px;background:#FEF2F2;color:var(--spese);border-radius:6px;font-weight:500">💸 ${V} ${fmt(conf.filter(t=>t.tipo==='SPESE').reduce((s,t)=>s+t.importo,0))}</span>
+    <span style="font-size:13px;padding:5px 10px;background:#F5F3FF;color:var(--debiti);border-radius:6px;font-weight:500">💳 ${V} ${fmt(conf.filter(t=>t.tipo==='DEBITI').reduce((s,t)=>s+t.importo,0))}</span>
+    <span style="font-size:13px;padding:5px 10px;background:#F0FDF4;color:var(--investimenti);border-radius:6px;font-weight:500">📈 ${V} ${fmt(conf.filter(t=>t.tipo==='INVESTIMENTI').reduce((s,t)=>s+t.importo,0))}</span>
+    <span style="font-size:13px;padding:5px 10px;background:#F8FAFC;border-radius:6px;color:var(--text2)">${txs.length} transazioni</span>`;
+
+  const tbody = document.getElementById('trans-tbody');
+  if (!txs.length) { tbody.innerHTML = ''; document.getElementById('trans-empty').style.display = 'block'; return; }
+  document.getElementById('trans-empty').style.display = 'none';
+  const amtClass = {REDDITO:'amt-in', SPESE:'amt-out', DEBITI:'amt-debt', INVESTIMENTI:'amt-inv', GIROCONTO:'amt-giro'};
+  const amtSign  = {REDDITO:'+', SPESE:'-', DEBITI:'-', INVESTIMENTI:'±', GIROCONTO:'↔'};
+  const selAll = document.getElementById('select-all');
+  selectedIds = new Set([...selectedIds].filter(id => txs.some(t => t.id === id)));
+  tbody.innerHTML = txs.map(t => `<tr style="${t.stato==='Programmata'?'opacity:.6':''}">
+    <td><input type="checkbox" class="tx-check" value="${t.id}" ${selectedIds.has(t.id)?'checked':''} onchange="onCheckChange(this)"></td>
+    <td class="td-date">${formatDateIt(t.data)}</td>
+    <td><span class="badge badge-${t.tipo}">${t.tipo.slice(0,3)}</span></td>
+    <td>${t.splits&&t.splits.length>1 ? t.splits.map(s=>s.categoria).join(' + ') : (t.categoria||'—')}</td><td>${t.descrizione}</td>
+    <td style="font-size:13px;color:var(--text2)">${t.metodo||'—'}</td>
+    <td style="font-size:13px;color:var(--text2)">${t.tipo==='GIROCONTO' ? t.conto+' → '+t.contoDestinazione : t.conto}</td>
+    <td class="td-num ${amtClass[t.tipo]}">${amtSign[t.tipo]}${V} ${fmt(t.importo)}</td>
+    <td><span class="stato stato-${t.stato}">${t.stato}</span></td>
+    <td style="font-size:13px;color:var(--text2);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.note||'—'}</td>
+    <td style="white-space:nowrap">
+      <button class="btn btn-icon btn-small" onclick="openForm('${t.id}')" title="Modifica">✏️</button>
+      <button class="btn btn-icon btn-small" onclick="duplicaTx('${t.id}')" title="Duplica">📋</button>
+      <button class="btn btn-icon btn-small" onclick="deleteTransaction('${t.id}')" title="Elimina">🗑️</button>
+    </td>
+  </tr>`).join('');
+  _txsRendered = txs.length;
+  updateBulkBar();
+}
+
+function openForm(id) {
+  editingId = id || null;
+  document.getElementById('form-title').textContent = id ? '✏️ Modifica Transazione' : '➕ Nuova Transazione';
+  populateContoSelect('f-fconto');
+  populateMetodoSelect('f-metodo');
+  if (id) {
+    const t = txAnno().find(x => x.id === id);
+    document.getElementById('f-data').value    = t.data;
+    document.getElementById('f-ftipo').value   = t.tipo;
+    updateCatSelect();
+    if (t.tipo !== 'GIROCONTO') initSplits(t.tipo, t.categoria, t.splits);
+    document.getElementById('f-importo').value = t.importo;
+    document.getElementById('f-desc').value    = t.descrizione;
+    document.getElementById('f-metodo').value  = t.metodo || '';
+    document.getElementById('f-fconto').value  = t.conto;
+    document.getElementById('f-fstato').value  = t.stato;
+    document.getElementById('f-note').value    = t.note || '';
+    if (t.tipo === 'INVESTIMENTI') document.getElementById('f-conto-invest').value = t.contoInvest || '';
+    if (t.tipo === 'GIROCONTO') document.getElementById('f-conto-dest').value = t.contoDestinazione || '';
+  } else {
+    const now = new Date();
+    const defaultDate = `${annoAttivo}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    document.getElementById('f-data').value    = defaultDate;
+    document.getElementById('f-ftipo').value   = '';
+    document.getElementById('splits-container').innerHTML = '';
+    document.getElementById('splits-remainder').style.display = 'none';
+    document.getElementById('f-importo').value = '';
+    document.getElementById('f-desc').value    = '';
+    document.getElementById('f-metodo').value  = '';
+    document.getElementById('f-fconto').value  = getConti()[0]?.nome || '';
+    document.getElementById('f-fstato').value  = 'Confermata';
+    document.getElementById('f-note').value    = '';
+  }
+  document.getElementById('form-backdrop').classList.add('open');
+  document.getElementById('f-desc').focus();
+}
+
+function closeForm() { document.getElementById('form-backdrop').classList.remove('open'); }
+
+function _catOptsHtml(tipo, selectedVal) {
+  const cats = DB.global.categorie[tipo] || {};
+  let html = `<option value=""${!selectedVal ? ' selected' : ''}>-- Seleziona --</option>`;
+  for (const [gruppo, arr] of Object.entries(cats)) {
+    if (Object.keys(cats).length > 1) {
+      html += `<optgroup label="${gruppo}">${arr.map(c=>`<option value="${c}"${c===selectedVal?' selected':''}>${c}</option>`).join('')}</optgroup>`;
+    } else {
+      html += arr.map(c=>`<option value="${c}"${c===selectedVal?' selected':''}>${c}</option>`).join('');
+    }
+  }
+  return html;
+}
+
+function _makeSplitRow(tipo, catVal, importoVal, showImporto, showRemove) {
+  const div = document.createElement('div');
+  div.className = 'split-row';
+  div.style.cssText = 'display:flex;gap:8px;align-items:center;margin-bottom:6px';
+  div.innerHTML = `
+    <select class="split-cat" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none" oninput="updateSplitRemainder()">${_catOptsHtml(tipo, catVal||'')}</select>
+    <input type="number" class="split-importo" step="0.01" min="0.01" placeholder="€" value="${importoVal||''}"
+      style="width:90px;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none;${showImporto?'':'display:none'}"
+      oninput="updateSplitRemainder()">
+    <button type="button" onclick="removeSplitRow(this)"
+      style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:transparent;cursor:pointer;color:var(--danger);font-size:16px;line-height:1;${showRemove?'':'visibility:hidden'}" title="Rimuovi">×</button>`;
+  return div;
+}
+
+function initSplits(tipo, catVal, savedSplits) {
+  const container = document.getElementById('splits-container');
+  container.innerHTML = '';
+  document.getElementById('splits-remainder').style.display = 'none';
+  if (!tipo || tipo === 'GIROCONTO') return;
+  if (savedSplits && savedSplits.length > 1) {
+    savedSplits.forEach((s, i) => container.appendChild(_makeSplitRow(tipo, s.categoria, s.importo, true, i > 0)));
+    document.getElementById('splits-remainder').style.display = '';
+    updateSplitRemainder();
+  } else {
+    container.appendChild(_makeSplitRow(tipo, catVal||'', '', false, false));
+  }
+}
+
+function addSplit() {
+  const tipo = document.getElementById('f-ftipo').value;
+  if (!tipo || tipo === 'GIROCONTO') return;
+  const container = document.getElementById('splits-container');
+  const rows = container.querySelectorAll('.split-row');
+  if (!rows.length) return;
+  if (rows.length === 1) {
+    rows[0].querySelector('.split-importo').style.display = '';
+    rows[0].querySelector('.split-importo').value = '';
+  }
+  container.appendChild(_makeSplitRow(tipo, '', '', true, true));
+  document.getElementById('splits-remainder').style.display = '';
+  updateSplitRemainder();
+}
+
+function removeSplitRow(btn) {
+  const container = document.getElementById('splits-container');
+  btn.closest('.split-row').remove();
+  const rows = container.querySelectorAll('.split-row');
+  if (rows.length === 1) {
+    rows[0].querySelector('.split-importo').style.display = 'none';
+    rows[0].querySelector('.split-importo').value = '';
+    document.getElementById('splits-remainder').style.display = 'none';
+  } else {
+    updateSplitRemainder();
+  }
+}
+
+function updateSplitRemainder() {
+  const rows = document.querySelectorAll('.split-row');
+  if (rows.length <= 1) return;
+  const total = parseFloat(document.getElementById('f-importo').value) || 0;
+  let assigned = 0;
+  rows.forEach(r => { assigned += parseFloat(r.querySelector('.split-importo').value) || 0; });
+  const rem = total - assigned;
+  const remEl = document.getElementById('splits-remainder');
+  const V = DB.global.valuta;
+  if (Math.abs(rem) < 0.005) {
+    remEl.textContent = '✓ Completo'; remEl.style.color = 'var(--investimenti)';
+  } else if (rem > 0) {
+    remEl.textContent = `Rimanente: ${V} ${fmt(rem)}`; remEl.style.color = 'var(--warning)';
+  } else {
+    remEl.textContent = `Eccesso: ${V} ${fmt(Math.abs(rem))}`; remEl.style.color = 'var(--spese)';
+  }
+}
+
+function updateCatSelect() {
+  const tipo     = document.getElementById('f-ftipo').value;
+  const isInvest = tipo === 'INVESTIMENTI';
+  const isGiro   = tipo === 'GIROCONTO';
+  document.getElementById('fg-cat').style.display          = isGiro ? 'none' : '';
+  document.getElementById('fg-conto-invest').style.display  = isInvest ? '' : 'none';
+  document.getElementById('fg-conto-dest').style.display    = isGiro ? '' : 'none';
+  if (isGiro) {
+    const selDest = document.getElementById('f-conto-dest');
+    selDest.innerHTML = '<option value="">— Seleziona conto —</option>';
+    getConti().forEach(c => { const o = document.createElement('option'); o.value = c.nome; o.textContent = c.icona + ' ' + c.nome; selDest.appendChild(o); });
+    return;
+  }
+  initSplits(tipo);
+  if (isInvest) {
+    const selInvest = document.getElementById('f-conto-invest');
+    selInvest.innerHTML = '<option value="">— Seleziona conto —</option>';
+    getConti().forEach(c => { const o = document.createElement('option'); o.value = c.nome; o.textContent = c.icona + ' ' + c.nome; selInvest.appendChild(o); });
+  }
+}
+
+function saveTransaction() {
+  const data    = document.getElementById('f-data').value;
+  const tipo    = document.getElementById('f-ftipo').value;
+  const importo = parseFloat(document.getElementById('f-importo').value);
+  const desc    = document.getElementById('f-desc').value.trim();
+  const isGiro  = tipo === 'GIROCONTO';
+  // Leggi splits dal DOM
+  const splitEls = [...document.querySelectorAll('.split-row')];
+  const isMultiSplit = splitEls.length > 1;
+  let cat, splits;
+  if (isGiro) {
+    cat = 'Giroconto'; splits = undefined;
+  } else if (isMultiSplit) {
+    splits = splitEls.map(r => ({ categoria: r.querySelector('.split-cat').value, importo: parseFloat(r.querySelector('.split-importo').value)||0 }));
+    if (splits.some(s => !s.categoria)) { toast('⚠️ Seleziona tutte le categorie nelle suddivisioni','error'); return; }
+    const splitSum = splits.reduce((s,x)=>s+x.importo,0);
+    if (Math.abs(splitSum - importo) > 0.01) { toast(`⚠️ La somma delle categorie (${fmtEur(splitSum)}) deve uguagliare l'importo totale (${fmtEur(importo)})`,'error'); return; }
+    cat = splits[0].categoria;
+  } else {
+    cat = splitEls[0]?.querySelector('.split-cat').value || '';
+    splits = undefined;
+  }
+  if (!data||!tipo||(!isGiro&&!cat)||!desc||isNaN(importo)||importo<=0) { toast('⚠️ Compila tutti i campi obbligatori','error'); return; }
+  const annoTx = parseInt(data.split('-')[0]);
+  if (annoTx !== annoAttivo) { toast(`⚠️ La data deve essere nell'anno ${annoAttivo}`,'error'); return; }
+  const mese = parseInt(data.split('-')[1]);
+  const contoInvest = tipo === 'INVESTIMENTI' ? document.getElementById('f-conto-invest').value : '';
+  if (tipo === 'INVESTIMENTI' && !contoInvest) { toast('⚠️ Seleziona il conto investimento','error'); return; }
+  const contoDa = document.getElementById('f-fconto').value;
+  const contoDestinazione = isGiro ? document.getElementById('f-conto-dest').value : '';
+  if (isGiro && !contoDestinazione) { toast('⚠️ Seleziona il conto di destinazione','error'); return; }
+  if (isGiro && contoDa === contoDestinazione) { toast('⚠️ Il conto di origine e destinazione devono essere diversi','error'); return; }
+  const t = { id:editingId||uid(), data, mese, tipo, categoria:cat, descrizione:desc, importo,
+    splits,
+    metodo:document.getElementById('f-metodo').value,
+    conto:contoDa,
+    contoInvest,
+    contoDestinazione,
+    note:document.getElementById('f-note').value.trim(),
+    stato:document.getElementById('f-fstato').value };
+  if (editingId) {
+    const idx = annoData().transazioni.findIndex(x => x.id === editingId);
+    annoData().transazioni[idx] = t;
+    toast('✅ Transazione aggiornata','success');
+  } else {
+    annoData().transazioni.push(t);
+    addCommissioneBonifico(t);
+    toast('✅ Transazione aggiunta','success');
+  }
+  closeForm(); autoSave(); renderCurrentPage();
+}
+
+// ── SELEZIONE MULTIPLA ────────────────────────────────────────────
+function onCheckChange(cb) {
+  if (cb.checked) selectedIds.add(cb.value); else selectedIds.delete(cb.value);
+  updateBulkBar();
+}
+function toggleSelectAll(cb) {
+  document.querySelectorAll('.tx-check:not(#select-all)').forEach(c => {
+    c.checked = cb.checked;
+    if (cb.checked) selectedIds.add(c.value); else selectedIds.delete(c.value);
+  });
+  updateBulkBar();
+}
+function deselectAll() {
+  selectedIds.clear();
+  document.querySelectorAll('.tx-check').forEach(c => c.checked = false);
+  updateBulkBar();
+}
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  const n = selectedIds.size;
+  bar.style.display = n > 0 ? 'flex' : 'none';
+  document.getElementById('bulk-count').textContent = `${n} transazion${n===1?'e':'i'} selezionat${n===1?'a':'e'}`;
+  const sa = document.getElementById('select-all');
+  if (sa) { sa.checked = n > 0 && n >= _txsRendered; sa.indeterminate = n > 0 && n < _txsRendered; }
+}
+function bulkConferma() {
+  if (!selectedIds.size) return;
+  selectedIds.forEach(id => { const t = txAnno().find(x=>x.id===id); if (t) t.stato='Confermata'; });
+  toast(`✅ ${selectedIds.size} transazioni confermate`, 'success');
+  deselectAll(); autoSave(); renderCurrentPage();
+}
+function bulkElimina() {
+  if (!selectedIds.size) return;
+  showConfirm('Elimina transazioni', `Eliminare ${selectedIds.size} transazioni selezionate?`, 'Elimina', () => {
+    annoData().transazioni = annoData().transazioni.filter(t => !selectedIds.has(t.id));
+    toast(`🗑️ ${selectedIds.size} transazioni eliminate`);
+    deselectAll(); autoSave(); renderCurrentPage();
+  });
+}
+
+// ── DUPLICA ───────────────────────────────────────────────────────
+function duplicaTx(id) {
+  const t = txAnno().find(x => x.id === id); if (!t) return;
+  annoData().transazioni.push({...t, id: uid(), stato: 'Da confermare'});
+  autoSave(); renderCurrentPage();
+  toast('📋 Transazione duplicata — modifica se necessario', 'success');
+}
+
+// ── SUGGERIMENTO CATEGORIA ────────────────────────────────────────
+function suggerisciCategoria() {
+  const val = document.getElementById('f-desc').value.trim().toLowerCase();
+  const div = document.getElementById('cat-suggestions');
+  if (val.length < 2) { div.style.display = 'none'; return; }
+  const freq = {};
+  Object.values(DB.anni).forEach(a => a.transazioni.forEach(t => {
+    if (!t.descrizione || !t.tipo || !t.categoria) return;
+    const k = t.descrizione.toLowerCase();
+    if (!k.includes(val)) return;
+    const combo = t.tipo + '|' + t.categoria + '|' + t.descrizione;
+    freq[combo] = (freq[combo] || 0) + 1;
+  }));
+  const results = Object.entries(freq)
+    .sort((a,b) => b[1]-a[1]).slice(0,6)
+    .map(([k]) => { const [tipo,cat,desc] = k.split('|'); return {tipo,cat,desc}; });
+  if (!results.length) { div.style.display = 'none'; return; }
+  div.innerHTML = results.map(r =>
+    `<div class="cat-suggestion" onmousedown="applySuggestion('${r.tipo}','${r.cat.replace(/'/g,"\\'")}','${r.desc.replace(/'/g,"\\'")}')">
+      <span>${r.desc}</span>
+      <span style="font-size:11px;color:var(--text2);white-space:nowrap">${r.tipo} › ${r.cat}</span>
+    </div>`
+  ).join('');
+  div.style.display = 'block';
+}
+function applySuggestion(tipo, cat, desc) {
+  document.getElementById('f-desc').value = desc;
+  document.getElementById('f-ftipo').value = tipo;
+  updateCatSelect();
+  setTimeout(() => {
+    const firstCat = document.querySelector('#splits-container .split-cat');
+    if (firstCat) firstCat.value = cat;
+  }, 0);
+  document.getElementById('cat-suggestions').style.display = 'none';
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#cat-suggestions') && e.target.id !== 'f-desc')
+    document.getElementById('cat-suggestions').style.display = 'none';
+});
+
+// INIT
+initDB();
+document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+document.querySelector(`[data-page="${PAGE_ID}"]`).classList.add('active');
+updateAnnoUI();
+document.getElementById('f-stato').value = 'Confermata';
+renderTransazioni();
+</script>
+</body>
+</html>

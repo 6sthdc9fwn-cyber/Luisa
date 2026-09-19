@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏷️ Categorie — Finanze Personali</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<button id="nav-toggle" onclick="toggleNav()">☰</button>
+<div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
+
+<nav id="nav">
+  <div class="nav-logo">
+    <h1>💰 Finanze<br><span id="nav-year">—</span></h1>
+    <span>Personali</span>
+  </div>
+  <div id="anno-switcher"></div>
+  <div class="nav-links">
+    <div class="nav-section">Overview</div>
+    <a class="nav-link" href="dashboard.html" data-page="dashboard"><span class="icon">📊</span> Dashboard</a>
+    <a class="nav-link" href="transazioni.html" data-page="transazioni"><span class="icon">💸</span> Transazioni</a>
+    <a class="nav-link" href="report.html" data-page="report"><span class="icon">📈</span> Report</a>
+    <div class="nav-section">Mensile</div>
+    <a class="nav-link" href="mensile.html" data-page="mensile"><span class="icon">📅</span> Mese Corrente</a>
+    <div class="nav-section">Gestione</div>
+    <a class="nav-link" href="budget.html" data-page="budget"><span class="icon">🎯</span> Budget</a>
+    <a class="nav-link" href="programmate.html" data-page="programmate"><span class="icon">🔁</span> Spese Programmate</a>
+    <a class="nav-link" href="categorie.html" data-page="categorie"><span class="icon">🏷️</span> Categorie</a>
+    <a class="nav-link" href="impostazioni.html" data-page="impostazioni"><span class="icon">⚙️</span> Impostazioni</a>
+    <a class="nav-link" href="personalizzazioni.html" data-page="personalizzazioni"><span class="icon">🎨</span> Personalizzazioni</a>
+  </div>
+  <div class="nav-user" id="nav-user">👤 —</div>
+</nav>
+
+<main id="main">
+  <div class="page-header">
+    <h2>Categorie</h2>
+    <p>Gestisci le categorie di transazione</p>
+  </div>
+  <div class="cat-grid" id="cat-grid"></div>
+</main>
+
+<div id="confirm-backdrop">
+  <div id="confirm-box">
+    <h4 id="confirm-title">Conferma</h4>
+    <p id="confirm-msg"></p>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="confirmReject()">Annulla</button>
+      <button class="btn btn-danger" id="confirm-ok-btn" onclick="confirmAccept()">Elimina</button>
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<script src="db.js"></script>
+<script>
+const PAGE_ID = 'categorie';
+
+function renderCurrentPage() { renderCategorie(); }
+
+function renderCategorie() {
+  const configs = [
+    {tipo:'SPESE',       label:'💸 Spese',        cls:'spese'},
+    {tipo:'REDDITO',     label:'💼 Reddito',       cls:'reddito'},
+    {tipo:'DEBITI',      label:'💳 Debiti',        cls:'debiti'},
+    {tipo:'INVESTIMENTI',label:'📈 Investimenti',  cls:'investimenti'}
+  ];
+  document.getElementById('cat-grid').innerHTML = configs.map(cfg => {
+    const cats    = DB.global.categorie[cfg.tipo];
+    const gruppi  = Object.keys(cats);
+    const hasGroups = gruppi.length > 1;
+    let items = '';
+    for (const [gruppo, arr] of Object.entries(cats)) {
+      if (hasGroups) items += `<div style="padding:8px 16px 4px;font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase">${gruppo}</div>`;
+      items += arr.map(c => `<div class="cat-item"><span>${c}</span><button onclick="deleteCat('${cfg.tipo}','${gruppo}','${c}')" title="Elimina">×</button></div>`).join('');
+    }
+    let addForm = '';
+    if (hasGroups) {
+      const optsGruppo = gruppi.map(g => `<option value="${g}">${g}</option>`).join('');
+      addForm = `<div class="cat-add" style="flex-wrap:wrap;gap:6px">
+        <select id="cat-gruppo-${cfg.tipo}" style="padding:7px 8px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;outline:none;min-height:40px">${optsGruppo}</select>
+        <input type="text" id="cat-input-${cfg.tipo}" placeholder="Nome categoria..." style="flex:1;min-width:100px" onkeypress="if(event.key==='Enter')addCatConGruppo('${cfg.tipo}')">
+        <button class="btn btn-primary btn-small" onclick="addCatConGruppo('${cfg.tipo}')">＋</button>
+      </div>`;
+    } else {
+      const firstGroup = gruppi[0];
+      addForm = `<div class="cat-add">
+        <input type="text" id="cat-input-${cfg.tipo}" placeholder="Nuova categoria..." onkeypress="if(event.key==='Enter')addCat('${cfg.tipo}','${firstGroup}')">
+        <button class="btn btn-primary btn-small" onclick="addCat('${cfg.tipo}','${firstGroup}')">＋</button>
+      </div>`;
+    }
+    return `<div class="cat-group-card">
+      <div class="cat-group-header ${cfg.cls}"><span>${cfg.label}</span><span style="font-size:12px;opacity:.7">${Object.values(cats).flat().length} cat.</span></div>
+      ${items}${addForm}
+    </div>`;
+  }).join('');
+}
+
+function addCatConGruppo(tipo) {
+  const sel    = document.getElementById('cat-gruppo-' + tipo);
+  const gruppo = sel ? sel.value : Object.keys(DB.global.categorie[tipo])[0];
+  addCat(tipo, gruppo);
+}
+
+function addCat(tipo, gruppo) {
+  const inp  = document.getElementById('cat-input-' + tipo);
+  const nome = inp.value.trim();
+  if (!nome) { toast('⚠️ Inserisci un nome','error'); return; }
+  if (!DB.global.categorie[tipo][gruppo]) DB.global.categorie[tipo][gruppo] = [];
+  const tutteLeCat = Object.values(DB.global.categorie[tipo]).flat();
+  if (tutteLeCat.includes(nome)) { toast('⚠️ Categoria già esistente in questo tipo','error'); return; }
+  DB.global.categorie[tipo][gruppo].push(nome);
+  inp.value = '';
+  autoSave(); renderCategorie();
+  toast(`✅ "${nome}" aggiunta al gruppo ${gruppo}`,'success');
+}
+
+function deleteCat(tipo, gruppo, cat) {
+  showConfirm('Elimina categoria', `Eliminare "${cat}"? Le transazioni esistenti non saranno modificate.`, 'Elimina', () => {
+    DB.global.categorie[tipo][gruppo] = DB.global.categorie[tipo][gruppo].filter(c => c !== cat);
+    autoSave(); renderCategorie(); toast('🗑️ Categoria eliminata');
+  });
+}
+
+// INIT
+initDB();
+document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+document.querySelector(`[data-page="${PAGE_ID}"]`).classList.add('active');
+updateAnnoUI();
+renderCategorie();
+</script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔁 Programmate — Finanze Personali</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<button id="nav-toggle" onclick="toggleNav()">☰</button>
+<div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
+
+<nav id="nav">
+  <div class="nav-logo">
+    <h1>💰 Finanze<br><span id="nav-year">—</span></h1>
+    <span>Personali</span>
+  </div>
+  <div id="anno-switcher"></div>
+  <div class="nav-links">
+    <div class="nav-section">Overview</div>
+    <a class="nav-link" href="dashboard.html" data-page="dashboard"><span class="icon">📊</span> Dashboard</a>
+    <a class="nav-link" href="transazioni.html" data-page="transazioni"><span class="icon">💸</span> Transazioni</a>
+    <a class="nav-link" href="report.html" data-page="report"><span class="icon">📈</span> Report</a>
+    <div class="nav-section">Mensile</div>
+    <a class="nav-link" href="mensile.html" data-page="mensile"><span class="icon">📅</span> Mese Corrente</a>
+    <div class="nav-section">Gestione</div>
+    <a class="nav-link" href="budget.html" data-page="budget"><span class="icon">🎯</span> Budget</a>
+    <a class="nav-link" href="programmate.html" data-page="programmate"><span class="icon">🔁</span> Spese Programmate</a>
+    <a class="nav-link" href="categorie.html" data-page="categorie"><span class="icon">🏷️</span> Categorie</a>
+    <a class="nav-link" href="impostazioni.html" data-page="impostazioni"><span class="icon">⚙️</span> Impostazioni</a>
+    <a class="nav-link" href="personalizzazioni.html" data-page="personalizzazioni"><span class="icon">🎨</span> Personalizzazioni</a>
+  </div>
+  <div class="nav-user" id="nav-user">👤 —</div>
+</nav>
+
+<main id="main">
+  <div class="page-header">
+    <h2>Spese Programmate</h2>
+    <p>Regole ricorrenti — le transazioni vengono generate automaticamente con stato "Programmata"</p>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+    <button class="btn btn-secondary" onclick="generaTutteLeRegole()" style="background:#EFF6FF;color:var(--reddito);border:1px solid #BFDBFE">
+      ⚡ Genera transazioni per il <span id="anno-genera"></span>
+    </button>
+    <button class="btn btn-primary" onclick="openProgForm()">＋ Nuova regola</button>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+      <table class="prog-table">
+        <thead>
+          <tr>
+            <th>Descrizione / Data</th><th>Categoria</th><th>Tipo</th>
+            <th style="text-align:right">Importo</th><th>Conto</th>
+            <th>Periodicità / Range</th><th>Date</th><th>Stato</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="prog-tbody"></tbody>
+      </table>
+    </div>
+    <div id="prog-empty" class="empty" style="display:none">
+      <div class="icon">🔁</div>
+      <p>Nessuna spesa programmata</p>
+    </div>
+  </div>
+</main>
+
+<!-- FORM SPESA PROGRAMMATA -->
+<div class="form-modal-backdrop" id="prog-backdrop">
+  <div class="form-modal">
+    <h3 id="prog-form-title">🔁 Nuova Spesa Programmata</h3>
+    <div class="form-grid">
+      <div class="form-group full"><label>Descrizione *</label><input type="text" id="pf-desc" required></div>
+      <div class="form-group">
+        <label>Tipo *</label>
+        <select id="pf-tipo" onchange="updateProgCatSelect()" required>
+          <option value="">--</option><option>SPESE</option><option>REDDITO</option>
+          <option>DEBITI</option><option>INVESTIMENTI</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Categoria *</label><select id="pf-cat" required><option value="">--</option></select></div>
+      <div class="form-group"><label>Importo (€) *</label><input type="number" id="pf-importo" step="0.01" min="0.01" required></div>
+      <div class="form-group"><label>Metodo pagamento</label><select id="pf-metodo"></select></div>
+      <div class="form-group"><label>Conto</label><select id="pf-conto"></select></div>
+      <div class="form-group">
+        <label>Periodicità *</label>
+        <select id="pf-periodicita" required>
+          <option>Mensile</option><option>Settimanale</option><option>Bi-mensile</option>
+          <option>Trimestrale</option><option>Semestrale</option><option>Annuale</option>
+          <option>Una volta sola</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Data inizio *</label><input type="date" id="pf-inizio" required></div>
+      <div class="form-group"><label>Giorno del mese</label><input type="number" id="pf-giorno" min="1" max="31" placeholder="es. 15"></div>
+      <div class="form-group"><label>Data fine (opz.)</label><input type="date" id="pf-fine"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeProgForm()">Annulla</button>
+      <button class="btn btn-primary" onclick="saveProgRule()">💾 Salva</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirm-backdrop">
+  <div id="confirm-box">
+    <h4 id="confirm-title">Conferma</h4>
+    <p id="confirm-msg"></p>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="confirmReject()">Annulla</button>
+      <button class="btn btn-danger" id="confirm-ok-btn" onclick="confirmAccept()">Elimina</button>
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<script src="db.js"></script>
+<script>
+const PAGE_ID = 'programmate';
+const expandedRules = new Set();
+
+function renderCurrentPage() { renderProgrammate(); }
+
+function toggleRule(ruleId) {
+  if (expandedRules.has(ruleId)) expandedRules.delete(ruleId);
+  else expandedRules.add(ruleId);
+  renderProgrammate();
+}
+
+function generaTutteLeRegole() {
+  const prog = DB.global.programmate || [];
+  if (!prog.length) { toast('⚠️ Nessuna regola configurata','error'); return; }
+  let totale = 0;
+  prog.forEach(p => { totale += generaTransazioniRegola(p, annoAttivo); });
+  autoSave(); renderProgrammate();
+  if (totale > 0) toast(`✅ ${totale} transazione/i generate per il ${annoAttivo}`,'success');
+  else toast('ℹ️ Nessuna nuova transazione da generare (già tutte presenti)','');
+}
+
+function renderProgrammate() {
+  const ag = document.getElementById('anno-genera');
+  if (ag) ag.textContent = annoAttivo;
+
+  const tbody = document.getElementById('prog-tbody');
+  const prog  = DB.global.programmate || [];
+  const V     = DB.global.valuta;
+  const todayStr = new Date().toISOString().slice(0,10);
+
+  if (!prog.length) {
+    tbody.innerHTML = '';
+    document.getElementById('prog-empty').style.display = 'block';
+    return;
+  }
+  document.getElementById('prog-empty').style.display = 'none';
+
+  let html = '';
+  prog.forEach(p => {
+    const txRegola  = txAnno().filter(t => t._regolaId === p.id).sort((a,b) => a.data.localeCompare(b.data));
+    const nConf     = txRegola.filter(t => t.stato === 'Confermata').length;
+    const nProg     = txRegola.filter(t => t.stato !== 'Confermata').length;
+    const isExpanded = expandedRules.has(p.id);
+    const hide      = isExpanded ? '' : 'display:none;';
+
+    // Riga regola — cliccabile per espandere/collassare
+    html += `<tr style="background:#F8FAFC;border-top:2px solid var(--border);cursor:pointer" onclick="toggleRule('${p.id}')">
+      <td style="font-weight:600">
+        <span style="font-size:11px;margin-right:6px;color:var(--text2);display:inline-block;width:12px">${isExpanded ? '▼' : '▶'}</span>
+        ${p.descrizione}
+        <span style="font-size:12px;font-weight:400;color:var(--text2);margin-left:6px">${txRegola.length} rate</span>
+      </td>
+      <td>${p.categoria}</td>
+      <td><span class="badge badge-${p.tipo}">${p.tipo.slice(0,3)}</span></td>
+      <td class="td-num" style="font-weight:600">${V} ${fmt(p.importo)}</td>
+      <td>${p.conto}</td>
+      <td>${p.periodicita}</td>
+      <td style="font-size:13px;color:var(--text2)">${p.dataInizio} → ${p.dataFine||'∞'}</td>
+      <td style="font-size:13px">
+        <span style="color:var(--success)">✅ ${nConf}</span>
+        <span style="color:var(--text2);margin-left:6px">⏳ ${nProg}</span>
+      </td>
+      <td onclick="event.stopPropagation()">
+        <button class="btn btn-icon btn-small" onclick="openProgForm('${p.id}')" title="Modifica">✏️</button>
+        <button class="btn btn-icon btn-small" onclick="deleteProgRule('${p.id}')" title="Elimina">🗑️</button>
+      </td>
+    </tr>`;
+
+    // Righe rate — visibili solo se espanso
+    if (txRegola.length === 0) {
+      html += `<tr style="${hide}"><td colspan="9" style="padding:6px 14px 10px;font-size:13px;color:var(--text2);font-style:italic;background:#FAFAFA">
+        Nessuna transazione generata — clicca "Genera transazioni" per crearle
+      </td></tr>`;
+    } else {
+      txRegola.forEach(t => {
+        const passata    = t.data <= todayStr;
+        const statoLabel = t.stato === 'Confermata'
+          ? `<span class="stato stato-Confermata">✅ Confermata</span>`
+          : passata
+            ? `<span class="stato" style="background:#FEE2E2;color:var(--danger)">❌ Da confermare</span>`
+            : `<span class="stato stato-Programmata">⏳ Programmata</span>`;
+        const btnConferma = t.stato !== 'Confermata'
+          ? `<button class="btn btn-small" style="background:#DCFCE7;color:#166534;min-height:32px" onclick="confermaTx('${t.id}')" title="Conferma">✓ Pagata</button>`
+          : '';
+        html += `<tr style="${hide}font-size:13px;${t.stato==='Confermata'?'opacity:.5':''}">
+          <td style="padding-left:32px;color:var(--text2);background:#FAFAFA">↳ ${formatDateIt(t.data)}</td>
+          <td style="background:#FAFAFA">${t.categoria}</td>
+          <td style="background:#FAFAFA"></td>
+          <td class="td-num" style="background:#FAFAFA">${V} ${fmt(t.importo)}</td>
+          <td style="background:#FAFAFA">${t.conto}</td>
+          <td style="background:#FAFAFA"></td>
+          <td style="background:#FAFAFA"></td>
+          <td style="background:#FAFAFA">${statoLabel}</td>
+          <td style="background:#FAFAFA">${btnConferma}<button class="btn btn-icon btn-small" onclick="deleteTransaction('${t.id}')" title="Elimina">🗑️</button></td>
+        </tr>`;
+      });
+    }
+  });
+  tbody.innerHTML = html;
+}
+
+function openProgForm(id) {
+  editingProgId = id || null;
+  document.getElementById('prog-form-title').textContent = id ? '✏️ Modifica Regola' : '🔁 Nuova Spesa Programmata';
+  populateContoSelect('pf-conto');
+  populateMetodoSelect('pf-metodo');
+  if (id) {
+    const p = DB.global.programmate.find(x => x.id === id);
+    document.getElementById('pf-desc').value        = p.descrizione;
+    document.getElementById('pf-tipo').value        = p.tipo;
+    updateProgCatSelect();
+    document.getElementById('pf-cat').value         = p.categoria;
+    document.getElementById('pf-importo').value     = p.importo;
+    document.getElementById('pf-metodo').value      = p.metodo || '';
+    document.getElementById('pf-conto').value       = p.conto;
+    document.getElementById('pf-periodicita').value = p.periodicita;
+    document.getElementById('pf-inizio').value      = p.dataInizio;
+    document.getElementById('pf-giorno').value      = p.giornoMese || '';
+    document.getElementById('pf-fine').value        = p.dataFine || '';
+  } else {
+    ['pf-desc','pf-importo','pf-giorno','pf-fine'].forEach(i => document.getElementById(i).value = '');
+    document.getElementById('pf-tipo').value  = '';
+    document.getElementById('pf-cat').innerHTML = '<option value="">--</option>';
+    document.getElementById('pf-inizio').value = `${annoAttivo}-01-01`;
+  }
+  document.getElementById('prog-backdrop').classList.add('open');
+}
+
+function closeProgForm() { document.getElementById('prog-backdrop').classList.remove('open'); }
+
+function updateProgCatSelect() {
+  const tipo = document.getElementById('pf-tipo').value;
+  const sel  = document.getElementById('pf-cat');
+  sel.innerHTML = '<option value="">--</option>';
+  if (!tipo) return;
+  allCategorie(tipo).forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });
+}
+
+function saveProgRule() {
+  const desc    = document.getElementById('pf-desc').value.trim();
+  const tipo    = document.getElementById('pf-tipo').value;
+  const cat     = document.getElementById('pf-cat').value;
+  const importo = parseFloat(document.getElementById('pf-importo').value);
+  if (!desc||!tipo||!cat||isNaN(importo)||importo<=0) { toast('⚠️ Compila tutti i campi obbligatori','error'); return; }
+  const p = {
+    id: editingProgId || pidx(),
+    descrizione: desc, tipo, categoria: cat, importo,
+    metodo: document.getElementById('pf-metodo').value,
+    conto: document.getElementById('pf-conto').value,
+    periodicita: document.getElementById('pf-periodicita').value,
+    dataInizio: document.getElementById('pf-inizio').value,
+    giornoMese: parseInt(document.getElementById('pf-giorno').value) || null,
+    dataFine: document.getElementById('pf-fine').value || null
+  };
+  if (!DB.global.programmate) DB.global.programmate = [];
+  if (editingProgId) {
+    const idx = DB.global.programmate.findIndex(x => x.id === editingProgId);
+    DB.global.programmate[idx] = p;
+    toast('✅ Regola aggiornata','success');
+  } else {
+    DB.global.programmate.push(p);
+    toast('✅ Regola aggiunta','success');
+  }
+  closeProgForm();
+  const n = generaTransazioniRegola(p, annoAttivo);
+  if (n > 0) toast(`+ ${n} transazione/i generate per ${annoAttivo}`,'success');
+  autoSave(); renderProgrammate();
+}
+
+function editProgRule(id) { openProgForm(id); }
+
+function deleteProgRule(id) {
+  const p   = DB.global.programmate.find(x => x.id === id);
+  const nTx = txAnno().filter(t => t._regolaId === id && t.stato === 'Programmata').length;
+  const msg = nTx
+    ? `Eliminare la regola "${p.descrizione}"? Verranno eliminate anche ${nTx} transazione/i Programmate.`
+    : `Eliminare la regola "${p.descrizione}"?`;
+  showConfirm('Elimina regola', msg, 'Elimina', () => {
+    DB.global.programmate = DB.global.programmate.filter(x => x.id !== id);
+    annoData().transazioni = annoData().transazioni.filter(t => !(t._regolaId === id && t.stato === 'Programmata'));
+    autoSave(); renderProgrammate(); toast('🗑️ Regola eliminata');
+  });
+}
+
+// INIT
+initDB();
+document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+document.querySelector(`[data-page="${PAGE_ID}"]`).classList.add('active');
+updateAnnoUI();
+renderProgrammate();
+</script>
+</body>
+</html>

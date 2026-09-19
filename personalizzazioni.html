@@ -1,0 +1,316 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎨 Personalizzazioni — Finanze Personali</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=Inter:wght@300;400;500;600&family=Roboto:wght@300;400;500;600&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<button id="nav-toggle" onclick="toggleNav()">☰</button>
+<div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
+
+<nav id="nav">
+  <div class="nav-logo">
+    <h1>💰 Finanze<br><span id="nav-year">—</span></h1>
+    <span>Personali</span>
+  </div>
+  <div id="anno-switcher"></div>
+  <div class="nav-links">
+    <div class="nav-section">Overview</div>
+    <a class="nav-link" href="dashboard.html" data-page="dashboard"><span class="icon">📊</span> Dashboard</a>
+    <a class="nav-link" href="transazioni.html" data-page="transazioni"><span class="icon">💸</span> Transazioni</a>
+    <a class="nav-link" href="report.html" data-page="report"><span class="icon">📈</span> Report</a>
+    <div class="nav-section">Mensile</div>
+    <a class="nav-link" href="mensile.html" data-page="mensile"><span class="icon">📅</span> Mese Corrente</a>
+    <div class="nav-section">Gestione</div>
+    <a class="nav-link" href="budget.html" data-page="budget"><span class="icon">🎯</span> Budget</a>
+    <a class="nav-link" href="programmate.html" data-page="programmate"><span class="icon">🔁</span> Spese Programmate</a>
+    <a class="nav-link" href="categorie.html" data-page="categorie"><span class="icon">🏷️</span> Categorie</a>
+    <a class="nav-link" href="impostazioni.html" data-page="impostazioni"><span class="icon">⚙️</span> Impostazioni</a>
+    <a class="nav-link" href="personalizzazioni.html" data-page="personalizzazioni"><span class="icon">🎨</span> Personalizzazioni</a>
+  </div>
+  <div class="nav-user" id="nav-user">👤 —</div>
+</nav>
+
+<main id="main">
+  <div class="page-header">
+    <h2>Personalizzazioni</h2>
+    <p>Aspetto, colori, gruppi spese e grafico mensile</p>
+  </div>
+
+  <!-- ASPETTO -->
+  <div class="card card-pad" style="margin-bottom:20px">
+    <h3 style="font-size:16px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)">🎨 Aspetto</h3>
+
+    <div class="setting-row">
+      <label>Font</label>
+      <select id="p-font" title="Seleziona font" onchange="onFontChange()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;min-height:44px">
+        <option value="'DM Sans', sans-serif">DM Sans (predefinito)</option>
+        <option value="'Inter', sans-serif">Inter</option>
+        <option value="'Roboto', sans-serif">Roboto</option>
+        <option value="'Open Sans', sans-serif">Open Sans</option>
+        <option value="system-ui, sans-serif">System UI</option>
+        <option value="Georgia, serif">Georgia (serif)</option>
+      </select>
+    </div>
+
+    <div style="margin-top:20px">
+      <p style="font-size:13px;font-weight:500;color:var(--text2);margin-bottom:14px;text-transform:uppercase;letter-spacing:.06em">Colori base</p>
+      <div class="color-pickers-grid" id="colori-base-grid">
+        <div class="color-picker-item">
+          <div class="color-swatch" id="sw-reddito"></div>
+          <label>Entrate</label>
+          <input type="color" id="c-reddito" onchange="onColorChange('reddito',this.value)">
+        </div>
+        <div class="color-picker-item">
+          <div class="color-swatch" id="sw-spese"></div>
+          <label>Spese</label>
+          <input type="color" id="c-spese" onchange="onColorChange('spese',this.value)">
+        </div>
+        <div class="color-picker-item">
+          <div class="color-swatch" id="sw-debiti"></div>
+          <label>Debiti</label>
+          <input type="color" id="c-debiti" onchange="onColorChange('debiti',this.value)">
+        </div>
+        <div class="color-picker-item">
+          <div class="color-swatch" id="sw-investimenti"></div>
+          <label>Investimenti</label>
+          <input type="color" id="c-investimenti" onchange="onColorChange('investimenti',this.value)">
+        </div>
+        <div class="color-picker-item">
+          <div class="color-swatch" id="sw-oro"></div>
+          <label>Accento</label>
+          <input type="color" id="c-oro" onchange="onColorChange('oro',this.value)">
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-small" style="margin-top:14px" onclick="resetColoriBase()">↺ Ripristina colori predefiniti</button>
+    </div>
+  </div>
+
+  <!-- GRUPPI SPESE -->
+  <div class="card card-pad" style="margin-bottom:20px">
+    <h3 style="font-size:16px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)">🏷️ Gruppi Spese</h3>
+    <div id="gruppi-list"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+      <input type="text" id="new-gruppo-nome" placeholder="Nome nuovo gruppo..." style="flex:1;min-width:140px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;min-height:44px">
+      <input type="color" id="new-gruppo-colore" value="#6366F1" title="Colore gruppo" style="width:44px;height:44px;border:1px solid var(--border);border-radius:8px;cursor:pointer;padding:2px">
+      <button class="btn btn-primary" onclick="addGruppo()">＋ Aggiungi gruppo</button>
+    </div>
+  </div>
+
+  <!-- GRAFICO MENSILE -->
+  <div class="card card-pad">
+    <h3 style="font-size:16px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)">📊 Grafico Mensile (Dashboard)</h3>
+
+    <div class="setting-row">
+      <label>Tipo di grafico</label>
+      <div style="display:flex;gap:20px;align-items:center">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:400">
+          <input type="radio" name="g-tipo" value="barre" onchange="saveGrafico()"> Barre
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:400">
+          <input type="radio" name="g-tipo" value="linee" onchange="saveGrafico()"> Linee
+        </label>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label>Colore entrate / serie 1</label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="color" id="c-g1" title="Colore entrate" onchange="saveGrafico()" style="width:40px;height:36px;border:1px solid var(--border);border-radius:6px;cursor:pointer;padding:2px">
+        <button class="btn btn-secondary btn-small" onclick="document.getElementById('c-g1').value='';saveGrafico()">Auto</button>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <label>Colore spese / serie 2</label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="color" id="c-g2" title="Colore spese" onchange="saveGrafico()" style="width:40px;height:36px;border:1px solid var(--border);border-radius:6px;cursor:pointer;padding:2px">
+        <button class="btn btn-secondary btn-small" onclick="document.getElementById('c-g2').value='';saveGrafico()">Auto</button>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+      <p style="font-size:13px;font-weight:500;color:var(--text2);margin-bottom:14px;text-transform:uppercase;letter-spacing:.06em">Filtro report predefinito</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:400">
+          <input type="radio" name="g-filtro" value="totale" onchange="onFiltroTipoChange()"> Entrate vs Spese totali
+        </label>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:400">
+            <input type="radio" name="g-filtro" value="gruppo" onchange="onFiltroTipoChange()"> Per gruppo:
+          </label>
+          <select id="g-filtro-gruppo" title="Gruppo" onchange="saveGrafico()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;outline:none"></select>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:400">
+            <input type="radio" name="g-filtro" value="categoria" onchange="onFiltroTipoChange()"> Per categoria:
+          </label>
+          <select id="g-filtro-categoria" title="Categoria" onchange="saveGrafico()" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;outline:none"></select>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="confirm-backdrop">
+  <div id="confirm-box">
+    <h4 id="confirm-title">Conferma</h4>
+    <p id="confirm-msg"></p>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="confirmReject()">Annulla</button>
+      <button class="btn btn-danger" id="confirm-ok-btn" onclick="confirmAccept()">Elimina</button>
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<script src="db.js"></script>
+<script>
+const PAGE_ID = 'personalizzazioni';
+const COLORI_DEFAULT = { reddito:'#004561', spese:'#C0392B', debiti:'#7358C3', investimenti:'#16A34A', oro:'#D97706' };
+
+function renderCurrentPage() { renderPersonalizzazioni(); }
+
+function renderPersonalizzazioni() {
+  const p = DB.global.personalizzazioni;
+
+  // Font
+  document.getElementById('p-font').value = p.font || "'DM Sans', sans-serif";
+
+  // Colori base
+  const root = getComputedStyle(document.documentElement);
+  const resolveColor = (key) => {
+    if (p.colori?.[key]) return p.colori[key];
+    return COLORI_DEFAULT[key];
+  };
+  ['reddito','spese','debiti','investimenti','oro'].forEach(k => {
+    const col = resolveColor(k);
+    const input = document.getElementById('c-' + k);
+    const swatch = document.getElementById('sw-' + k);
+    if (input) input.value = col;
+    if (swatch) swatch.style.background = col;
+  });
+
+  // Gruppi spese
+  renderGruppiList();
+
+  // Grafico
+  const g = p.grafico || {};
+  document.querySelectorAll('input[name="g-tipo"]').forEach(r => { r.checked = (r.value === (g.tipo || 'barre')); });
+  if (g.colore1) document.getElementById('c-g1').value = g.colore1;
+  if (g.colore2) document.getElementById('c-g2').value = g.colore2;
+
+  // Filtro grafico
+  const gruppi = Object.keys(DB.global.categorie?.SPESE || {});
+  const cats = allCategorie('SPESE');
+  document.getElementById('g-filtro-gruppo').innerHTML = gruppi.map(gr => `<option value="${gr}" ${gr===g.filtroValore?'selected':''}>${gr}</option>`).join('');
+  document.getElementById('g-filtro-categoria').innerHTML = cats.map(c => `<option value="${c}" ${c===g.filtroValore?'selected':''}>${c}</option>`).join('');
+  document.querySelectorAll('input[name="g-filtro"]').forEach(r => { r.checked = (r.value === (g.filtroTipo || 'totale')); });
+}
+
+function renderGruppiList() {
+  const gruppi = DB.global.categorie?.SPESE || {};
+  const coloriGruppi = DB.global.personalizzazioni?.coloriGruppi || {};
+  let html = '';
+  Object.entries(gruppi).forEach(([nome, cats], i) => {
+    const col = coloriGruppi[nome] || DEFAULT_COLORS_GRUPPI[i % DEFAULT_COLORS_GRUPPI.length];
+    html += `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">
+      <input type="color" value="${col}" title="Colore ${nome}" style="width:36px;height:36px;border:1px solid var(--border);border-radius:6px;cursor:pointer;padding:2px" onchange="setGruppoColore('${nome}',this.value)">
+      <span style="font-weight:500;flex:1;min-width:80px">${nome}</span>
+      <span style="font-size:13px;color:var(--text2)">${cats.length} categorie</span>
+      <button class="btn btn-icon btn-small" style="color:var(--danger)" onclick="deleteGruppo('${nome}')" title="Elimina gruppo">×</button>
+    </div>`;
+  });
+  if (!html) html = '<p style="color:var(--text2);font-size:14px;padding:8px 0">Nessun gruppo configurato.</p>';
+  document.getElementById('gruppi-list').innerHTML = html;
+}
+
+function onFontChange() {
+  const val = document.getElementById('p-font').value;
+  DB.global.personalizzazioni.font = val;
+  document.body.style.fontFamily = val;
+  autoSave();
+  toast('✅ Font aggiornato', 'success');
+}
+
+function onColorChange(key, value) {
+  if (!DB.global.personalizzazioni.colori) DB.global.personalizzazioni.colori = {};
+  DB.global.personalizzazioni.colori[key] = value;
+  document.documentElement.style.setProperty('--' + key, value);
+  const swatch = document.getElementById('sw-' + key);
+  if (swatch) swatch.style.background = value;
+  autoSave();
+}
+
+function resetColoriBase() {
+  DB.global.personalizzazioni.colori = {};
+  Object.entries(COLORI_DEFAULT).forEach(([k,v]) => document.documentElement.style.setProperty('--'+k, v));
+  renderPersonalizzazioni();
+  autoSave();
+  toast('✅ Colori ripristinati', 'success');
+}
+
+function setGruppoColore(nome, colore) {
+  if (!DB.global.personalizzazioni.coloriGruppi) DB.global.personalizzazioni.coloriGruppi = {};
+  DB.global.personalizzazioni.coloriGruppi[nome] = colore;
+  autoSave();
+}
+
+function addGruppo() {
+  const nome = document.getElementById('new-gruppo-nome').value.trim();
+  const colore = document.getElementById('new-gruppo-colore').value;
+  if (!nome) { toast('⚠️ Inserisci il nome del gruppo', 'error'); return; }
+  if (DB.global.categorie.SPESE[nome]) { toast('⚠️ Il gruppo esiste già', 'error'); return; }
+  DB.global.categorie.SPESE[nome] = [];
+  if (!DB.global.personalizzazioni.coloriGruppi) DB.global.personalizzazioni.coloriGruppi = {};
+  DB.global.personalizzazioni.coloriGruppi[nome] = colore;
+  document.getElementById('new-gruppo-nome').value = '';
+  autoSave();
+  renderGruppiList();
+  toast(`✅ Gruppo "${nome}" aggiunto`, 'success');
+}
+
+function deleteGruppo(nome) {
+  const cats = (DB.global.categorie.SPESE[nome] || []).length;
+  const msg = cats > 0
+    ? `Il gruppo "${nome}" contiene ${cats} categorie. Eliminarle tutte insieme al gruppo?`
+    : `Eliminare il gruppo "${nome}"?`;
+  showConfirm('Elimina gruppo', msg, 'Elimina', () => {
+    delete DB.global.categorie.SPESE[nome];
+    if (DB.global.personalizzazioni.coloriGruppi) delete DB.global.personalizzazioni.coloriGruppi[nome];
+    autoSave();
+    renderGruppiList();
+    toast(`🗑️ Gruppo "${nome}" eliminato`);
+  });
+}
+
+function onFiltroTipoChange() {
+  saveGrafico();
+}
+
+function saveGrafico() {
+  const tipo = document.querySelector('input[name="g-tipo"]:checked')?.value || 'barre';
+  const filtroTipo = document.querySelector('input[name="g-filtro"]:checked')?.value || 'totale';
+  let filtroValore = '';
+  if (filtroTipo === 'gruppo') filtroValore = document.getElementById('g-filtro-gruppo').value;
+  if (filtroTipo === 'categoria') filtroValore = document.getElementById('g-filtro-categoria').value;
+  const colore1 = document.getElementById('c-g1').value || '';
+  const colore2 = document.getElementById('c-g2').value || '';
+  DB.global.personalizzazioni.grafico = { tipo, filtroTipo, filtroValore, colore1, colore2 };
+  autoSave();
+  toast('✅ Grafico aggiornato', 'success');
+}
+
+// INIT
+initDB();
+document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+document.querySelector(`[data-page="${PAGE_ID}"]`).classList.add('active');
+updateAnnoUI();
+renderPersonalizzazioni();
+</script>
+</body>
+</html>

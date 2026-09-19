@@ -1,0 +1,304 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📅 Mensile — Finanze Personali</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<button id="nav-toggle" onclick="toggleNav()">☰</button>
+<div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
+
+<nav id="nav">
+  <div class="nav-logo">
+    <h1>💰 Finanze<br><span id="nav-year">—</span></h1>
+    <span>Personali</span>
+  </div>
+  <div id="anno-switcher"></div>
+  <div class="nav-links">
+    <div class="nav-section">Overview</div>
+    <a class="nav-link" href="dashboard.html" data-page="dashboard"><span class="icon">📊</span> Dashboard</a>
+    <a class="nav-link" href="transazioni.html" data-page="transazioni"><span class="icon">💸</span> Transazioni</a>
+    <a class="nav-link" href="report.html" data-page="report"><span class="icon">📈</span> Report</a>
+    <div class="nav-section">Mensile</div>
+    <a class="nav-link" href="mensile.html" data-page="mensile"><span class="icon">📅</span> Mese Corrente</a>
+    <div class="nav-section">Gestione</div>
+    <a class="nav-link" href="budget.html" data-page="budget"><span class="icon">🎯</span> Budget</a>
+    <a class="nav-link" href="programmate.html" data-page="programmate"><span class="icon">🔁</span> Spese Programmate</a>
+    <a class="nav-link" href="categorie.html" data-page="categorie"><span class="icon">🏷️</span> Categorie</a>
+    <a class="nav-link" href="impostazioni.html" data-page="impostazioni"><span class="icon">⚙️</span> Impostazioni</a>
+    <a class="nav-link" href="personalizzazioni.html" data-page="personalizzazioni"><span class="icon">🎨</span> Personalizzazioni</a>
+  </div>
+  <div class="nav-user" id="nav-user">👤 —</div>
+</nav>
+
+<main id="main">
+  <div class="page-header">
+    <h2 id="mensile-title">Mese Corrente</h2>
+  </div>
+  <div class="mese-tabs" id="mese-tabs"></div>
+  <div class="mensile-grid" id="mensile-grid"></div>
+  <div class="quad-box" id="quad-box">
+    <h4>🔍 Quadratura Saldi</h4>
+    <div class="quad-grid" id="quad-grid"></div>
+  </div>
+</main>
+
+<div id="confirm-backdrop">
+  <div id="confirm-box">
+    <h4 id="confirm-title">Conferma</h4>
+    <p id="confirm-msg"></p>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="confirmReject()">Annulla</button>
+      <button class="btn btn-danger" id="confirm-ok-btn" onclick="confirmAccept()">Elimina</button>
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<script src="db.js"></script>
+<script>
+const PAGE_ID = 'mensile';
+
+function renderCurrentPage() { renderMensile(); }
+
+function renderMensile() {
+  document.getElementById('mese-tabs').innerHTML = MESI.map((m,i) =>
+    `<div class="mese-tab ${i+1===selectedMese?'active':''}" onclick="selectMese(${i+1})">${m}</div>`
+  ).join('');
+  document.getElementById('mensile-title').textContent = `${MESI[selectedMese-1]} ${annoAttivo}`;
+  renderMeseSections(selectedMese);
+}
+
+function selectMese(m) { selectedMese = m; saveNavState(); renderMensile(); }
+
+function renderMeseSections(mese) {
+  const V  = DB.global.valuta;
+  const tx = txAnno().filter(t => t.mese === mese && txConfirmed(t));
+  const sections = [
+    {tipo:'REDDITO',    label:'💼 Reddito',     cls:'reddito'},
+    {tipo:'SPESE',      label:'💸 Spese',        cls:'spese'},
+    {tipo:'DEBITI',     label:'💳 Debiti',       cls:'debiti'},
+    {tipo:'INVESTIMENTI',label:'📈 Investimenti',cls:'investimenti'}
+  ];
+  let html = '';
+  for (const sec of sections) {
+    const isInvest  = sec.tipo === 'INVESTIMENTI';
+    const secTx     = tx.filter(t => t.tipo === sec.tipo);
+    const progSecTx = txAnno().filter(t => t.mese === mese && !txConfirmed(t) && t.tipo === sec.tipo);
+    const bycat     = {};
+    allCategorie(sec.tipo).forEach(c => { bycat[c] = 0; });
+    secTx.forEach(t => { txSplits(t).forEach(s => { bycat[s.categoria] = (bycat[s.categoria]||0) + s.importo; }); });
+    const withSpending = Object.entries(bycat).filter(([,v]) => v > 0);
+    const hasBudget    = withSpending.some(([cat]) => (budgetAnno()[cat]?.[mese] || 0) > 0);
+    // Per INVESTIMENTI il totale è netto: versamenti − prelievi
+    const total     = isInvest
+      ? withSpending.reduce((s,[cat,v]) => s + (isInvestReturning({categoria:cat}) ? -v : v), 0)
+      : withSpending.reduce((s,[,v]) => s+v, 0);
+    const totalProg = isInvest
+      ? progSecTx.reduce((s,t) => s + (isInvestReturning(t) ? -t.importo : t.importo), 0)
+      : progSecTx.reduce((s,t) => s+t.importo, 0);
+    let rows = withSpending.map(([cat, val]) => {
+      const returning   = isInvest && isInvestReturning({categoria:cat});
+      const signedVal   = returning ? -val : val;
+      const numCls      = isInvest ? (returning ? 'diff-neg' : 'diff-pos') : '';
+      const displayVal  = isInvest ? (returning ? '−' : '+') + fmt(val) : fmt(val);
+      if (hasBudget) {
+        const budget = budgetAnno()[cat]?.[mese] || 0;
+        const diff   = budget ? signedVal - budget : null;
+        return `<div class="mensile-row"><div class="cat" title="${cat}">${cat}</div><div class="num num-budget">${budget?fmt(budget,0):'—'}</div><div class="num ${numCls}">${displayVal}</div><div class="num ${diff===null?'':diff>0?'diff-neg':'diff-pos'}">${diff===null?'—':(diff>0?'+':'')+fmt(diff)}</div></div>`;
+      }
+      return `<div class="mensile-row mensile-row-slim"><div class="cat" title="${cat}">${cat}</div><div class="num ${numCls}">${displayVal}</div></div>`;
+    }).join('');
+    if (!rows) rows = `<div style="padding:12px;color:var(--text2);font-size:13px;text-align:center">Nessuna transazione</div>`;
+    const colHeader = hasBudget
+      ? `<div class="mensile-col-header"><div>Categoria</div><div class="num-budget" style="text-align:right">Budget</div><div style="text-align:right">Effettivo</div><div style="text-align:right">Diff.</div></div>`
+      : `<div class="mensile-col-header mensile-col-header-slim"><div>Categoria</div><div style="text-align:right">Effettivo</div></div>`;
+    const totalRow = hasBudget
+      ? `<div class="mensile-row total"><div class="cat">TOTALE</div><div class="num num-budget">—</div><div class="num">${fmt(total)}</div><div class="num">—</div></div>`
+      : `<div class="mensile-row mensile-row-slim total"><div class="cat">TOTALE</div><div class="num">${fmt(total)}</div></div>`;
+    let progHtml = '';
+    if (progSecTx.length > 0) {
+      const progRows = [...progSecTx].sort((a,b)=>(a.data||'').localeCompare(b.data||'')).map(t => {
+        const ret = isInvest && isInvestReturning(t);
+        return `<div class="mensile-row mensile-row-slim mensile-row-prog">
+          <div class="cat"><span class="prog-date">${formatDateIt(t.data)}</span> ${t.descrizione||t.categoria}</div>
+          <div class="num prog-num ${ret?'diff-neg':''}">
+            ${ret?'−':'+'}${fmt(t.importo)}
+            <button class="btn-confirma-prog" onclick="event.stopPropagation();confermaTx('${t.id}')" title="Conferma e conta nel mese">✓</button>
+          </div>
+        </div>`;
+      }).join('');
+      progHtml = `<div class="prog-section">
+        <div class="prog-section-header">🔁 Programmate &mdash; ${V} ${fmt(Math.abs(totalProg))}</div>
+        ${progRows}
+        <div class="mensile-row mensile-row-slim prog-totale-proiettato">
+          <div class="cat">Totale se confermate</div>
+          <div class="num">${V} ${fmt(total + totalProg)}</div>
+        </div>
+      </div>`;
+    }
+    html += `<div class="mensile-section">
+      <div class="mensile-header ${sec.cls}">${sec.label}</div>
+      ${colHeader}
+      <div class="mensile-body">${rows}</div>
+      ${totalRow}
+      ${progHtml}
+    </div>`;
+  }
+  document.getElementById('mensile-grid').innerHTML = html;
+
+  let quadHtml = '';
+  getConti().forEach(conto => {
+    const sb = calcSaldoConto(conto.nome, mese);
+    let rows = '', footerHtml = '';
+
+    if (sb.isMainBank) {
+      // Banca: quadratura classica con ✅/❌
+      const ok = sb.inserito !== null ? Math.abs(sb.calcolato - sb.inserito) < 0.02 : null;
+      rows = `<div class="quad-row"><span>Saldo inizio</span><span>${V} ${fmt(sb.saldoInizio)}</span></div>
+        <div class="quad-row"><span>+ Entrate</span><span>${V} ${fmt(sb.entrate)}</span></div>
+        <div class="quad-row"><span>− Spese (no CC)</span><span>−${V} ${fmt(sb.spese)}</span></div>
+        <div class="quad-row"><span>− Debiti (no CC)</span><span>−${V} ${fmt(sb.debiti)}</span></div>
+        <div class="quad-row"><span>± Flusso inv.</span><span>${V} ${fmt(sb.investIn-sb.investOut)}</span></div>
+        ${(sb.giroIn||sb.giroOut) ? `<div class="quad-row"><span>↔ Giroconti</span><span>${V} ${fmt(sb.giroIn-sb.giroOut)}</span></div>` : ''}
+        <div class="quad-row"><span>CC mese prec.</span><span>−${V} ${fmt(sb.cc.spese+sb.cc.debiti)}</span></div>`;
+      // Saldo proiettato (include transazioni programmate del mese per questo conto)
+      const progContoTx = txAnno().filter(t => t.mese === mese && !txConfirmed(t) && t.conto === conto.nome);
+      const pEnt = progContoTx.filter(t=>t.tipo==='REDDITO').reduce((s,t)=>s+t.importo,0);
+      const pSpe = progContoTx.filter(t=>t.tipo==='SPESE'&&t.metodo!=='Carta di Credito').reduce((s,t)=>s+t.importo,0);
+      const pDeb = progContoTx.filter(t=>t.tipo==='DEBITI'&&t.metodo!=='Carta di Credito').reduce((s,t)=>s+t.importo,0);
+      const pInv = progContoTx.filter(t=>t.tipo==='INVESTIMENTI'&&!isInvestReturning(t)).reduce((s,t)=>s+t.importo,0);
+      const pGiroOut = progContoTx.filter(t=>t.tipo==='GIROCONTO').reduce((s,t)=>s+t.importo,0);
+      const pGiroIn  = txAnno().filter(t=>t.mese===mese&&!txConfirmed(t)&&t.tipo==='GIROCONTO'&&t.contoDestinazione===conto.nome).reduce((s,t)=>s+t.importo,0);
+      const proiettato = pEnt+pSpe+pDeb+pInv+pGiroOut+pGiroIn > 0 ? sb.calcolato + pEnt - pSpe - pDeb - pInv + (pGiroIn-pGiroOut) : null;
+      const andamentoSvg = buildAndamentoConto(conto.nome, mese, sb.saldoInizio, sb.cc, V);
+      footerHtml = `
+        <div class="quad-row" style="font-weight:600"><span>Calcolato</span><span>${V} ${fmt(sb.calcolato)}</span></div>
+        ${proiettato !== null ? `<div class="quad-row" style="color:var(--warning);font-style:italic"><span>🔁 Proiettato</span><span>${V} ${fmt(proiettato)}</span></div>` : ''}
+        <div class="quad-row" style="font-weight:600"><span>Saldo reale</span>
+          <input type="number" step="0.01" value="${sb.inserito??''}" style="width:90px;text-align:right;padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:13px" onchange="setSaldoInserito('${conto.nome}',${mese},this.value)">
+        </div>
+        <div class="quad-status">${sb.inserito!==null?(ok?'✅':'❌'):'⏳'}</div>
+        ${andamentoSvg}`;
+    } else {
+      // Conti investimento: nessun check, solo valore reale e rendimento
+      const guadagno = sb.inserito !== null ? sb.inserito - sb.calcolato : null;
+      rows = `<div class="quad-row"><span>Saldo inizio</span><span>${V} ${fmt(sb.saldoInizio)}</span></div>
+        <div class="quad-row"><span>+ Versamenti</span><span>+${V} ${fmt(sb.flussiOut)}</span></div>
+        <div class="quad-row"><span>− Prelievi</span><span>−${V} ${fmt(sb.flussiIn)}</span></div>
+        ${(sb.giroIn||sb.giroOut) ? `<div class="quad-row"><span>↔ Giroconti</span><span>${V} ${fmt(sb.giroIn-sb.giroOut)}</span></div>` : ''}`;
+      const rendColor = guadagno === null ? '' : guadagno >= 0 ? 'color:var(--success)' : 'color:var(--danger)';
+      const rendLabel = guadagno === null ? '' : guadagno >= 0 ? '📈 Rendimento' : '📉 Perdita';
+      footerHtml = `
+        <div class="quad-row"><span>Base calcolata</span><span style="color:var(--text2)">${V} ${fmt(sb.calcolato)}</span></div>
+        <div class="quad-row" style="font-weight:600"><span>Valore reale</span>
+          <input type="number" step="0.01" value="${sb.inserito??''}" style="width:90px;text-align:right;padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:13px" onchange="setSaldoInserito('${conto.nome}',${mese},this.value)">
+        </div>
+        ${guadagno !== null ? `<div class="quad-row" style="font-weight:600;${rendColor}"><span>${rendLabel}</span><span>${guadagno>=0?'+':''}${V} ${fmt(guadagno)}</span></div>` : ''}
+        <div class="quad-status">${sb.inserito !== null ? (guadagno >= 0 ? '📈' : '📉') : '⏳'}</div>`;
+    }
+
+    const contoColore = conto.colore || 'var(--reddito)';
+    quadHtml += `<div class="quad-conto" style="border-left:3px solid ${contoColore}">
+      <div class="quad-conto-title" style="color:${contoColore}">${conto.icona} ${conto.nome}</div>
+      ${rows}
+      ${footerHtml}
+    </div>`;
+  });
+  document.getElementById('quad-grid').innerHTML = quadHtml;
+}
+
+function buildAndamentoConto(nomeConto, mese, saldoInizio, cc, V) {
+  const lastDay = new Date(annoAttivo, mese, 0).getDate();
+  const today   = new Date();
+  const isCurMonth = today.getFullYear() === annoAttivo && today.getMonth() + 1 === mese;
+  const endDay  = isCurMonth ? Math.min(today.getDate(), lastDay) : lastDay;
+
+  // Calcola il delta giornaliero delle tx confermate sul conto bancario
+  const txMese = txAnno().filter(t => t.mese === mese && txConfirmed(t) && t.conto === nomeConto);
+  const giroInMese = txAnno().filter(t => t.mese === mese && txConfirmed(t) && t.tipo === 'GIROCONTO' && t.contoDestinazione === nomeConto);
+  const dailyDelta = {};
+  txMese.forEach(t => {
+    const day = parseInt(t.data.split('-')[2]);
+    let d = 0;
+    if (t.tipo === 'REDDITO') d = t.importo;
+    else if (t.tipo === 'SPESE'  && t.metodo !== 'Carta di Credito') d = -t.importo;
+    else if (t.tipo === 'DEBITI' && t.metodo !== 'Carta di Credito') d = -t.importo;
+    else if (t.tipo === 'INVESTIMENTI') d = isInvestReturning(t) ? t.importo : -t.importo;
+    else if (t.tipo === 'GIROCONTO') d = -t.importo;
+    dailyDelta[day] = (dailyDelta[day] || 0) + d;
+  });
+  giroInMese.forEach(t => {
+    const day = parseInt(t.data.split('-')[2]);
+    dailyDelta[day] = (dailyDelta[day] || 0) + t.importo;
+  });
+
+  // Saldo di partenza: saldoInizio del mese meno la rata CC del mese precedente (già inclusa nel calcolato)
+  const startBal = saldoInizio - (cc ? cc.spese + cc.debiti : 0);
+  const points = [{ day: 0, bal: startBal }];
+  let running = startBal;
+  for (let d = 1; d <= endDay; d++) {
+    if (dailyDelta[d]) running += dailyDelta[d];
+    points.push({ day: d, bal: running });
+  }
+
+  const bals  = points.map(p => p.bal);
+  const rawMin = Math.min(...bals), maxB = Math.max(...bals);
+  const minB  = Math.min(0, rawMin);
+  const range = maxB - minB || 1;
+  const n     = points.length;
+  const W = 400, H = 56;
+  const px = i => (n > 1 ? i / (n - 1) : 0.5) * W;
+  const py = v  => H - 4 - ((v - minB) / range) * (H - 10);
+
+  const col   = running >= startBal ? 'var(--investimenti)' : 'var(--spese)';
+  const pts   = points.map((p, i) => `${px(i)},${py(p.bal)}`).join(' ');
+  const area  = `M ${px(0)},${H} ${points.map((p,i) => `L ${px(i)},${py(p.bal)}`).join(' ')} L ${px(n-1)},${H} Z`;
+  const delta = running - startBal;
+  const dCol  = delta >= 0 ? 'var(--investimenti)' : 'var(--spese)';
+
+  let zeroLine = '';
+  if (minB < 0 && maxB > 0) {
+    const y0 = py(0);
+    zeroLine = `<line x1="0" y1="${y0}" x2="${W}" y2="${y0}" stroke="var(--spese)" stroke-width="1" stroke-dasharray="3,2" opacity=".4"/>`;
+  }
+
+  return `<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+    <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
+      <span style="color:var(--text2)">Andamento mese</span>
+      <span style="color:${dCol};font-weight:600">${delta>=0?'+':''}${V} ${fmt(delta)}</span>
+    </div>
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:50px;display:block;border-radius:4px;overflow:hidden">
+      ${zeroLine}
+      <path d="${area}" fill="${col}" opacity=".15"/>
+      <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="${px(n-1)}" cy="${py(running)}" r="3.5" fill="${col}"/>
+    </svg>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-top:2px">
+      <span>${V} ${fmt(startBal)}</span>
+      <span style="color:${col};font-weight:600">${V} ${fmt(running)}</span>
+    </div>
+  </div>`;
+}
+
+function setSaldoInserito(conto, mese, val) {
+  const sm = saldiAnno();
+  if (!sm[conto]) sm[conto] = {};
+  if (!sm[conto][mese]) sm[conto][mese] = {};
+  sm[conto][mese].inserito = val ? parseFloat(val) : null;
+  autoSave(); renderMeseSections(mese);
+}
+
+// INIT
+initDB();
+document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+document.querySelector(`[data-page="${PAGE_ID}"]`).classList.add('active');
+updateAnnoUI();
+renderMensile();
+</script>
+</body>
+</html>

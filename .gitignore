@@ -1,0 +1,5 @@
+node_modules/
+dist/
+app_log.txt
+*.log
+finanze_*.json

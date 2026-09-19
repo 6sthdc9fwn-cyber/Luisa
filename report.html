@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📈 Report — Finanze Personali</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+/* ── PERIODO ── */
+.period-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.period-btn{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text2);transition:.2s;font-family:inherit}
+.period-btn.active{background:var(--reddito);color:#fff;border-color:var(--reddito)}
+.period-custom{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:14px}
+.period-custom select{padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none}
+.period-label{font-size:13px;color:var(--text2);margin-top:6px}
+/* ── KPI ── */
+.report-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:900px){.report-kpi-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.report-kpi-grid{grid-template-columns:1fr}}
+/* ── DASHBOARD ── */
+#report-dashboard{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;padding-bottom:40px}
+.dash-card{position:relative;background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;box-sizing:border-box;min-width:220px;min-height:180px}
+.dash-card.dragging{opacity:.45;border-style:dashed}
+.dash-card.drag-over{border-color:var(--oro);border-width:2px;box-shadow:0 0 0 3px rgba(217,119,6,.15)}
+/* ── HEADER ── */
+.dash-header{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--card);user-select:none;cursor:grab}
+.dash-header:active{cursor:grabbing}
+.dash-drag-icon{font-size:16px;color:var(--text2);opacity:.35;flex-shrink:0;line-height:1}
+.dash-header h4{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-controls{display:flex;gap:4px;flex-shrink:0}
+.toggle-btn{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text2);font-family:inherit;white-space:nowrap}
+.toggle-btn.active{background:var(--reddito);color:#fff;border-color:var(--reddito)}
+/* ── BODY ── */
+.dash-body{overflow:auto;padding:12px}
+.dash-body-inner{width:100%;height:100%}
+/* ── RESIZE HANDLE ── */
+.dash-resize{position:absolute;bottom:0;right:0;width:18px;height:18px;cursor:nwse-resize;display:flex;align-items:center;justify-content:center;z-index:10;background:linear-gradient(135deg,transparent 50%,rgba(0,0,0,.06) 50%);border-radius:0 0 var(--radius) 0}
+.dash-resize svg{pointer-events:none}
+/* ── CHART CONTENT ── */
+.donut-wrap{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.donut-legend{flex:1;min-width:100px;display:flex;flex-direction:column;gap:5px;font-size:12px}
+.legend-item{display:flex;align-items:center;gap:5px}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.conti-wrap{display:flex;flex-direction:column;gap:12px}
+.conto-block{border-left:3px solid var(--border);padding-left:10px}
+</style>
+</head>
+<body>
+
+<button id="nav-toggle" onclick="toggleNav()">☰</button>
+<div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
+
+<nav id="nav">
+  <div class="nav-logo">
+    <h1>💰 Finanze<br><span id="nav-year">—</span></h1>
+    <span>Personali</span>
+  </div>
+  <div id="anno-switcher"></div>
+  <div class="nav-links">
+    <div class="nav-section">Overview</div>
+    <a class="nav-link" href="dashboard.html" data-page="dashboard"><span class="icon">📊</span> Dashboard</a>
+    <a class="nav-link" href="transazioni.html" data-page="transazioni"><span class="icon">💸</span> Transazioni</a>
+    <a class="nav-link" href="report.html" data-page="report"><span class="icon">📈</span> Report</a>
+    <div class="nav-section">Mensile</div>
+    <a class="nav-link" href="mensile.html" data-page="mensile"><span class="icon">📅</span> Mese Corrente</a>
+    <div class="nav-section">Gestione</div>
+    <a class="nav-link" href="budget.html" data-page="budget"><span class="icon">🎯</span> Budget</a>
+    <a class="nav-link" href="programmate.html" data-page="programmate"><span class="icon">🔁</span> Spese Programmate</a>
+    <a class="nav-link" href="categorie.html" data-page="categorie"><span class="icon">🏷️</span> Categorie</a>
+    <a class="nav-link" href="impostazioni.html" data-page="impostazioni"><span class="icon">⚙️</span> Impostazioni</a>
+    <a class="nav-link" href="personalizzazioni.html" data-page="personalizzazioni"><span class="icon">🎨</span> Personalizzazioni</a>
+  </div>
+  <div class="nav-user" id="nav-user">👤 —</div>
+</nav>
+
+<main id="main">
+  <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+    <div>
+      <h2>Report</h2>
+      <p>Analisi avanzata su periodi personalizzabili — trascina le card per spostarle, ridimensionale dal bordo</p>
+    </div>
+    <button class="btn btn-secondary btn-small" onclick="resetLayout()" title="Ripristina disposizione predefinita">↺ Layout</button>
+  </div>
+
+  <!-- PERIODO -->
+  <div class="card card-pad" style="margin-bottom:16px">
+    <div class="period-bar" id="period-presets"></div>
+    <div class="period-custom">
+      <span style="color:var(--text2);font-size:13px">Da:</span>
+      <select id="pd-da-anno" title="Anno inizio" onchange="onCustomPeriod()"></select>
+      <select id="pd-da-mese" title="Mese inizio" onchange="onCustomPeriod()"></select>
+      <span style="color:var(--text2);font-size:13px">→ A:</span>
+      <select id="pd-a-anno" title="Anno fine" onchange="onCustomPeriod()"></select>
+      <select id="pd-a-mese" title="Mese fine" onchange="onCustomPeriod()"></select>
+    </div>
+    <div class="period-label" id="period-label"></div>
+  </div>
+
+  <!-- KPI -->
+  <div class="report-kpi-grid" id="report-kpis"></div>
+
+  <!-- DASHBOARD LIBERA -->
+  <div id="report-dashboard"></div>
+</main>
+
+<div id="confirm-backdrop">
+  <div id="confirm-box">
+    <h4 id="confirm-title">Conferma</h4>
+    <p id="confirm-msg"></p>
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="confirmReject()">Annulla</button>
+      <button class="btn btn-danger" id="confirm-ok-btn" onclick="confirmAccept()">Elimina</button>
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<script src="db.js"></script>
+<script>
+const PAGE_ID = 'report';
+const HEADER_H = 46;   // altezza header card in px
+const LAYOUT_KEY = 'report_dash_layout';
+
+// ── STATO ──────────────────────────────────────────────────────────
+let reportPeriod = null;
+let monthlyTipo  = 'barre';
+let gruppiTipo   = 'torta';
+let dashLayout   = null;   // { order: [...], sizes: { key: {w,h} } }
+let _lastAgg = null, _lastAllTx = null, _lastMonths = null;
+let draggedKey   = null;
+let rerenderTimers = {};
+
+// ── DEFINIZIONE CARD (dinamica: una card per ogni conto) ──────────
+function getCardDefs() {
+  const defs = [
+    { key:'monthly',    title:'📈 Andamento mensile',    controls:'monthly' },
+    { key:'gruppi',     title:'🥧 Spese per gruppo',      controls:'gruppi' },
+    { key:'savings',    title:'💰 Savings Rate',          controls:null },
+    { key:'confronto',  title:'📅 Confronto Annuale',     controls:null },
+    { key:'cat',            title:'🏆 Top categorie spese',   controls:null },
+    { key:'cat_all',        title:'📋 Tutte le categorie',    controls:null },
+    { key:'summary',        title:'💡 Riepilogo periodo',     controls:null },
+    { key:'conti_overlay',  title:'🏦 Tutti i Conti',         controls:null },
+  ];
+  getConti().forEach(c => {
+    defs.push({ key:`conto_${c.nome}`, title:`${c.icona} ${c.nome}`, controls:null, contoNome:c.nome });
+  });
+  return defs;
+}
+
+function defaultLayout() {
+  const cw = document.getElementById('report-dashboard').clientWidth || 900;
+  const conti = getConti();
+  const nConti = conti.length;
+  const contoW = nConti >= 2 ? Math.round(cw * 0.48) : cw;
+  const sizes = {
+    monthly:   { w: Math.round(cw * 0.63), h: 290 },
+    gruppi:    { w: Math.round(cw * 0.34), h: 290 },
+    savings:   { w: Math.round(cw * 0.48), h: 260 },
+    confronto: { w: Math.round(cw * 0.48), h: 260 },
+    cat:           { w: Math.round(cw * 0.48), h: 360 },
+    cat_all:       { w: Math.round(cw * 0.48), h: 420 },
+    summary:       { w: Math.round(cw * 0.48), h: 360 },
+    conti_overlay: { w: cw, h: 280 },
+  };
+  conti.forEach(c => { sizes[`conto_${c.nome}`] = { w: contoW, h: 200 }; });
+  const order = ['monthly','gruppi','savings','confronto','cat','cat_all','summary','conti_overlay', ...conti.map(c=>`conto_${c.nome}`)];
+  return { order, sizes };
+}
+
+function saveDashLayout() {
+  try { localStorage.setItem(LAYOUT_KEY, JSON.stringify(dashLayout)); } catch(e){}
+}
+
+function loadDashLayout() {
+  try {
+    const s = localStorage.getItem(LAYOUT_KEY);
+    if (s) { const l = JSON.parse(s); if (l?.order && l?.sizes) return l; }
+  } catch(e){}
+  return null;
+}
+
+function resetLayout() {
+  dashLayout = defaultLayout();
+  saveDashLayout();
+  buildDashboard();
+  renderAllCharts();
+}
+
+// ── COSTRUZIONE DASHBOARD ─────────────────────────────────────────
+function buildDashboard() {
+  const container = document.getElementById('report-dashboard');
+  const cw = container.clientWidth || 900;
+  const defs = getCardDefs();
+  const defKeys = defs.map(d => d.key);
+  // Aggiunge card mancanti (es. nuovi conti aggiunti dopo il salvataggio del layout)
+  defs.forEach(def => {
+    if (!dashLayout.sizes[def.key]) {
+      dashLayout.sizes[def.key] = { w: Math.round(cw * 0.48), h: 200 };
+      dashLayout.order.push(def.key);
+    }
+  });
+  // Rimuove card che non esistono più (es. conti eliminati)
+  dashLayout.order = dashLayout.order.filter(k => defKeys.includes(k));
+
+  container.innerHTML = '';
+  dashLayout.order.forEach(key => {
+    const def  = defs.find(d => d.key === key);
+    if (!def) return;
+    const size = dashLayout.sizes[key] || { w:400, h:280 };
+    const card = document.createElement('div');
+    card.className = 'dash-card';
+    card.dataset.key = key;
+    card.style.width  = size.w + 'px';
+    card.style.height = size.h + 'px';
+    // Header
+    const header = document.createElement('div');
+    header.className = 'dash-header';
+    header.innerHTML = `<span class="dash-drag-icon" title="Trascina per spostare">⣿</span>
+      <h4>${def.title}</h4>
+      ${buildControls(def.controls)}`;
+    card.appendChild(header);
+    // Body
+    const body = document.createElement('div');
+    body.className = 'dash-body';
+    body.id = 'dc-' + key;
+    body.style.height = (size.h - HEADER_H) + 'px';
+    card.appendChild(body);
+    // Resize handle
+    const rh = document.createElement('div');
+    rh.className = 'dash-resize';
+    rh.title = 'Trascina per ridimensionare';
+    rh.innerHTML = `<svg width="10" height="10" viewBox="0 0 10 10">
+      <line x1="9" y1="2" x2="2" y2="9" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="9" y1="5.5" x2="5.5" y2="9" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>`;
+    card.appendChild(rh);
+    container.appendChild(card);
+    // Init interactions
+    initResize(card, key, rh);
+    initDrag(card, key, header);
+  });
+}
+
+function buildControls(type) {
+  if (type === 'monthly') return `<div class="dash-controls">
+    <button class="toggle-btn active" id="monthly-btn-barre" onclick="setMonthlyTipo('barre')">Barre</button>
+    <button class="toggle-btn" id="monthly-btn-linee" onclick="setMonthlyTipo('linee')">Linee</button>
+  </div>`;
+  if (type === 'gruppi') return `<div class="dash-controls">
+    <button class="toggle-btn active" id="gruppi-btn-torta" onclick="setGruppiTipo('torta')">Torta</button>
+    <button class="toggle-btn" id="gruppi-btn-barre" onclick="setGruppiTipo('barre')">Barre</button>
+  </div>`;
+  return '';
+}
+
+// ── RESIZE ─────────────────────────────────────────────────────────
+function initResize(card, key, handle) {
+  let sx, sy, sw, sh;
+  handle.addEventListener('mousedown', e => {
+    sx = e.clientX; sy = e.clientY;
+    sw = card.offsetWidth; sh = card.offsetHeight;
+    card.setAttribute('draggable', 'false'); // evita drag durante resize
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    e.preventDefault(); e.stopPropagation();
+  });
+  function onMove(e) {
+    const nw = Math.max(220, sw + e.clientX - sx);
+    const nh = Math.max(HEADER_H + 80, sh + e.clientY - sy);
+    card.style.width  = nw + 'px';
+    card.style.height = nh + 'px';
+    card.querySelector('.dash-body').style.height = (nh - HEADER_H) + 'px';
+    dashLayout.sizes[key] = { w: nw, h: nh };
+    // Rerender debounced
+    clearTimeout(rerenderTimers[key]);
+    rerenderTimers[key] = setTimeout(() => rerenderCard(key), 80);
+  }
+  function onUp() {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    document.body.style.userSelect = '';
+    card.setAttribute('draggable', 'true');
+    rerenderCard(key);
+    saveDashLayout();
+  }
+}
+
+// ── DRAG & DROP REORDER ───────────────────────────────────────────
+function initDrag(card, key, header) {
+  card.setAttribute('draggable', 'true');
+  header.addEventListener('mousedown', () => { card.setAttribute('draggable','true'); });
+  card.addEventListener('dragstart', e => {
+    draggedKey = key;
+    card.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', key);
+  });
+  card.addEventListener('dragend', () => {
+    card.classList.remove('dragging');
+    draggedKey = null;
+  });
+  card.addEventListener('dragover', e => {
+    e.preventDefault();
+    if (draggedKey && draggedKey !== key) card.classList.add('drag-over');
+  });
+  card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+  card.addEventListener('drop', e => {
+    e.preventDefault();
+    card.classList.remove('drag-over');
+    if (!draggedKey || draggedKey === key) return;
+    const order = dashLayout.order;
+    const fi = order.indexOf(draggedKey), ti = order.indexOf(key);
+    if (fi < 0 || ti < 0) return;
+    order.splice(fi, 1);
+    order.splice(ti, 0, draggedKey);
+    buildDashboard();
+    renderAllCharts();
+    saveDashLayout();
+  });
+}
+
+// ── RE-RENDER SINGOLA CARD ─────────────────────────────────────────
+function rerenderCard(key) {
+  if (key.startsWith('conto_')) {
+    const nome = key.slice(6);
+    const conto = getConti().find(c => c.nome === nome);
+    if (conto && _lastMonths) renderContoCard(conto, _lastMonths);
+    return;
+  }
+  switch(key) {
+    case 'monthly':   if (_lastAgg)    renderMonthlyChart(_lastAgg);           break;
+    case 'gruppi':    if (_lastAllTx)  renderGruppiChart(_lastAllTx);          break;
+    case 'cat':       if (_lastAllTx)  renderTopCat(_lastAllTx);               break;
+    case 'summary':   if (_lastAgg)    renderSummary(_lastAgg, _lastAllTx||[]); break;
+    case 'savings':        if (_lastAgg)     renderSavingsCard(_lastAgg);         break;
+    case 'confronto':                       renderConfrontoCard();               break;
+    case 'cat_all':       if (_lastAllTx)  renderAllCat(_lastAllTx);             break;
+    case 'conti_overlay':                   renderContiOverlayCard();            break;
+  }
+}
+
+function bodyH(key) {
+  return (dashLayout.sizes[key]?.h || 280) - HEADER_H - 24; // 24 = 12px padding top + bottom
+}
+
+// ── UTILITY PERIODO ────────────────────────────────────────────────
+function addMesiA(anno, mese, delta) {
+  let m = mese + delta, y = anno;
+  while (m < 1) { m += 12; y--; }
+  while (m > 12) { m -= 12; y++; }
+  return { anno: y, mese: m };
+}
+
+function getMonthsPeriodo(da, a) {
+  const months = [];
+  let anno = da.anno, mese = da.mese, prevAnno = null;
+  for (let i = 0; i < 240; i++) {
+    if (anno > a.anno || (anno === a.anno && mese > a.mese)) break;
+    months.push({ anno, mese, label: MESI_SHORT[mese-1] + (anno !== prevAnno ? ` ${anno}` : '') });
+    prevAnno = anno;
+    if (++mese > 12) { mese = 1; anno++; }
+  }
+  return months;
+}
+
+function txPeriodo(da, a) {
+  const result = [];
+  anniDisponibili().forEach(anno => {
+    if (anno < da.anno || anno > a.anno) return;
+    (DB.anni[anno]?.transazioni || []).forEach(t => {
+      if (!txConfirmed(t)) return;
+      const tm = parseInt(t.mese) || 1;
+      if (anno === da.anno && tm < da.mese) return;
+      if (anno === a.anno && tm > a.mese) return;
+      result.push({ ...t, _anno: anno });
+    });
+  });
+  return result;
+}
+
+function monthlyAggPeriodo(months) {
+  return months.map(({ anno, mese, label }) => {
+    const tx = (DB.anni[anno]?.transazioni || []).filter(t => parseInt(t.mese) === mese && txConfirmed(t));
+    return { label, anno, mese,
+      reddito:   tx.filter(t=>t.tipo==='REDDITO').reduce((s,t)=>s+t.importo,0),
+      spese:     tx.filter(t=>t.tipo==='SPESE').reduce((s,t)=>s+t.importo,0),
+      debiti:    tx.filter(t=>t.tipo==='DEBITI').reduce((s,t)=>s+t.importo,0),
+      investOut: tx.filter(t=>t.tipo==='INVESTIMENTI'&&!isInvestReturning(t)).reduce((s,t)=>s+t.importo,0),
+    };
+  });
+}
+
+function saldoContoAt(nomeConto, anno, mese) {
+  const saved = annoAttivo;
+  annoAttivo = anno;
+  const sb = calcSaldoConto(nomeConto, mese);
+  annoAttivo = saved;
+  return sb.inserito ?? sb.calcolato;
+}
+
+function fmtK(v) {
+  if (Math.abs(v) >= 10000) return (v/1000).toFixed(1)+'k';
+  if (Math.abs(v) >= 1000)  return (v/1000).toFixed(2)+'k';
+  return fmt(v, 0);
+}
+
+// ── PERIODO UI ─────────────────────────────────────────────────────
+const PRESETS = [
+  {id:'mese',label:'Mese att.'},{id:'3m',label:'3 mesi'},
+  {id:'6m',label:'6 mesi'},{id:'anno',label:'Anno att.'},
+  {id:'anno-prec',label:'Anno prec.'},{id:'2anni',label:'2 anni'},
+  {id:'tutto',label:'Tutto lo storico'},
+];
+let activePreset = 'anno';
+
+function calcPreset(id) {
+  const now = new Date();
+  const cur = {anno:now.getFullYear(), mese:now.getMonth()+1};
+  const allAnni = anniDisponibili();
+  const minAnno = allAnni[0] || cur.anno;
+  switch(id) {
+    case 'mese':      return {da:{...cur},a:{...cur}};
+    case '3m':        return {da:addMesiA(cur.anno,cur.mese,-2),a:{...cur}};
+    case '6m':        return {da:addMesiA(cur.anno,cur.mese,-5),a:{...cur}};
+    case 'anno':      return {da:{anno:cur.anno,mese:1},a:{anno:cur.anno,mese:12}};
+    case 'anno-prec': return {da:{anno:cur.anno-1,mese:1},a:{anno:cur.anno-1,mese:12}};
+    case '2anni':     return {da:addMesiA(cur.anno,cur.mese,-23),a:{...cur}};
+    case 'tutto':     return {da:{anno:minAnno,mese:1},a:{anno:cur.anno,mese:12}};
+    default:          return {da:{anno:cur.anno,mese:1},a:{...cur}};
+  }
+}
+
+function initPeriodUI() {
+  const allAnni = anniDisponibili();
+  const now = new Date();
+  const cur = {anno:now.getFullYear(),mese:now.getMonth()+1};
+  const years = [...new Set([...allAnni,cur.anno])].sort((a,b)=>a-b);
+  document.getElementById('period-presets').innerHTML = PRESETS.map(p =>
+    `<button class="period-btn${p.id===activePreset?' active':''}" onclick="setPreset('${p.id}')">${p.label}</button>`
+  ).join('');
+  const annoOpts = years.map(y=>`<option value="${y}">${y}</option>`).join('');
+  const meseOpts = MESI.map((m,i)=>`<option value="${i+1}">${m}</option>`).join('');
+  ['pd-da-anno','pd-a-anno'].forEach(id=>{document.getElementById(id).innerHTML=annoOpts;});
+  ['pd-da-mese','pd-a-mese'].forEach(id=>{document.getElementById(id).innerHTML=meseOpts;});
+  syncSelectsToPeriod();
+  updatePeriodLabel();
+}
+
+function syncSelectsToPeriod() {
+  document.getElementById('pd-da-anno').value=reportPeriod.da.anno;
+  document.getElementById('pd-da-mese').value=reportPeriod.da.mese;
+  document.getElementById('pd-a-anno').value=reportPeriod.a.anno;
+  document.getElementById('pd-a-mese').value=reportPeriod.a.mese;
+}
+
+function updatePeriodLabel() {
+  const {da,a} = reportPeriod;
+  const months = getMonthsPeriodo(da,a);
+  document.getElementById('period-label').textContent =
+    `${MESI[da.mese-1]} ${da.anno} → ${MESI[a.mese-1]} ${a.anno} (${months.length} mes${months.length===1?'e':'i'})`;
+}
+
+function setPreset(id) {
+  activePreset = id;
+  reportPeriod = calcPreset(id);
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.toggle('active', b.textContent===PRESETS.find(p=>p.id===id)?.label));
+  syncSelectsToPeriod(); updatePeriodLabel(); renderAllCharts();
+}
+
+function onCustomPeriod() {
+  activePreset = null;
+  document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
+  reportPeriod = {
+    da:{anno:+document.getElementById('pd-da-anno').value,mese:+document.getElementById('pd-da-mese').value},
+    a: {anno:+document.getElementById('pd-a-anno').value, mese:+document.getElementById('pd-a-mese').value}
+  };
+  if (reportPeriod.da.anno>reportPeriod.a.anno||(reportPeriod.da.anno===reportPeriod.a.anno&&reportPeriod.da.mese>reportPeriod.a.mese)) {
+    reportPeriod.a={...reportPeriod.da}; syncSelectsToPeriod();
+  }
+  updatePeriodLabel(); renderAllCharts();
+}
+
+// ── TOGGLE CHART TYPE ──────────────────────────────────────────────
+function setMonthlyTipo(tipo) {
+  monthlyTipo = tipo;
+  ['barre','linee'].forEach(t => document.getElementById('monthly-btn-'+t)?.classList.toggle('active',t===tipo));
+  if (_lastAgg) renderMonthlyChart(_lastAgg);
+}
+function setGruppiTipo(tipo) {
+  gruppiTipo = tipo;
+  ['torta','barre'].forEach(t => document.getElementById('gruppi-btn-'+t)?.classList.toggle('active',t===tipo));
+  if (_lastAllTx) renderGruppiChart(_lastAllTx);
+}
+
+// ── RENDER KPI ─────────────────────────────────────────────────────
+function renderKPIs(agg) {
+  const V=DB.global.valuta;
+  const reddito=agg.reduce((s,m)=>s+m.reddito,0);
+  const spese=agg.reduce((s,m)=>s+m.spese+m.debiti,0);
+  const risparmio=reddito-spese;
+  const investOut=agg.reduce((s,m)=>s+m.investOut,0);
+  document.getElementById('report-kpis').innerHTML=`
+    <div class="kpi reddito"><label>💼 Entrate</label><div class="val">${V} ${fmt(reddito)}</div></div>
+    <div class="kpi spese"><label>💸 Uscite</label><div class="val">${V} ${fmt(spese)}</div></div>
+    <div class="kpi ${risparmio>=0?'investimenti':'spese'}"><label>💰 Risparmio</label><div class="val">${risparmio>=0?'+':''}${V} ${fmt(Math.abs(risparmio))}</div></div>
+    <div class="kpi investimenti"><label>📈 Investito</label><div class="val">${V} ${fmt(investOut)}</div></div>`;
+}
+
+// ── RENDER MONTHLY CHART ───────────────────────────────────────────
+function renderMonthlyChart(agg) {
+  const el = document.getElementById('dc-monthly'); if (!el) return;
+  const V=DB.global.valuta;
+  const col1=DB.global.personalizzazioni?.grafico?.colore1||'var(--reddito)';
+  const col2=DB.global.personalizzazioni?.grafico?.colore2||'var(--spese)';
+  const n=agg.length;
+  if (!n) { el.innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:20px">Nessun dato nel periodo</p>'; return; }
+  const H = Math.max(60, bodyH('monthly') - 30); // leave room for legend
+  const W=800, showLabels = n<=18 && H>=100;
+  const PAD={l:8,r:8,t:showLabels?Math.max(18,Math.round(H*.14)):6,b:22};
+  const plotH=H-PAD.t-PAD.b, plotW=W-PAD.l-PAD.r;
+  const d1=agg.map(m=>m.reddito), d2=agg.map(m=>m.spese+m.debiti);
+  const maxVal=Math.max(...d1,...d2,1);
+  // Legend
+  const leg = `<div style="display:flex;gap:12px;margin-bottom:4px;font-size:11px;color:var(--text2)">
+    <span style="display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:8px;height:8px;background:${col1};border-radius:2px"></span>Entrate</span>
+    <span style="display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:8px;height:8px;background:${col2};border-radius:2px"></span>Spese</span>
+  </div>`;
+  let svgContent='';
+  if (monthlyTipo==='linee') {
+    const px=i=>PAD.l+(n>1?(i/(n-1)):0.5)*plotW, py=v=>PAD.t+plotH-(v/maxVal)*plotH;
+    [[d1,col1,'Entrate'],[d2,col2,'Spese']].forEach(([data,col,lbl])=>{
+      const pts=data.map((v,i)=>`${px(i)},${py(v)}`).join(' ');
+      svgContent+=`<polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round" opacity=".9"/>`;
+      const area=`M ${px(0)},${PAD.t+plotH} ${data.map((v,i)=>`L ${px(i)},${py(v)}`).join(' ')} L ${px(n-1)},${PAD.t+plotH} Z`;
+      svgContent+=`<path d="${area}" fill="${col}" opacity=".07"/>`;
+      data.forEach((v,i)=>{
+        svgContent+=`<circle cx="${px(i)}" cy="${py(v)}" r="3.5" fill="${col}"><title>${lbl} ${agg[i].label}: ${V} ${fmt(v)}</title></circle>`;
+        if (showLabels&&v>0) svgContent+=`<text x="${px(i)}" y="${py(v)-5}" text-anchor="middle" font-size="9" fill="${col}" font-family="DM Sans,sans-serif">${fmtK(v)}</text>`;
+      });
+    });
+    agg.forEach((m,i)=>{svgContent+=`<text x="${px(i)}" y="${H-3}" text-anchor="middle" font-size="9" fill="#94A3B8" font-family="DM Sans,sans-serif">${m.label}</text>`;});
+  } else {
+    const gW=plotW/n, bW=Math.max(gW*.37,3);
+    agg.forEach((m,i)=>{
+      const xB=PAD.l+i*gW+gW*.07;
+      [[m.reddito,col1,'Entrate'],[m.spese+m.debiti,col2,'Uscite']].forEach(([v,col,lbl],j)=>{
+        if(v<=0)return;
+        const bH=(v/maxVal)*plotH,y=PAD.t+plotH-bH,x=xB+j*(bW+2);
+        svgContent+=`<rect x="${x}" y="${y}" width="${bW}" height="${bH}" fill="${col}" rx="2" opacity=".85"><title>${lbl} ${m.label}: ${V} ${fmt(v)}</title></rect>`;
+        if(showLabels&&bH>14) svgContent+=`<text x="${x+bW/2}" y="${y-3}" text-anchor="middle" font-size="9" fill="${col}" font-family="DM Sans,sans-serif">${fmtK(v)}</text>`;
+      });
+      svgContent+=`<text x="${PAD.l+i*gW+gW/2}" y="${H-3}" text-anchor="middle" font-size="9" fill="#94A3B8" font-family="DM Sans,sans-serif">${m.label}</text>`;
+    });
+  }
+  // Media mobile 3 mesi sulle spese
+  if (n >= 3) {
+    const ma = d2.map((v,i) => { const sl=d2.slice(Math.max(0,i-2),i+1); return sl.reduce((a,b)=>a+b,0)/sl.length; });
+    const pxM = monthlyTipo==='linee'
+      ? (i => PAD.l+(n>1?(i/(n-1)):0.5)*plotW)
+      : (i => PAD.l+i*(plotW/n)+(plotW/n)/2);
+    const pyM = v => PAD.t+plotH-(v/maxVal)*plotH;
+    const maLine = ma.map((v,i)=>`${pxM(i)},${pyM(v)}`).join(' ');
+    svgContent += `<polyline points="${maLine}" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="5,3" opacity=".7"><title>Media mobile 3 mesi spese</title></polyline>`;
+  }
+  const legMa = n>=3 ? `<span style="display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:14px;height:2px;background:#94A3B8;border-top:2px dashed #94A3B8"></span>Media 3m</span>` : '';
+  el.innerHTML = leg.replace('</div>', legMa+'</div>') + `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:${H}px;display:block">${svgContent}</svg>`;
+}
+
+// ── RENDER GRUPPI ──────────────────────────────────────────────────
+function renderGruppiChart(allTx) {
+  const el=document.getElementById('dc-gruppi'); if(!el) return;
+  const V=DB.global.valuta;
+  const gruppi={};
+  allTx.filter(t=>t.tipo==='SPESE').forEach(t=>{txSplits(t).forEach(s=>{const g=getGruppoSpesa(s.categoria);gruppi[g]=(gruppi[g]||0)+s.importo;});});
+  const entries=Object.entries(gruppi).sort((a,b)=>b[1]-a[1]);
+  const total=entries.reduce((s,[,v])=>s+v,0)||1;
+  const cols=entries.map(([g])=>getGruppoColore(g));
+  if (!entries.length){el.innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:20px">Nessuna spesa</p>';return;}
+  if (gruppiTipo==='torta') {
+    const bH=bodyH('gruppi');
+    const W=Math.max(80, Math.min(bH-10, 200)), R=Math.round(W*.437), ir=Math.round(W*.262), cx=W/2, cy=W/2;
+    let start=-Math.PI/2, svgPaths='';
+    entries.forEach(([g,v],i)=>{
+      const frac=v/total, angle=Math.max(frac*Math.PI*2,.01), end=start+angle;
+      const x1o=cx+R*Math.cos(start),y1o=cy+R*Math.sin(start),x2o=cx+R*Math.cos(end),y2o=cy+R*Math.sin(end);
+      const x1i=cx+ir*Math.cos(end),y1i=cy+ir*Math.sin(end),x2i=cx+ir*Math.cos(start),y2i=cy+ir*Math.sin(start);
+      const lg=angle>Math.PI?1:0;
+      svgPaths+=`<path d="M ${x1o} ${y1o} A ${R} ${R} 0 ${lg} 1 ${x2o} ${y2o} L ${x1i} ${y1i} A ${ir} ${ir} 0 ${lg} 0 ${x2i} ${y2i} Z" fill="${cols[i]}" opacity=".9"><title>${g}: ${V} ${fmt(v)} (${(frac*100).toFixed(1)}%)</title></path>`;
+      start=end;
+    });
+    const legend=entries.map(([g,v],i)=>`<div class="legend-item"><div class="legend-dot" style="background:${cols[i]}"></div><div><div style="font-weight:500;font-size:12px">${g}</div><div style="color:var(--text2);font-size:11px">${V} ${fmt(v)} · ${(v/total*100).toFixed(1)}%</div></div></div>`).join('');
+    el.innerHTML=`<div class="donut-wrap"><svg viewBox="0 0 ${W} ${W}" style="width:${W}px;height:${W}px;flex-shrink:0">${svgPaths}</svg><div class="donut-legend">${legend}</div></div>`;
+  } else {
+    const maxV=entries[0]?.[1]||1;
+    el.innerHTML=entries.map(([g,v],i)=>`<div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px"><span style="font-weight:500">${g}</span><span style="color:${cols[i]};font-weight:600">${V} ${fmt(v)}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(v/maxV*100).toFixed(1)}%;background:${cols[i]}"></div></div>
+      <div style="font-size:10px;color:var(--text2);margin-top:1px">${(v/total*100).toFixed(1)}%</div>
+    </div>`).join('');
+  }
+}
+
+// ── RENDER TOP CATEGORIE ───────────────────────────────────────────
+function renderTopCat(allTx) {
+  const el=document.getElementById('dc-cat'); if(!el) return;
+  const V=DB.global.valuta;
+  const cats={};
+  allTx.filter(t=>t.tipo==='SPESE').forEach(t=>{txSplits(t).forEach(s=>{cats[s.categoria]=(cats[s.categoria]||0)+s.importo;});});
+  const top=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const maxV=top[0]?.[1]||1;
+  el.innerHTML=top.length?top.map(([c,v])=>
+    `<div class="bar-row"><div class="bar-label">${c}</div><div class="bar-track"><div class="bar-fill" style="width:${(v/maxV*100).toFixed(1)}%;background:var(--spese)"></div></div><div class="bar-value">${V} ${fmt(v)}</div></div>`
+  ).join(''):'<p style="color:var(--text2);font-size:13px">Nessuna spesa</p>';
+}
+
+// ── RENDER TUTTE LE CATEGORIE ─────────────────────────────────────
+function renderAllCat(allTx) {
+  const el=document.getElementById('dc-cat_all'); if(!el) return;
+  const V=DB.global.valuta;
+  const cats={};
+  allTx.filter(t=>t.tipo==='SPESE').forEach(t=>{txSplits(t).forEach(s=>{cats[s.categoria]=(cats[s.categoria]||0)+s.importo;});});
+  const all=Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+  const total=all.reduce((s,[,v])=>s+v,0)||1;
+  const maxV=all[0]?.[1]||1;
+  el.style.overflowY='auto';
+  el.innerHTML=all.length?all.map(([c,v])=>`
+    <div class="bar-row">
+      <div class="bar-label">${c}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(v/maxV*100).toFixed(1)}%;background:var(--spese)"></div></div>
+      <div class="bar-value" style="display:flex;flex-direction:column;align-items:flex-end;gap:1px">
+        <span>${V} ${fmt(v)}</span>
+        <span style="font-size:10px;color:var(--text2)">${(v/total*100).toFixed(1)}%</span>
+      </div>
+    </div>`).join(''):'<p style="color:var(--text2);font-size:13px">Nessuna spesa</p>';
+}
+
+// ── RENDER RIEPILOGO ───────────────────────────────────────────────
+function renderSummary(agg, allTx) {
+  const el=document.getElementById('dc-summary'); if(!el) return;
+  const V=DB.global.valuta;
+  const mesiConDati=agg.filter(m=>m.reddito+m.spese+m.debiti>0).length||1;
+  const totR=agg.reduce((s,m)=>s+m.reddito,0);
+  const totS=agg.reduce((s,m)=>s+m.spese+m.debiti,0);
+  const totI=agg.reduce((s,m)=>s+m.investOut,0);
+  const med=n=>`${V} ${fmt(n/mesiConDati)}`;
+  el.innerHTML=`<div style="display:flex;flex-direction:column;gap:8px">
+    <div class="quad-row"><span>Entrate medie/mese</span><span style="color:var(--reddito);font-weight:600">${med(totR)}</span></div>
+    <div class="quad-row"><span>Uscite medie/mese</span><span style="color:var(--spese);font-weight:600">${med(totS)}</span></div>
+    <div class="quad-row"><span>Investito medie/mese</span><span style="color:var(--investimenti);font-weight:600">${med(totI)}</span></div>
+    <div class="quad-row" style="border-top:2px solid var(--border);padding-top:8px;margin-top:4px">
+      <span style="font-weight:600">Tasso risparmio</span>
+      <span style="font-weight:600">${totR>0?(((totR-totS)/totR)*100).toFixed(1):'—'}%</span>
+    </div>
+    <div class="quad-row"><span>Categorie usate</span><span>${new Set(allTx.filter(t=>t.tipo==='SPESE').map(t=>t.categoria)).size}</span></div>
+    <div class="quad-row"><span>Transazioni totali</span><span>${allTx.length}</span></div>
+  </div>`;
+}
+
+// ── RENDER SINGOLO CONTO ───────────────────────────────────────────
+function renderContoCard(conto, months) {
+  const key = `conto_${conto.nome}`;
+  const el = document.getElementById('dc-' + key); if (!el) return;
+  const V = DB.global.valuta;
+  const col = conto.colore || 'var(--reddito)';
+  if (!months.length) { el.innerHTML='<p style="color:var(--text2);font-size:13px;padding:8px">Nessun dato nel periodo</p>'; return; }
+  const balances = months.map(({anno,mese}) => saldoContoAt(conto.nome, anno, mese));
+  const rawMinV = Math.min(...balances);
+  const minV = Math.min(0, rawMinV), maxV = Math.max(...balances, minV+1), range = maxV-minV||1;
+  const n = months.length;
+  const H = Math.max(60, bodyH(key) - 28); // lascia spazio per riga delta
+  const W = 800, PAD = {l:46, r:8, t:10, b:18};
+  const plotW = W-PAD.l-PAD.r, plotH = H-PAD.t-PAD.b;
+  const px = i => PAD.l + (n>1 ? (i/(n-1)) : 0.5) * plotW;
+  const py = v => PAD.t + plotH - ((v-minV)/range)*plotH;
+  const pts = balances.map((v,i) => `${px(i)},${py(v)}`).join(' ');
+  const area = `M ${px(0)},${PAD.t+plotH} ${balances.map((v,i)=>`L ${px(i)},${py(v)}`).join(' ')} L ${px(n-1)},${PAD.t+plotH} Z`;
+  let zLine = '';
+  if (minV<0&&maxV>0) { const y0=py(0); zLine=`<line x1="${PAD.l}" y1="${y0}" x2="${W-PAD.r}" y2="${y0}" stroke="#E2E8F0" stroke-width="1"/>`; }
+  let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:${H}px;display:block">
+    ${zLine}<path d="${area}" fill="${col}" opacity=".1"/>
+    <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round" opacity=".9"/>`;
+  balances.forEach((v,i) => { svg+=`<circle cx="${px(i)}" cy="${py(v)}" r="3" fill="${col}"><title>${months[i].label}: ${V} ${fmt(v)}</title></circle>`; });
+  svg += `<text x="${PAD.l-3}" y="${PAD.t+8}" text-anchor="end" font-size="9" fill="#94A3B8" font-family="DM Sans,sans-serif">${fmtK(maxV)}</text>
+    <text x="${PAD.l-3}" y="${H-PAD.b+3}" text-anchor="end" font-size="9" fill="#94A3B8" font-family="DM Sans,sans-serif">${fmtK(minV)}</text>`;
+  if (n>0) svg+=`<text x="${px(0)}" y="${H-2}" text-anchor="start" font-size="8" fill="#94A3B8" font-family="DM Sans,sans-serif">${months[0].label}</text>`;
+  if (n>1) svg+=`<text x="${px(n-1)}" y="${H-2}" text-anchor="end" font-size="8" fill="#94A3B8" font-family="DM Sans,sans-serif">${months[n-1].label}</text>`;
+  svg += '</svg>';
+  const ultimo = balances[balances.length-1], delta = ultimo - balances[0];
+  const dCol = delta>=0?'var(--investimenti)':'var(--spese)';
+  el.innerHTML = `${svg}
+    <div style="display:flex;justify-content:space-between;font-size:12px;padding-top:6px;border-top:1px solid var(--border)">
+      <span style="color:var(--text2)">Saldo finale: <strong style="color:${col}">${V} ${fmt(ultimo)}</strong></span>
+      <span style="color:${dCol};font-weight:600">${delta>=0?'+':''}${V} ${fmt(Math.abs(delta))}</span>
+    </div>`;
+}
+
+// ── SAVINGS RATE ──────────────────────────────────────────────────
+function renderSavingsCard(agg) {
+  const el = document.getElementById('dc-savings'); if (!el) return;
+  const V = DB.global.valuta;
+  if (!agg.length) { el.innerHTML='<p style="color:var(--text2);font-size:13px;text-align:center;padding:20px">Nessun dato</p>'; return; }
+  const rates = agg.map(m => m.reddito > 0 ? ((m.reddito - m.spese - m.debiti) / m.reddito * 100) : null);
+  const validRates = rates.filter(r => r !== null);
+  const avgRate = validRates.length ? validRates.reduce((a,b)=>a+b,0)/validRates.length : 0;
+  const n = agg.length;
+  const H = Math.max(60, bodyH('savings') - 28);
+  const W = 800, PAD = {l:34,r:8,t:10,b:18};
+  const plotW = W-PAD.l-PAD.r, plotH = H-PAD.t-PAD.b;
+  const maxAbs = Math.max(Math.abs(Math.min(...validRates,0)), Math.max(...validRates,1), 1);
+  const py0 = PAD.t + plotH * (maxAbs / (maxAbs*2)); // zero line
+  const py = v => py0 - (v/maxAbs)*(plotH/2);
+  const gW = plotW/n, bW = Math.max(gW*.6, 3);
+  let svgContent = `<line x1="${PAD.l}" y1="${py0}" x2="${W-PAD.r}" y2="${py0}" stroke="#E2E8F0" stroke-width="1"/>`;
+  svgContent += `<text x="${PAD.l-2}" y="${py0+3}" text-anchor="end" font-size="8" fill="#94A3B8" font-family="DM Sans,sans-serif">0%</text>`;
+  rates.forEach((r,i) => {
+    if (r===null) return;
+    const col = r>=0 ? 'var(--investimenti)' : 'var(--spese)';
+    const y = r>=0 ? py(r) : py0, h = Math.abs(py(r)-py0);
+    svgContent += `<rect x="${PAD.l+i*gW+(gW-bW)/2}" y="${y}" width="${bW}" height="${Math.max(h,1)}" fill="${col}" rx="2" opacity=".8"><title>${agg[i].label}: ${r.toFixed(1)}%</title></rect>`;
+    if (H>100) svgContent += `<text x="${PAD.l+i*gW+gW/2}" y="${H-3}" text-anchor="middle" font-size="8" fill="#94A3B8" font-family="DM Sans,sans-serif">${agg[i].label}</text>`;
+  });
+  const avgCol = avgRate>=0?'var(--investimenti)':'var(--spese)';
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:${H}px;display:block">${svgContent}</svg>
+    <div style="display:flex;justify-content:space-between;font-size:12px;padding-top:6px;border-top:1px solid var(--border)">
+      <span style="color:var(--text2)">Media periodo</span>
+      <span style="color:${avgCol};font-weight:600">${avgRate>=0?'+':''}${avgRate.toFixed(1)}%</span>
+    </div>`;
+}
+
+// ── CONFRONTO ANNUALE ─────────────────────────────────────────────
+let confrontoAnno1 = null, confrontoAnno2 = null, confrontoMetrica = 'spese';
+
+function monthlyAggAnno(anno) {
+  const data = DB.anni[anno]; if (!data) return [];
+  const tx = data.transazioni.filter(t => t.stato !== 'Programmata');
+  return MESI_SHORT.map((label, i) => {
+    const m = tx.filter(t => t.mese === i+1);
+    return {
+      label,
+      reddito: m.filter(t=>t.tipo==='REDDITO').reduce((s,t)=>s+t.importo,0),
+      spese:   m.filter(t=>t.tipo==='SPESE').reduce((s,t)=>s+t.importo,0) + m.filter(t=>t.tipo==='DEBITI').reduce((s,t)=>s+t.importo,0),
+      risparmio: m.filter(t=>t.tipo==='REDDITO').reduce((s,t)=>s+t.importo,0) - m.filter(t=>t.tipo==='SPESE').reduce((s,t)=>s+t.importo,0) - m.filter(t=>t.tipo==='DEBITI').reduce((s,t)=>s+t.importo,0),
+    };
+  });
+}
+
+function renderConfrontoCard() {
+  const el = document.getElementById('dc-confronto'); if (!el) return;
+  const anni = anniDisponibili();
+  if (anni.length < 1) { el.innerHTML='<p style="color:var(--text2);font-size:13px;padding:8px">Nessun anno disponibile</p>'; return; }
+  if (!confrontoAnno1) confrontoAnno1 = anni[anni.length-1];
+  if (!confrontoAnno2) confrontoAnno2 = anni.length>1 ? anni[anni.length-2] : anni[0];
+  const V = DB.global.valuta;
+  const cols = ['var(--reddito)','var(--investimenti)'];
+  const metricaOpts = ['spese','reddito','risparmio'].map(m =>
+    `<option value="${m}" ${m===confrontoMetrica?'selected':''}>${m.charAt(0).toUpperCase()+m.slice(1)}</option>`).join('');
+  const annoOpts1 = anni.map(a=>`<option value="${a}" ${a==confrontoAnno1?'selected':''}>${a}</option>`).join('');
+  const annoOpts2 = anni.map(a=>`<option value="${a}" ${a==confrontoAnno2?'selected':''}>${a}</option>`).join('');
+  const controls = `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px;font-size:12px">
+    <select style="padding:3px 6px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit" onchange="confrontoAnno1=+this.value;renderConfrontoCard()">${annoOpts1}</select>
+    <span style="color:var(--text2)">vs</span>
+    <select style="padding:3px 6px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit" onchange="confrontoAnno2=+this.value;renderConfrontoCard()">${annoOpts2}</select>
+    <select style="padding:3px 6px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit" onchange="confrontoMetrica=this.value;renderConfrontoCard()">${metricaOpts}</select>
+  </div>`;
+  const d1 = monthlyAggAnno(confrontoAnno1).map(m=>m[confrontoMetrica]);
+  const d2 = monthlyAggAnno(confrontoAnno2).map(m=>m[confrontoMetrica]);
+  const maxVal = Math.max(...d1,...d2,1);
+  const H = Math.max(60, bodyH('confronto') - 36);
+  const W = 800, n = 12, PAD = {l:8,r:8,t:12,b:18};
+  const plotW = W-PAD.l-PAD.r, plotH = H-PAD.t-PAD.b;
+  const px = i => PAD.l + (i/(n-1))*plotW;
+  const py = v => PAD.t + plotH - (v/maxVal)*plotH;
+  let svgContent = '';
+  [[d1,cols[0],confrontoAnno1],[d2,cols[1],confrontoAnno2]].forEach(([data,col,anno]) => {
+    const pts = data.map((v,i)=>`${px(i)},${py(v)}`).join(' ');
+    const area = `M ${px(0)},${PAD.t+plotH} ${data.map((v,i)=>`L ${px(i)},${py(v)}`).join(' ')} L ${px(n-1)},${PAD.t+plotH} Z`;
+    svgContent += `<path d="${area}" fill="${col}" opacity=".07"/>
+      <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" opacity=".9"/>`;
+    data.forEach((v,i) => { svgContent+=`<circle cx="${px(i)}" cy="${py(v)}" r="3" fill="${col}"><title>${MESI_SHORT[i]} ${anno}: ${V} ${fmt(v)}</title></circle>`; });
+  });
+  MESI_SHORT.forEach((m,i) => { svgContent+=`<text x="${px(i)}" y="${H-2}" text-anchor="middle" font-size="8" fill="#94A3B8" font-family="DM Sans,sans-serif">${m}</text>`; });
+  const leg = `<div style="display:flex;gap:12px;margin-bottom:4px;font-size:11px;color:var(--text2)">
+    <span style="display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:10px;height:3px;background:${cols[0]};border-radius:2px"></span>${confrontoAnno1}</span>
+    <span style="display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:10px;height:3px;background:${cols[1]};border-radius:2px"></span>${confrontoAnno2}</span>
+  </div>`;
+  el.innerHTML = controls + leg + `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:${H}px;display:block">${svgContent}</svg>`;
+}
+
+// ── TUTTI I CONTI OVERLAY ─────────────────────────────────────────
+let hiddenConti = new Set();
+
+function toggleContoLine(nome) {
+  if (hiddenConti.has(nome)) hiddenConti.delete(nome); else hiddenConti.add(nome);
+  renderContiOverlayCard();
+}
+
+function renderContiOverlayCard() {
+  const el = document.getElementById('dc-conti_overlay'); if (!el) return;
+  const conti = getConti();
+  const V = DB.global.valuta;
+  if (!conti.length || !_lastMonths?.length) {
+    el.innerHTML = '<p style="color:var(--text2);font-size:13px;padding:8px">Nessun conto disponibile</p>'; return;
+  }
+  const months = _lastMonths, n = months.length;
+  const series = conti.map(c => ({
+    nome: c.nome, col: c.colore || 'var(--reddito)', icona: c.icona || '🏦',
+    bals: months.map(({anno,mese}) => saldoContoAt(c.nome, anno, mese)),
+    hidden: hiddenConti.has(c.nome),
+  }));
+  const allBals = series.flatMap(s => s.hidden ? [] : s.bals);
+  const rawMin = allBals.length ? Math.min(...allBals) : 0;
+  const minV = Math.min(0, rawMin), maxV = Math.max(...(allBals.length ? allBals : [1]), minV+1);
+  const range = maxV - minV || 1;
+  const H = Math.max(80, bodyH('conti_overlay') - 36);
+  const W = 800, PAD = {l:42, r:8, t:8, b:18};
+  const plotW = W-PAD.l-PAD.r, plotH = H-PAD.t-PAD.b;
+  const px = i => PAD.l + (n>1 ? (i/(n-1)) : 0.5)*plotW;
+  const py = v => PAD.t + plotH - ((v-minV)/range)*plotH;
+  let svg = '';
+  const y0 = py(0);
+  svg += `<line x1="${PAD.l}" y1="${y0}" x2="${W-PAD.r}" y2="${y0}" stroke="#E2E8F0" stroke-width="1"/>`;
+  svg += `<text x="${PAD.l-3}" y="${PAD.t+8}" text-anchor="end" font-size="9" fill="#94A3B8" font-family="DM Sans,sans-serif">${fmtK(maxV)}</text>`;
+  svg += `<text x="${PAD.l-3}" y="${y0+3}" text-anchor="end" font-size="9" fill="#94A3B8" font-family="DM Sans,sans-serif">0</text>`;
+  if (minV < 0) svg += `<text x="${PAD.l-3}" y="${H-PAD.b+3}" text-anchor="end" font-size="9" fill="#94A3B8" font-family="DM Sans,sans-serif">${fmtK(minV)}</text>`;
+  series.forEach(s => {
+    if (s.hidden) return;
+    const pts = s.bals.map((v,i)=>`${px(i)},${py(v)}`).join(' ');
+    const area = `M ${px(0)},${py(0)} ${s.bals.map((v,i)=>`L ${px(i)},${py(v)}`).join(' ')} L ${px(n-1)},${py(0)} Z`;
+    svg += `<path d="${area}" fill="${s.col}" opacity=".06"/>`;
+    svg += `<polyline points="${pts}" fill="none" stroke="${s.col}" stroke-width="2" stroke-linejoin="round" opacity=".9"/>`;
+    s.bals.forEach((v,i) => { svg += `<circle cx="${px(i)}" cy="${py(v)}" r="2.5" fill="${s.col}"><title>${s.nome} ${months[i].label}: ${V} ${fmt(v)}</title></circle>`; });
+  });
+  if (n>0) svg+=`<text x="${px(0)}" y="${H-2}" text-anchor="start" font-size="8" fill="#94A3B8" font-family="DM Sans,sans-serif">${months[0].label}</text>`;
+  if (n>1) svg+=`<text x="${px(n-1)}" y="${H-2}" text-anchor="end" font-size="8" fill="#94A3B8" font-family="DM Sans,sans-serif">${months[n-1].label}</text>`;
+  const leg = `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px;font-size:11px">
+    ${series.map(s=>`<span style="display:flex;align-items:center;gap:4px;cursor:pointer;opacity:${s.hidden?'.3':'1'};transition:opacity .15s;user-select:none" onclick="toggleContoLine('${s.nome.replace(/'/g,"\\'")}')"><span style="display:inline-block;width:16px;height:3px;background:${s.col};border-radius:2px"></span>${s.icona} ${s.nome}</span>`).join('')}
+  </div>`;
+  el.innerHTML = leg + `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:${H}px;display:block">${svg}</svg>`;
+}
+
+// ── MAIN RENDER ────────────────────────────────────────────────────
+function renderAllCharts() {
+  const months=getMonthsPeriodo(reportPeriod.da,reportPeriod.a);
+  const agg=monthlyAggPeriodo(months);
+  const allTx=txPeriodo(reportPeriod.da,reportPeriod.a);
+  _lastAgg=agg; _lastAllTx=allTx; _lastMonths=months;
+  renderKPIs(agg);
+  renderMonthlyChart(agg);
+  renderGruppiChart(allTx);
+  renderTopCat(allTx);
+  renderAllCat(allTx);
+  renderSummary(agg,allTx);
+  renderSavingsCard(agg);
+  renderConfrontoCard();
+  renderContiOverlayCard();
+  getConti().forEach(c => renderContoCard(c, months));
+}
+
+function renderCurrentPage() { renderAllCharts(); }
+
+// ── INIT ───────────────────────────────────────────────────────────
+initDB();
+document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+document.querySelector(`[data-page="${PAGE_ID}"]`).classList.add('active');
+updateAnnoUI();
+reportPeriod = calcPreset('anno');
+// Build dashboard first (so container has size), then load/calc layout
+setTimeout(() => {
+  dashLayout = loadDashLayout() || defaultLayout();
+  initPeriodUI();
+  buildDashboard();
+  renderAllCharts();
+}, 0);
+</script>
+</body>
+</html>

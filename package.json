@@ -1,0 +1,43 @@
+{
+  "name": "finanze-personali",
+  "version": "1.0.0",
+  "description": "App per la gestione delle finanze personali",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-packager . \"Finanze Personali\" --platform=win32 --arch=x64 --out=dist --overwrite --ignore=node_modules"
+  },
+  "build": {
+    "appId": "it.finanzepersonali",
+    "productName": "Finanze Personali",
+    "copyright": "Andrea",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "*.html",
+      "*.js",
+      "*.css",
+      "main.js",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico",
+      "certificateFile": null,
+      "sign": null
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Finanze Personali"
+    }
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3",
+    "electron-packager": "^17.1.2"
+  }
+}

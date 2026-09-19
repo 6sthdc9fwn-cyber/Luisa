@@ -177,16 +177,8 @@ function renderCurrentPage() { renderPersonalizzazioni(); }
 
 function renderPersonalizzazioni() {
   const p = DB.global.personalizzazioni;
-
-  // Font
   document.getElementById('p-font').value = p.font || "'DM Sans', sans-serif";
-
-  // Colori base
-  const root = getComputedStyle(document.documentElement);
-  const resolveColor = (key) => {
-    if (p.colori?.[key]) return p.colori[key];
-    return COLORI_DEFAULT[key];
-  };
+  const resolveColor = (key) => p.colori?.[key] || COLORI_DEFAULT[key];
   ['reddito','spese','debiti','investimenti','oro'].forEach(k => {
     const col = resolveColor(k);
     const input = document.getElementById('c-' + k);
@@ -194,17 +186,11 @@ function renderPersonalizzazioni() {
     if (input) input.value = col;
     if (swatch) swatch.style.background = col;
   });
-
-  // Gruppi spese
   renderGruppiList();
-
-  // Grafico
   const g = p.grafico || {};
   document.querySelectorAll('input[name="g-tipo"]').forEach(r => { r.checked = (r.value === (g.tipo || 'barre')); });
   if (g.colore1) document.getElementById('c-g1').value = g.colore1;
   if (g.colore2) document.getElementById('c-g2').value = g.colore2;
-
-  // Filtro grafico
   const gruppi = Object.keys(DB.global.categorie?.SPESE || {});
   const cats = allCategorie('SPESE');
   document.getElementById('g-filtro-gruppo').innerHTML = gruppi.map(gr => `<option value="${gr}" ${gr===g.filtroValore?'selected':''}>${gr}</option>`).join('');
@@ -288,9 +274,7 @@ function deleteGruppo(nome) {
   });
 }
 
-function onFiltroTipoChange() {
-  saveGrafico();
-}
+function onFiltroTipoChange() { saveGrafico(); }
 
 function saveGrafico() {
   const tipo = document.querySelector('input[name="g-tipo"]:checked')?.value || 'barre';

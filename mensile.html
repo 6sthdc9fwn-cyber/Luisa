@@ -3,37 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📅 Mensile — Finanze Personali</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Mensile — Finanze Personali</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<script src="tema.js"></script>
+<script src="icone.js"></script>
 </head>
 <body>
 
-<button id="nav-toggle" onclick="toggleNav()">☰</button>
-<div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
-
-<nav id="nav">
-  <div class="nav-logo">
-    <h1>💰 Finanze<br><span id="nav-year">—</span></h1>
-    <span>Personali</span>
-  </div>
-  <div id="anno-switcher"></div>
-  <div class="nav-links">
-    <div class="nav-section">Overview</div>
-    <a class="nav-link" href="dashboard.html" data-page="dashboard"><span class="icon">📊</span> Dashboard</a>
-    <a class="nav-link" href="transazioni.html" data-page="transazioni"><span class="icon">💸</span> Transazioni</a>
-    <a class="nav-link" href="report.html" data-page="report"><span class="icon">📈</span> Report</a>
-    <div class="nav-section">Mensile</div>
-    <a class="nav-link" href="mensile.html" data-page="mensile"><span class="icon">📅</span> Mese Corrente</a>
-    <div class="nav-section">Gestione</div>
-    <a class="nav-link" href="budget.html" data-page="budget"><span class="icon">🎯</span> Budget</a>
-    <a class="nav-link" href="programmate.html" data-page="programmate"><span class="icon">🔁</span> Spese Programmate</a>
-    <a class="nav-link" href="categorie.html" data-page="categorie"><span class="icon">🏷️</span> Categorie</a>
-    <a class="nav-link" href="impostazioni.html" data-page="impostazioni"><span class="icon">⚙️</span> Impostazioni</a>
-    <a class="nav-link" href="personalizzazioni.html" data-page="personalizzazioni"><span class="icon">🎨</span> Personalizzazioni</a>
-  </div>
-  <div class="nav-user" id="nav-user">👤 —</div>
-</nav>
+<script src="shell.js"></script>
 
 <main id="main">
   <div class="page-header">
@@ -42,7 +20,7 @@
   <div class="mese-tabs" id="mese-tabs"></div>
   <div class="mensile-grid" id="mensile-grid"></div>
   <div class="quad-box" id="quad-box">
-    <h4>🔍 Quadratura Saldi</h4>
+    <h4><span data-ic="search" data-s="18"></span> Quadratura Saldi</h4>
     <div class="quad-grid" id="quad-grid"></div>
   </div>
 </main>
@@ -79,10 +57,10 @@ function renderMeseSections(mese) {
   const V  = DB.global.valuta;
   const tx = txAnno().filter(t => t.mese === mese && txConfirmed(t));
   const sections = [
-    {tipo:'REDDITO',    label:'💼 Reddito',     cls:'reddito'},
-    {tipo:'SPESE',      label:'💸 Spese',        cls:'spese'},
-    {tipo:'DEBITI',     label:'💳 Debiti',       cls:'debiti'},
-    {tipo:'INVESTIMENTI',label:'📈 Investimenti',cls:'investimenti'}
+    {tipo:'REDDITO',    ic:'briefcase', label:'Reddito',     cls:'reddito'},
+    {tipo:'SPESE',      ic:'banknote', label:'Spese',        cls:'spese'},
+    {tipo:'DEBITI',     ic:'card', label:'Debiti',       cls:'debiti'},
+    {tipo:'INVESTIMENTI',ic:'report', label:'Investimenti',cls:'investimenti'}
   ];
   let html = '';
   for (const sec of sections) {
@@ -128,12 +106,12 @@ function renderMeseSections(mese) {
           <div class="cat"><span class="prog-date">${formatDateIt(t.data)}</span> ${t.descrizione||t.categoria}</div>
           <div class="num prog-num ${ret?'diff-neg':''}">
             ${ret?'−':'+'}${fmt(t.importo)}
-            <button class="btn-confirma-prog" onclick="event.stopPropagation();confermaTx('${t.id}')" title="Conferma e conta nel mese">✓</button>
+            <button class="btn-confirma-prog" onclick="event.stopPropagation();confermaTx('${t.id}')" title="Conferma e conta nel mese">${icona('tick',12)}</button>
           </div>
         </div>`;
       }).join('');
       progHtml = `<div class="prog-section">
-        <div class="prog-section-header">🔁 Programmate &mdash; ${V} ${fmt(Math.abs(totalProg))}</div>
+        <div class="prog-section-header">${icona('programmate',16)} Programmate &mdash; ${V} ${fmt(Math.abs(totalProg))}</div>
         ${progRows}
         <div class="mensile-row mensile-row-slim prog-totale-proiettato">
           <div class="cat">Totale se confermate</div>
@@ -142,7 +120,7 @@ function renderMeseSections(mese) {
       </div>`;
     }
     html += `<div class="mensile-section">
-      <div class="mensile-header ${sec.cls}">${sec.label}</div>
+      <div class="mensile-header ${sec.cls}">${icona(sec.ic,16)} ${sec.label}</div>
       ${colHeader}
       <div class="mensile-body">${rows}</div>
       ${totalRow}
@@ -157,14 +135,14 @@ function renderMeseSections(mese) {
     let rows = '', footerHtml = '';
 
     if (sb.isMainBank) {
-      // Banca: quadratura classica con ✅/❌
+      // Banca: quadratura classica con /
       const ok = sb.inserito !== null ? Math.abs(sb.calcolato - sb.inserito) < 0.02 : null;
       rows = `<div class="quad-row"><span>Saldo inizio</span><span>${V} ${fmt(sb.saldoInizio)}</span></div>
         <div class="quad-row"><span>+ Entrate</span><span>${V} ${fmt(sb.entrate)}</span></div>
         <div class="quad-row"><span>− Spese (no CC)</span><span>−${V} ${fmt(sb.spese)}</span></div>
         <div class="quad-row"><span>− Debiti (no CC)</span><span>−${V} ${fmt(sb.debiti)}</span></div>
         <div class="quad-row"><span>± Flusso inv.</span><span>${V} ${fmt(sb.investIn-sb.investOut)}</span></div>
-        ${(sb.giroIn||sb.giroOut) ? `<div class="quad-row"><span>↔ Giroconti</span><span>${V} ${fmt(sb.giroIn-sb.giroOut)}</span></div>` : ''}
+        ${(sb.giroIn||sb.giroOut) ? `<div class="quad-row"><span>${icona('shuffle',14)} Giroconti</span><span>${V} ${fmt(sb.giroIn-sb.giroOut)}</span></div>` : ''}
         <div class="quad-row"><span>CC mese prec.</span><span>−${V} ${fmt(sb.cc.spese+sb.cc.debiti)}</span></div>`;
       // Saldo proiettato (include transazioni programmate del mese per questo conto)
       const progContoTx = txAnno().filter(t => t.mese === mese && !txConfirmed(t) && t.conto === conto.nome);
@@ -178,11 +156,11 @@ function renderMeseSections(mese) {
       const andamentoSvg = buildAndamentoConto(conto.nome, mese, sb.saldoInizio, sb.cc, V);
       footerHtml = `
         <div class="quad-row" style="font-weight:600"><span>Calcolato</span><span>${V} ${fmt(sb.calcolato)}</span></div>
-        ${proiettato !== null ? `<div class="quad-row" style="color:var(--warning);font-style:italic"><span>🔁 Proiettato</span><span>${V} ${fmt(proiettato)}</span></div>` : ''}
+        ${proiettato !== null ? `<div class="quad-row" style="color:var(--warning);font-style:italic"><span>${icona('programmate',16)} Proiettato</span><span>${V} ${fmt(proiettato)}</span></div>` : ''}
         <div class="quad-row" style="font-weight:600"><span>Saldo reale</span>
           <input type="number" step="0.01" value="${sb.inserito??''}" style="width:90px;text-align:right;padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:13px" onchange="setSaldoInserito('${conto.nome}',${mese},this.value)">
         </div>
-        <div class="quad-status">${sb.inserito!==null?(ok?'✅':'❌'):'⏳'}</div>
+        <div class="quad-status">${sb.inserito!==null?(ok?'<span class="q-ok">'+icona('check',22)+'</span>':'<span class="q-ko">'+icona('xcircle',22)+'</span>'):icona('hourglass',22)}</div>
         ${andamentoSvg}`;
     } else {
       // Conti investimento: nessun check, solo valore reale e rendimento
@@ -190,19 +168,19 @@ function renderMeseSections(mese) {
       rows = `<div class="quad-row"><span>Saldo inizio</span><span>${V} ${fmt(sb.saldoInizio)}</span></div>
         <div class="quad-row"><span>+ Versamenti</span><span>+${V} ${fmt(sb.flussiOut)}</span></div>
         <div class="quad-row"><span>− Prelievi</span><span>−${V} ${fmt(sb.flussiIn)}</span></div>
-        ${(sb.giroIn||sb.giroOut) ? `<div class="quad-row"><span>↔ Giroconti</span><span>${V} ${fmt(sb.giroIn-sb.giroOut)}</span></div>` : ''}`;
+        ${(sb.giroIn||sb.giroOut) ? `<div class="quad-row"><span>${icona('shuffle',14)} Giroconti</span><span>${V} ${fmt(sb.giroIn-sb.giroOut)}</span></div>` : ''}`;
       const rendColor = guadagno === null ? '' : guadagno >= 0 ? 'color:var(--success)' : 'color:var(--danger)';
-      const rendLabel = guadagno === null ? '' : guadagno >= 0 ? '📈 Rendimento' : '📉 Perdita';
+      const rendLabel = guadagno === null ? '' : guadagno >= 0 ? icona('report',14)+' Rendimento' : icona('trendDown',14)+' Perdita';
       footerHtml = `
         <div class="quad-row"><span>Base calcolata</span><span style="color:var(--text2)">${V} ${fmt(sb.calcolato)}</span></div>
         <div class="quad-row" style="font-weight:600"><span>Valore reale</span>
           <input type="number" step="0.01" value="${sb.inserito??''}" style="width:90px;text-align:right;padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:13px" onchange="setSaldoInserito('${conto.nome}',${mese},this.value)">
         </div>
         ${guadagno !== null ? `<div class="quad-row" style="font-weight:600;${rendColor}"><span>${rendLabel}</span><span>${guadagno>=0?'+':''}${V} ${fmt(guadagno)}</span></div>` : ''}
-        <div class="quad-status">${sb.inserito !== null ? (guadagno >= 0 ? '📈' : '📉') : '⏳'}</div>`;
+        <div class="quad-status">${sb.inserito !== null ? (guadagno >= 0 ? '<span class="q-ok">'+icona('report',22)+'</span>' : '<span class="q-ko">'+icona('trendDown',22)+'</span>') : icona('hourglass',22)}</div>`;
     }
 
-    const contoColore = conto.colore || 'var(--reddito)';
+    const contoColore = coloreLeggibile(conto.colore) || 'var(--reddito)';
     quadHtml += `<div class="quad-conto" style="border-left:3px solid ${contoColore}">
       <div class="quad-conto-title" style="color:${contoColore}">${conto.icona} ${conto.nome}</div>
       ${rows}
@@ -295,7 +273,7 @@ function setSaldoInserito(conto, mese, val) {
 
 // INIT
 initDB();
-document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+renderNavUser();
 document.querySelector(`[data-page="${PAGE_ID}"]`).classList.add('active');
 updateAnnoUI();
 renderMensile();

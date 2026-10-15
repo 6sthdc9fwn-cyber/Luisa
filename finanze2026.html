@@ -955,9 +955,9 @@ function annualTotals() {
   return{reddito,spese,debiti,investOut};
 }
 
-function ccPrevMese(mese) {
+function ccPrevMese(mese, nomeConto) {
   if (mese<2) return {spese:0,debiti:0};
-  const tx = txAnno().filter(t=>t.mese===mese-1&&t.metodo==='Carta di Credito'&&txConfirmed(t));
+  const tx = txAnno().filter(t=>t.mese===mese-1&&t.metodo==='Carta di Credito'&&t.conto===nomeConto&&txConfirmed(t));
   return { spese:tx.filter(t=>t.tipo==='SPESE').reduce((s,t)=>s+t.importo,0), debiti:tx.filter(t=>t.tipo==='DEBITI').reduce((s,t)=>s+t.importo,0) };
 }
 
@@ -978,7 +978,7 @@ function calcSaldoConto(nomeConto, mese) {
     const debiti   = tx.filter(t=>t.tipo==='DEBITI'&&t.metodo!=='Carta di Credito').reduce((s,t)=>s+t.importo,0);
     const investOut= tx.filter(t=>t.tipo==='INVESTIMENTI'&&['PAC - Versamento','Crypto - Acquisto','Trade Republic - Versamento','Altro investimento'].some(c=>t.categoria===c)).reduce((s,t)=>s+t.importo,0);
     const investIn = tx.filter(t=>t.tipo==='INVESTIMENTI'&&['PAC - Prelievo','Crypto - Vendita','Trade Republic - Prelievo'].some(c=>t.categoria===c)).reduce((s,t)=>s+t.importo,0);
-    const cc = ccPrevMese(mese);
+    const cc = ccPrevMese(mese, nomeConto);
     const calcolato = saldoInizio + entrate - spese - debiti + (investIn-investOut) - cc.spese - cc.debiti;
     const inserito  = saldiAnno()[nomeConto]?.[mese]?.inserito ?? null;
     return { saldoInizio, entrate, spese, debiti, investOut, investIn, cc, calcolato, inserito, isMainBank:true };

@@ -3,37 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚙️ Impostazioni — Finanze Personali</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Impostazioni — Finanze Personali</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<script src="tema.js"></script>
+<script src="icone.js"></script>
 </head>
 <body>
 
-<button id="nav-toggle" onclick="toggleNav()">☰</button>
-<div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
-
-<nav id="nav">
-  <div class="nav-logo">
-    <h1>💰 Finanze<br><span id="nav-year">—</span></h1>
-    <span>Personali</span>
-  </div>
-  <div id="anno-switcher"></div>
-  <div class="nav-links">
-    <div class="nav-section">Overview</div>
-    <a class="nav-link" href="dashboard.html" data-page="dashboard"><span class="icon">📊</span> Dashboard</a>
-    <a class="nav-link" href="transazioni.html" data-page="transazioni"><span class="icon">💸</span> Transazioni</a>
-    <a class="nav-link" href="report.html" data-page="report"><span class="icon">📈</span> Report</a>
-    <div class="nav-section">Mensile</div>
-    <a class="nav-link" href="mensile.html" data-page="mensile"><span class="icon">📅</span> Mese Corrente</a>
-    <div class="nav-section">Gestione</div>
-    <a class="nav-link" href="budget.html" data-page="budget"><span class="icon">🎯</span> Budget</a>
-    <a class="nav-link" href="programmate.html" data-page="programmate"><span class="icon">🔁</span> Spese Programmate</a>
-    <a class="nav-link" href="categorie.html" data-page="categorie"><span class="icon">🏷️</span> Categorie</a>
-    <a class="nav-link" href="impostazioni.html" data-page="impostazioni"><span class="icon">⚙️</span> Impostazioni</a>
-    <a class="nav-link" href="personalizzazioni.html" data-page="personalizzazioni"><span class="icon">🎨</span> Personalizzazioni</a>
-  </div>
-  <div class="nav-user" id="nav-user">👤 —</div>
-</nav>
+<script src="shell.js"></script>
 
 <main id="main">
   <div class="page-header">
@@ -41,13 +19,17 @@
     <p>Configurazione generale dell'app</p>
   </div>
   <div class="settings-grid">
+    <div class="settings-section" style="grid-column:1/-1">
+      <h3><span data-ic="personalizzazioni" data-s="18"></span> Stile</h3>
+      <div id="selettore-stile"></div>
+    </div>
     <div class="settings-section">
-      <h3>👤 Profilo</h3>
+      <h3><span data-ic="user" data-s="18"></span> Profilo</h3>
       <div class="setting-row"><label>Nome</label><input id="s-nome" type="text" value="Andrea"></div>
       <div class="setting-row"><label>Valuta</label><input id="s-valuta" type="text" value="€"></div>
     </div>
     <div class="settings-section" id="conti-section">
-      <h3>🏦 Conti &amp; Saldi Iniziali</h3>
+      <h3><span data-ic="landmark" data-s="18"></span> Conti &amp; Saldi Iniziali</h3>
       <div id="conti-list"></div>
       <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
         <p style="font-size:13px;color:var(--text2);margin-bottom:10px">Aggiungi nuovo conto:</p>
@@ -57,35 +39,35 @@
           <input type="text" id="new-conto-nome" placeholder="Nome conto..." style="flex:1;min-width:120px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;min-height:44px">
           <input type="number" id="new-conto-saldo" placeholder="Saldo iniziale" step="0.01" style="width:130px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;min-height:44px">
           <select id="new-conto-tipo" title="Tipo di conto" style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none;min-height:44px">
-            <option value="banca">🏦 Bancario</option>
-            <option value="investimenti">📈 Investimenti</option>
-            <option value="entrambi">🔀 Entrambi</option>
+            <option value="banca">Bancario</option>
+            <option value="investimenti">Investimenti</option>
+            <option value="entrambi">Entrambi</option>
           </select>
-          <button class="btn btn-primary" onclick="addConto()">＋ Aggiungi</button>
+          <button class="btn btn-primary" onclick="addConto()"><span data-ic="plus" data-s="16"></span> Aggiungi</button>
         </div>
       </div>
     </div>
     <div class="settings-section" style="grid-column:1/-1">
-      <h3>💳 Metodi di Pagamento</h3>
+      <h3><span data-ic="card" data-s="18"></span> Metodi di Pagamento</h3>
       <div id="metodi-list"></div>
       <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center">
         <input type="text" id="new-metodo-nome" placeholder="Nuovo metodo..." style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;min-height:44px">
-        <button class="btn btn-primary" onclick="addMetodo()">＋ Aggiungi</button>
+        <button class="btn btn-primary" onclick="addMetodo()"><span data-ic="plus" data-s="16"></span> Aggiungi</button>
       </div>
     </div>
     <div class="settings-section" style="grid-column:1/-1">
-      <h3>📥 Importa / Esporta dati</h3>
+      <h3><span data-ic="download" data-s="18"></span> Importa / Esporta dati</h3>
       <div style="display:flex;gap:12px;flex-wrap:wrap">
-        <button class="btn btn-secondary" onclick="exportData()">📤 Esporta JSON</button>
+        <button class="btn btn-secondary" onclick="exportData()"><span data-ic="upload" data-s="16"></span> Esporta JSON</button>
         <label class="btn btn-secondary" style="cursor:pointer">
-          📥 Importa JSON <input type="file" accept=".json" style="display:none" onchange="importData(event)">
+          <span data-ic="download" data-s="16"></span> Importa JSON <input type="file" accept=".json" style="display:none" onchange="importData(event)">
         </label>
       </div>
       <p style="font-size:13px;color:var(--text2);margin-top:12px">I dati sono salvati nel localStorage del browser. Usa Esporta/Importa per backup o trasferimento.</p>
     </div>
   </div>
   <div style="margin-top:16px;text-align:right">
-    <button class="btn btn-primary" onclick="saveSettings()">💾 Salva Impostazioni</button>
+    <button class="btn btn-primary" onclick="saveSettings()"><span data-ic="save" data-s="16"></span> Salva Impostazioni</button>
   </div>
 </main>
 
@@ -108,6 +90,7 @@ const PAGE_ID = 'impostazioni';
 function renderCurrentPage() { renderImpostazioni(); }
 
 function renderImpostazioni() {
+  renderSelettoreStile('selettore-stile');
   document.getElementById('s-nome').value   = DB.global.nome;
   document.getElementById('s-valuta').value = DB.global.valuta;
   renderContiList();
@@ -133,9 +116,9 @@ function renderContiList() {
         <input type="text" value="${c.nome}" style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:15px;font-family:inherit;outline:none;min-height:40px;width:100%" onchange="renameContoInTransazioni('${c.nome}',this.value,${i})">
         <input type="number" step="0.01" value="${si}" style="padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:15px;font-family:inherit;outline:none;min-height:40px;width:100%;text-align:right" onchange="updateSaldoInizialeInput(${i},this.value)">
         <select title="Tipo conto" onchange="updateContoField(${i},'tipo',this.value)" style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;outline:none;min-height:36px;width:100%">
-          <option value="banca" ${tipoVal==='banca'?'selected':''}>🏦 Banca</option>
-          <option value="investimenti" ${tipoVal==='investimenti'?'selected':''}>📈 Invest.</option>
-          <option value="entrambi" ${tipoVal==='entrambi'?'selected':''}>🔀 Entrambi</option>
+          <option value="banca" ${tipoVal==='banca'?'selected':''}>Banca</option>
+          <option value="investimenti" ${tipoVal==='investimenti'?'selected':''}>${icona('report',16)} Invest.</option>
+          <option value="entrambi" ${tipoVal==='entrambi'?'selected':''}>${icona('shuffle',16)} Entrambi</option>
         </select>
         <button class="btn btn-icon btn-small" onclick="moveContoUp(${i})" ${i===0?'disabled':''} title="Sposta su">↑</button>
         <button class="btn btn-icon btn-small" style="color:var(--danger)" onclick="deleteContoAt(${i})" title="Elimina">×</button>
@@ -160,8 +143,8 @@ function updateSaldoInizialeInput(idx, val) {
 
 function renameContoInTransazioni(vecchioNome, nuovoNome, idx) {
   nuovoNome = nuovoNome.trim();
-  if (!nuovoNome) { toast('⚠️ Il nome non può essere vuoto','error'); return; }
-  if (getConti().some((c,i) => i !== idx && c.nome.toLowerCase() === nuovoNome.toLowerCase())) { toast('⚠️ Nome già in uso','error'); return; }
+  if (!nuovoNome) { toast('Il nome non può essere vuoto','error'); return; }
+  if (getConti().some((c,i) => i !== idx && c.nome.toLowerCase() === nuovoNome.toLowerCase())) { toast('Nome già in uso','error'); return; }
   Object.values(DB.anni).forEach(anno => {
     anno.transazioni.forEach(t => { if (t.conto === vecchioNome) t.conto = nuovoNome; });
   });
@@ -169,7 +152,7 @@ function renameContoInTransazioni(vecchioNome, nuovoNome, idx) {
     if (anno.saldiMensili[vecchioNome]) { anno.saldiMensili[nuovoNome] = anno.saldiMensili[vecchioNome]; delete anno.saldiMensili[vecchioNome]; }
   });
   DB.global.conti[idx].nome = nuovoNome;
-  autoSave(); toast(`✅ Conto rinominato in "${nuovoNome}"`, 'success');
+  autoSave(); toast(`Conto rinominato in "${nuovoNome}"`, 'success');
 }
 
 function moveContoUp(idx) {
@@ -185,13 +168,13 @@ function addConto() {
   const saldo = parseFloat(document.getElementById('new-conto-saldo').value) || 0;
   const tipo   = document.getElementById('new-conto-tipo').value || 'banca';
   const colore = document.getElementById('new-conto-colore').value || '#004561';
-  if (!nome) { toast('⚠️ Inserisci il nome del conto','error'); return; }
-  if (getConti().some(c => c.nome.toLowerCase() === nome.toLowerCase())) { toast('⚠️ Esiste già un conto con questo nome','error'); return; }
+  if (!nome) { toast('Inserisci il nome del conto','error'); return; }
+  if (getConti().some(c => c.nome.toLowerCase() === nome.toLowerCase())) { toast('Esiste già un conto con questo nome','error'); return; }
   DB.global.conti.push({nome, icona, tipo, colore, saldoIniziale: {[annoAttivo]: saldo}});
   document.getElementById('new-conto-icona').value = '';
   document.getElementById('new-conto-nome').value  = '';
   document.getElementById('new-conto-saldo').value = '';
-  autoSave(); renderContiList(); toast('✅ Conto aggiunto','success');
+  autoSave(); renderContiList(); toast('Conto aggiunto','success');
 }
 
 function deleteContoAt(idx) {
@@ -202,7 +185,7 @@ function deleteContoAt(idx) {
     : `Eliminare il conto "${c.nome}"?`;
   showConfirm('Elimina conto', msg, 'Elimina', () => {
     DB.global.conti.splice(idx, 1);
-    autoSave(); renderContiList(); toast('🗑️ Conto eliminato');
+    autoSave(); renderContiList(); toast('Conto eliminato');
   });
 }
 
@@ -229,18 +212,18 @@ function renderMetodiList() {
 
 function addMetodo() {
   const nome = document.getElementById('new-metodo-nome').value.trim();
-  if (!nome) { toast('⚠️ Inserisci il nome del metodo','error'); return; }
-  if (getMetodi().some(m => m.toLowerCase() === nome.toLowerCase())) { toast('⚠️ Metodo già presente','error'); return; }
+  if (!nome) { toast('Inserisci il nome del metodo','error'); return; }
+  if (getMetodi().some(m => m.toLowerCase() === nome.toLowerCase())) { toast('Metodo già presente','error'); return; }
   if (!DB.global.metodi) DB.global.metodi = [];
   DB.global.metodi.push(nome);
   document.getElementById('new-metodo-nome').value = '';
-  autoSave(); renderMetodiList(); toast('✅ Metodo aggiunto','success');
+  autoSave(); renderMetodiList(); toast('Metodo aggiunto','success');
 }
 
 function renameMetodo(idx, val) {
   val = val.trim();
-  if (!val) { toast('⚠️ Il nome non può essere vuoto','error'); renderMetodiList(); return; }
-  if (getMetodi().some((m,i) => i !== idx && m.toLowerCase() === val.toLowerCase())) { toast('⚠️ Metodo già presente','error'); renderMetodiList(); return; }
+  if (!val) { toast('Il nome non può essere vuoto','error'); renderMetodiList(); return; }
+  if (getMetodi().some((m,i) => i !== idx && m.toLowerCase() === val.toLowerCase())) { toast('Metodo già presente','error'); renderMetodiList(); return; }
   const old = DB.global.metodi[idx];
   DB.global.metodi[idx] = val;
   Object.values(DB.anni).forEach(anno => anno.transazioni.forEach(t => { if (t.metodo === old) t.metodo = val; }));
@@ -248,7 +231,7 @@ function renameMetodo(idx, val) {
     DB.global.commissioni[val] = DB.global.commissioni[old];
     delete DB.global.commissioni[old];
   }
-  autoSave(); toast(`✅ Metodo rinominato in "${val}"`, 'success');
+  autoSave(); toast(`Metodo rinominato in "${val}"`, 'success');
 }
 
 function setCommissioneMetodo(idx, val) {
@@ -258,7 +241,7 @@ function setCommissioneMetodo(idx, val) {
   if (!DB.global.commissioni) DB.global.commissioni = {};
   if (importo > 0) DB.global.commissioni[m] = importo;
   else delete DB.global.commissioni[m];
-  autoSave(); toast(importo > 0 ? `✅ Spesa fissa impostata per "${m}"` : `✅ Spesa fissa rimossa per "${m}"`, 'success');
+  autoSave(); toast(importo > 0 ? `Spesa fissa impostata per "${m}"` : `Spesa fissa rimossa per "${m}"`, 'success');
 }
 
 function deleteMetodoAt(idx) {
@@ -270,15 +253,15 @@ function deleteMetodoAt(idx) {
   showConfirm('Elimina metodo', msg, 'Elimina', () => {
     DB.global.metodi.splice(idx, 1);
     if (DB.global.commissioni) delete DB.global.commissioni[m];
-    autoSave(); renderMetodiList(); toast('🗑️ Metodo eliminato');
+    autoSave(); renderMetodiList(); toast('Metodo eliminato');
   });
 }
 
 function saveSettings() {
   DB.global.nome   = document.getElementById('s-nome').value.trim() || 'Utente';
   DB.global.valuta = document.getElementById('s-valuta').value.trim() || '€';
-  document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
-  autoSave(); toast('✅ Impostazioni salvate','success');
+  renderNavUser();
+  autoSave(); toast('Impostazioni salvate','success');
 }
 
 function exportData() {
@@ -287,7 +270,7 @@ function exportData() {
   a.href = URL.createObjectURL(blob);
   a.download = `finanze_${new Date().toISOString().slice(0,10)}.json`;
   a.click();
-  toast('📤 File JSON esportato','success');
+  toast('File JSON esportato','success');
 }
 
 function importData(event) {
@@ -333,10 +316,11 @@ function importData(event) {
       const anni = anniDisponibili();
       annoAttivo = anni.length ? anni[anni.length-1] : new Date().getFullYear();
       autoSave(); updateAnnoUI();
-      document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+      applicaTema(temaCorrente()); applyPersonalizzazioni();
+      renderNavUser();
       renderCurrentPage();
-      toast(`✅ Dati importati (${anni.length} ann${anni.length === 1 ? 'o' : 'i'}: ${anni.join(', ')})`, 'success');
-    } catch(err) { toast('❌ Errore importazione: ' + err.message, 'error'); }
+      toast(`Dati importati (${anni.length} ann${anni.length === 1 ? 'o' : 'i'}: ${anni.join(', ')})`, 'success');
+    } catch(err) { toast('Errore importazione: ' + err.message, 'error'); }
   };
   reader.readAsText(file);
   event.target.value = '';
@@ -344,7 +328,7 @@ function importData(event) {
 
 // INIT
 initDB();
-document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+renderNavUser();
 document.querySelector(`[data-page="${PAGE_ID}"]`).classList.add('active');
 updateAnnoUI();
 renderImpostazioni();

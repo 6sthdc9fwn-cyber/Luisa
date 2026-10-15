@@ -1,0 +1,86 @@
+/* C · Bento Dark */
+:root{
+  --font:'Inter',system-ui,sans-serif;--font-head:'Space Grotesk','Inter',sans-serif;
+  --bg:#09090b;--card:#131316;--surface2:#1a1a1f;--input:#1a1a1f;--border:#26262c;--track:#212127;
+  --text:#f4f4ef;--text2:#8a8a95;--accent:#d4ff3a;--accent-ink:#0b0b0d;
+  --reddito:#7dd3fc;--spese:#ff7a6b;--debiti:#c4b5fd;--investimenti:#d4ff3a;--oro:#ffc94d;--giro:#7dd3fc;
+  --success:#d4ff3a;--warning:#ffc94d;--danger:#ff7a6b;
+  --g1:#d4ff3a;--g2:#7dd3fc;--g3:#ff7a6b;--g4:#c4b5fd;--g5:#ffc94d;--g6:#f9a8d4;--g7:#5eead4;
+  --radius:28px;--shadow:0 12px 32px rgba(0,0,0,.4);--nav-w:96px;
+}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(50vw 40vh at 85% -5%,rgba(212,255,58,.07),transparent 70%)}
+.card,.chart-box,.kpi,.dash-card,.settings-section,.mensile-section,.quad-box,.cat-group-card{background:var(--card);border:1px solid var(--border);border-radius:28px;box-shadow:none}
+.chart-box,.kpi,.card-pad,.settings-section{padding:24px}
+.kpi,.chart-box,.card{transition:border-color .25s,transform .25s}
+.kpi:hover,.chart-box:hover,.card:hover{border-color:#3a3a42}
+.table-wrap{border:0;background:transparent;border-radius:0}
+.form-modal,#confirm-box,#cat-suggestions,#bulk-bar,.toast{background:#17171b!important;border:1px solid #303038;border-radius:28px}
+.mensile-section,.cat-group-card{border-radius:24px}
+
+/* rail a icone: si espande al passaggio del mouse */
+#nav{top:16px;left:16px;bottom:16px;min-height:0;width:64px;padding:14px 11px;background:var(--card);border:1px solid var(--border);border-radius:32px;overflow:hidden;transition:width .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s}
+#nav:hover{width:240px;box-shadow:0 30px 60px rgba(0,0,0,.6)}
+.nav-logo{display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-items:center;padding:0 0 12px;border-bottom:0;white-space:nowrap;height:56px}
+.nav-logo .logo-mark{grid-row:1/3;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--accent);color:#0b0b0d}
+.nav-logo h1{font-size:16px;font-weight:600;line-height:1.1}
+.nav-logo h1 br{display:none}
+.nav-logo h1 span{margin-left:6px;font-size:12px;color:var(--text2)}
+.nav-logo>span:not(.logo-mark){font-size:12px;color:var(--text2)}
+.nav-logo h1,.nav-logo>span:not(.logo-mark),.nav-link .lbl,.nav-user .lbl{opacity:0;transition:opacity .2s}
+#nav:hover .nav-logo h1,#nav:hover .nav-logo>span:not(.logo-mark),#nav:hover .nav-link .lbl,#nav:hover .nav-user .lbl{opacity:1;transition-delay:.1s}
+#anno-switcher{display:none}#nav:hover #anno-switcher{display:block}
+#anno-switcher>div{border-bottom:0!important;padding:4px 2px 8px!important}
+#anno-switcher button{border-radius:99px!important}
+.nav-section{height:1px;margin:12px 4px;padding:0;background:var(--border);color:transparent;line-height:0;font-size:10.5px;letter-spacing:.14em;white-space:nowrap;overflow:hidden}
+#nav:hover .nav-section{height:auto;background:none;margin:14px 8px 4px;color:var(--text2);line-height:1.2;overflow:visible}
+.nav-links{padding-top:6px;overflow-x:hidden}
+.nav-link{height:40px;padding:0 11px;margin-bottom:4px;border-radius:99px;color:var(--text2);font-size:14px;font-weight:500;white-space:nowrap;border-left:0}
+.nav-link:hover{background:var(--surface2);color:#fff}
+.nav-link.active{background:var(--accent);color:#0b0b0d}
+.nav-link .icon{display:grid;place-items:center;width:20px}
+.nav-user{display:flex;align-items:center;gap:10px;padding:12px 0 0;border-top:1px solid var(--border);white-space:nowrap;font-size:14px;color:var(--text2)}
+.avatar{display:grid;place-items:center;flex-shrink:0;width:38px;height:38px;border-radius:50%;background:var(--surface2);color:var(--accent);font:600 14px var(--font-head)}
+
+/* pagina */
+#main{padding:32px 36px 96px 32px}
+.page-header h2{font-size:34px;font-weight:600;line-height:1.1;letter-spacing:-.035em}
+.page-header{margin-bottom:22px}
+.chart-box h4,.quad-box h4{font:500 16px var(--font-head);letter-spacing:-.01em;text-transform:none;color:var(--text)}
+.kpi{border-left:1px solid var(--border)}
+.kpi label{font-size:13px;letter-spacing:.04em;text-transform:none;color:var(--text2);font-weight:500}
+.kpi .val{font:600 clamp(22px,2.4vw,34px)/1.1 var(--font-head);letter-spacing:-.04em;margin:18px 0 6px;color:var(--text)}
+.kpi-grid{gap:14px;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr)}
+/* tile hero: risparmio netto a tinta piena */
+.kpi-grid .kpi-hero{grid-column:1;grid-row:1/3;background:var(--accent);border-color:var(--accent);color:#0b0b0d;display:flex;flex-direction:column;justify-content:space-between}
+.kpi-grid .kpi-hero label,.kpi-grid .kpi-hero .sub{color:rgba(11,11,13,.62);font-weight:600}
+.kpi-grid .kpi-hero .val{color:#0b0b0d;font-size:52px}
+.kpi-grid .kpi-wide{grid-column:2/4}
+.chart-row{gap:14px}
+.bar-track{height:10px}.bar-fill{border-radius:99px}
+th{font-size:12px;font-weight:500;letter-spacing:.04em;text-transform:none!important}
+td{border-bottom:1px solid #1c1c21}
+.mese-tab,.period-btn{border-radius:99px}
+.btn{border-radius:99px;font-weight:600}
+.form-group input,.form-group select,.form-group textarea,.filters select,.filters input[type=text]{border-radius:16px}
+.btn-primary{background:var(--accent);color:#0b0b0d}
+::-webkit-scrollbar-thumb{background:#33333b}
+@media(max-width:900px){.kpi-grid{grid-template-columns:1fr 1fr}.kpi-grid .kpi-hero{grid-column:1/3;grid-row:auto}.kpi-grid .kpi-wide{grid-column:auto}}
+/* risparmio negativo: tile corallo invece di lime */
+.kpi-grid .kpi-hero.spese{background:var(--spese);border-color:var(--spese)}
+
+@media(max-width:900px){
+  #nav{width:240px;transform:translateX(calc(-100% - 20px))}
+  #nav.open{transform:translateX(0);box-shadow:0 30px 60px rgba(0,0,0,.6)}
+  .nav-logo h1,.nav-logo>span:not(.logo-mark),.nav-link .lbl,.nav-user .lbl{opacity:1}
+  #anno-switcher{display:block}
+  .nav-section{height:auto;background:none;margin:14px 8px 4px;color:var(--text2);line-height:1.2;overflow:visible}
+  #main{padding:64px 16px 88px}
+  .page-header h2{font-size:26px}
+  .kpi-grid .kpi-wide{grid-column:1/3}
+  .form-modal{padding:22px}
+}
+@media(max-width:600px){
+  .kpi-grid{grid-template-columns:minmax(0,1fr)}
+  .kpi-grid .kpi-hero,.kpi-grid .kpi-wide{grid-column:auto}
+  .kpi-grid .kpi-hero .val{font-size:40px}
+}

@@ -307,6 +307,59 @@ tbody td{padding:11px 14px;vertical-align:middle}
 .amt-inv{color:var(--investimenti);font-weight:600}
 .amt-giro{color:#0369A1;font-weight:600}
 
+/* ── ICONE ── */
+.ic{flex-shrink:0;vertical-align:-.2em}
+[data-ic]{display:inline-flex;align-items:center;vertical-align:middle;line-height:0}
+.q-ok{color:var(--success)}
+.q-ko{color:var(--danger)}
+.toast{display:flex;align-items:flex-start;gap:8px}
+.toast-ic{display:inline-flex;margin-top:1px}
+
+/* ── SELETTORE ANNO (menu) ── */
+.anno-box{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.1)}
+.anno-title{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.anno-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.anno-chip{padding:4px 10px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);transition:.2s}
+.anno-chip.active{background:var(--oro);color:#000}
+.anno-tools{display:flex;gap:4px;align-items:center}
+.anno-input{width:68px;padding:4px 6px;border-radius:5px;font-size:12px;border:1px dashed rgba(255,255,255,.35);background:rgba(255,255,255,.05);color:rgba(255,255,255,.85);outline:none;font-family:inherit}
+.anno-add,.anno-del{padding:4px 10px;border-radius:5px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center}
+.anno-add{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:rgba(255,255,255,.75)}
+.anno-del{padding:4px 8px;border:1px solid rgba(192,57,43,.5);background:rgba(192,57,43,.2);color:#ff8a80}
+
+/* ── SELETTORE STILE ── */
+.stile-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.stile-tile{display:flex;flex-direction:column;align-items:stretch;width:100%;gap:6px;padding:10px;text-align:left;font-family:inherit;color:var(--text);background:transparent;border:2px solid var(--border);border-radius:14px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.stile-tile:hover{border-color:var(--text2)}
+.stile-tile.active{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+.stile-tile .nm{display:flex;align-items:center;justify-content:space-between;margin-top:4px;font-size:15px;font-weight:600}
+.stile-tile .ds{font-size:12px;line-height:1.35;color:var(--text2)}
+.stile-ck{display:inline-flex;color:var(--accent)}
+.stile-nota{margin-top:12px;font-size:13px;color:var(--text2)}
+.stile-prev{display:flex;width:100%;box-sizing:border-box;gap:6px;height:96px;padding:7px;border-radius:9px;overflow:hidden}
+.stile-prev .p-nav{width:20%;border-radius:6px}
+.stile-prev .p-main{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0}
+.stile-prev .p-h{display:block;height:7px;width:50%;border-radius:4px}
+.stile-prev .p-row{display:flex;gap:5px;flex:1}
+.stile-prev .p-row span{flex:1;border-radius:6px}
+.stile-prev .p-wide{display:block;height:28%;border-radius:6px}
+.prev-classico{background:#F8FAFC;border:1px solid #E2E8F0}
+.prev-classico .p-nav,.prev-classico .p-h{background:#0C0C2C}
+.prev-classico .p-row span,.prev-classico .p-wide{background:#FFFFFF;border:1px solid #E2E8F0}
+.prev-classico .p-row span:first-child{border-left:3px solid #004561}
+.prev-glass{background:radial-gradient(70% 90% at 15% 0%,rgba(99,102,241,.55),transparent 70%),radial-gradient(60% 80% at 100% 10%,rgba(34,211,238,.35),transparent 70%),#080a12;border:1px solid rgba(255,255,255,.1)}
+.prev-glass .p-nav{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.14)}
+.prev-glass .p-h{background:linear-gradient(90deg,#fff,#aab4ff)}
+.prev-glass .p-row span,.prev-glass .p-wide{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14)}
+.prev-bento{background:#09090b;border:1px solid #26262c}
+.prev-bento .p-nav{width:11%;background:#131316;border:1px solid #26262c;border-radius:99px}
+.prev-bento .p-h{background:#f4f4ef}
+.prev-bento .p-row span,.prev-bento .p-wide{background:#131316;border:1px solid #26262c;border-radius:9px}
+.prev-bento .p-row span:first-child{background:#d4ff3a;border-color:#d4ff3a}
+@media(max-width:700px){.stile-grid{grid-template-columns:1fr}}
+
+@media(prefers-reduced-motion:reduce){.bar-fill,.month-bar,.toast{transition:none;animation:none}}
+
 /* scrollbar */
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}

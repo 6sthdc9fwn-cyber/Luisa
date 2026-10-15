@@ -1,0 +1,121 @@
+/* Regole comuni ai 3 temi: mappano i componenti reali dell'app sui token del tema.
+   Ogni tema definisce i token (--bg, --card, --accent, ...) e la propria firma visiva. */
+html{color-scheme:dark}
+:root{--axis:var(--text2);--row:var(--surface2)}
+body{font-family:var(--font)!important;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+body>*{position:relative}
+.page-header h2,.nav-logo h1,.kpi .val,.form-modal h3{font-family:var(--font-head)}
+.kpi .val,.td-num,td.amt-in,td.amt-out,td.amt-debt,.bar-value,.mensile-row .num{font-variant-numeric:tabular-nums}
+
+/* ── contenitori ── */
+.card,.chart-box,.kpi,.dash-card,.settings-section,.mensile-section,.quad-box,.cat-group-card,.form-modal,#confirm-box,.table-wrap,#bulk-bar{background:var(--card);border-color:var(--border);color:var(--text)}
+.dash-header{background:transparent;border-bottom-color:var(--border)}
+.dash-header h4,.chart-box h4,.quad-box h4,.card h4{color:var(--text2)}
+.page-header p,.kpi label,.kpi .sub,.month-label,.legend-item,.empty,.empty p{color:var(--text2)}
+.form-modal-backdrop,#confirm-backdrop{background:rgba(3,4,10,.62);backdrop-filter:blur(6px)}
+
+/* ── tabelle ── */
+thead th,.budget-table th,.prog-table th,.saldi-table th{background:var(--surface2)!important;color:var(--text2);border-bottom-color:var(--border)!important}
+tbody tr,.budget-table td,.prog-table td,.saldi-table td,.mensile-row,.mensile-row-slim,.cat-item,.setting-row,.quad-row{border-color:var(--border)!important}
+tbody tr:hover{background:var(--surface2)}
+.budget-section-header td,.mensile-row.total{background:var(--surface2)!important;color:var(--text2)}
+.prog-totale-proiettato{background:color-mix(in srgb,var(--oro) 14%,transparent)!important;color:var(--oro)!important;border-color:var(--border)!important}
+.prog-section-header{background:color-mix(in srgb,var(--oro) 8%,transparent)}
+.mensile-row-prog{background:color-mix(in srgb,var(--oro) 5%,transparent)}
+.td-date{color:var(--text2)}
+.amt-in{color:var(--reddito)}.amt-out{color:var(--spese)}.amt-debt{color:var(--debiti)}.amt-inv{color:var(--investimenti)}.amt-giro{color:var(--giro,var(--reddito))}
+.settings-section h3,.card>h3{border-bottom-color:var(--border)!important}
+
+/* ── badge e stati ── */
+.badge-SPESE{background:color-mix(in srgb,var(--spese) 16%,transparent);color:var(--spese)}
+.badge-REDDITO{background:color-mix(in srgb,var(--reddito) 16%,transparent);color:var(--reddito)}
+.badge-DEBITI{background:color-mix(in srgb,var(--debiti) 16%,transparent);color:var(--debiti)}
+.badge-INVESTIMENTI{background:color-mix(in srgb,var(--investimenti) 16%,transparent);color:var(--investimenti)}
+.badge-GIROCONTO{background:color-mix(in srgb,var(--giro,var(--reddito)) 16%,transparent);color:var(--giro,var(--reddito))}
+.stato-Confermata,.prog-stato-futura{background:color-mix(in srgb,var(--investimenti) 16%,transparent);color:var(--investimenti)}
+.stato-Da\ confermare,.prog-stato-pagare{background:color-mix(in srgb,var(--oro) 18%,transparent);color:var(--oro)}
+.stato-Programmata,.prog-stato-pagata{background:var(--surface2);color:var(--text2)}
+.mensile-header.reddito,.cat-group-header.reddito{background:color-mix(in srgb,var(--reddito) 13%,transparent);color:var(--reddito);border-bottom-color:var(--reddito)}
+.mensile-header.spese,.cat-group-header.spese{background:color-mix(in srgb,var(--spese) 13%,transparent);color:var(--spese);border-bottom-color:var(--spese)}
+.mensile-header.debiti,.cat-group-header.debiti{background:color-mix(in srgb,var(--debiti) 13%,transparent);color:var(--debiti);border-bottom-color:var(--debiti)}
+.mensile-header.investimenti,.cat-group-header.investimenti{background:color-mix(in srgb,var(--investimenti) 13%,transparent);color:var(--investimenti);border-bottom-color:var(--investimenti)}
+.mensile-row .diff-pos{color:var(--investimenti)}.mensile-row .diff-neg{color:var(--spese)}
+
+/* ── pulsanti ── */
+.btn{font-family:inherit;transition:.2s}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn-primary:hover:not(:disabled){background:var(--accent);filter:brightness(1.12)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--border)}
+.btn-danger{background:color-mix(in srgb,var(--spese) 15%,transparent);color:var(--spese);border:1px solid color-mix(in srgb,var(--spese) 30%,transparent)}
+.btn-danger:hover{background:color-mix(in srgb,var(--spese) 26%,transparent)}
+.btn-icon{color:var(--text2)}.btn-icon:hover{background:var(--surface2);color:var(--text)}
+.btn .ic,.btn-icon .ic{vertical-align:-3px}
+.mese-tab,.period-btn,.toggle-btn{background:var(--card);color:var(--text2);border-color:var(--border);font-family:inherit}
+.mese-tab:hover:not(.active){background:var(--surface2);color:var(--text)}
+.mese-tab.active,.period-btn.active,.toggle-btn.active{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn-confirma-prog{background:var(--surface2);color:var(--text2);border-color:var(--border)}
+button[style*="border:1px solid var(--border)"]{color:var(--text2)}
+
+/* ── input ── */
+body input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=file]),body select,body textarea{background:var(--input)!important;color:var(--text)!important;border-color:var(--border)!important;font-family:inherit}
+body input:focus,body select:focus,body textarea:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)!important;outline:none}
+/* Lista delle opzioni: la disegna il sistema su un fondo suo, e lo sfondo del <select> (traslucido) non arriva fin lì.
+   Senza un colore pieno il testo chiaro finisce su bianco. */
+body select option,body select optgroup{background-color:var(--bg);color:var(--text)}
+body input::placeholder,body textarea::placeholder{color:var(--text2);opacity:.6}
+.budget-table input{background:transparent!important}
+.budget-table input:focus{background:var(--input)!important}
+.tx-check,input[type=checkbox],input[type=radio]{accent-color:var(--accent)}
+.form-group label,.filters label,.setting-row label{color:var(--text2)}
+.cat-suggestion:hover{background:var(--surface2)}
+#cat-suggestions{background:var(--card)!important;border-color:var(--border)!important}
+.import-area{border-color:var(--border)}
+.import-area:hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.color-swatch{border-color:var(--border)}
+
+/* ── toast e dialoghi ── */
+.toast{background:var(--card);color:var(--text);border:1px solid var(--border);box-shadow:var(--shadow)}
+.toast.success{background:color-mix(in srgb,var(--investimenti) 20%,var(--card));border-color:var(--investimenti)}
+.toast.error{background:color-mix(in srgb,var(--spese) 20%,var(--card));border-color:var(--spese)}
+#confirm-box p{color:var(--text2)}
+
+/* ── grafici e barre ── */
+.bar-track,.track{background:var(--track)}
+.conto-block{border-left-color:var(--border)}
+.dash-resize{background:linear-gradient(135deg,transparent 50%,rgba(255,255,255,.12) 50%)}
+.dash-card.drag-over{box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent);border-color:var(--accent)}
+
+/* ── nav: selettore anno ── */
+#anno-switcher button{font-family:inherit}
+.anno-title{color:var(--text2)}
+.anno-chip{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
+.anno-chip:hover:not(.active){color:var(--text)}
+.anno-chip.active{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.anno-add{background:var(--surface2);color:var(--text2);border-color:var(--border)}
+.anno-add:hover{color:var(--text)}
+.anno-del{background:color-mix(in srgb,var(--spese) 16%,transparent);color:var(--spese);border-color:color-mix(in srgb,var(--spese) 35%,transparent)}
+.q-ok{color:var(--investimenti)}.q-ko{color:var(--spese)}
+#nav-toggle{background:var(--card);color:var(--text);border:1px solid var(--border)}
+
+
+/* ── correzioni emerse dalle pagine reali ── */
+#main{min-width:0}
+.kpi .val,.report-kpi-grid .kpi .val{font-size:clamp(20px,2.4vw,29px)}
+.kpi .val{white-space:nowrap}
+.settings-grid>*{min-width:0}
+.kpi-grid,.report-kpi-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.kpi .val{font-size:clamp(18px,2vw,29px)}
+.chart-row>*,.mensile-grid>*,.cat-grid>*{min-width:0}
+
+/* ── responsive (sotto 900px la barra laterale è fuori schermo: vedi i file dei temi) ── */
+@media(max-width:900px){
+  .kpi-grid,.report-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body:has(#nav.open) #nav-toggle{visibility:hidden}
+}
+@media(max-width:600px){
+  .kpi-grid,.report-kpi-grid{grid-template-columns:minmax(0,1fr)}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}

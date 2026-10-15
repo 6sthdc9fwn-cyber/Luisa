@@ -3,37 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎨 Personalizzazioni — Finanze Personali</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=Inter:wght@300;400;500;600&family=Roboto:wght@300;400;500;600&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Personalizzazioni — Finanze Personali</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Roboto:wght@300;400;500;600&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<script src="tema.js"></script>
+<script src="icone.js"></script>
 </head>
 <body>
 
-<button id="nav-toggle" onclick="toggleNav()">☰</button>
-<div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
-
-<nav id="nav">
-  <div class="nav-logo">
-    <h1>💰 Finanze<br><span id="nav-year">—</span></h1>
-    <span>Personali</span>
-  </div>
-  <div id="anno-switcher"></div>
-  <div class="nav-links">
-    <div class="nav-section">Overview</div>
-    <a class="nav-link" href="dashboard.html" data-page="dashboard"><span class="icon">📊</span> Dashboard</a>
-    <a class="nav-link" href="transazioni.html" data-page="transazioni"><span class="icon">💸</span> Transazioni</a>
-    <a class="nav-link" href="report.html" data-page="report"><span class="icon">📈</span> Report</a>
-    <div class="nav-section">Mensile</div>
-    <a class="nav-link" href="mensile.html" data-page="mensile"><span class="icon">📅</span> Mese Corrente</a>
-    <div class="nav-section">Gestione</div>
-    <a class="nav-link" href="budget.html" data-page="budget"><span class="icon">🎯</span> Budget</a>
-    <a class="nav-link" href="programmate.html" data-page="programmate"><span class="icon">🔁</span> Spese Programmate</a>
-    <a class="nav-link" href="categorie.html" data-page="categorie"><span class="icon">🏷️</span> Categorie</a>
-    <a class="nav-link" href="impostazioni.html" data-page="impostazioni"><span class="icon">⚙️</span> Impostazioni</a>
-    <a class="nav-link" href="personalizzazioni.html" data-page="personalizzazioni"><span class="icon">🎨</span> Personalizzazioni</a>
-  </div>
-  <div class="nav-user" id="nav-user">👤 —</div>
-</nav>
+<script src="shell.js"></script>
 
 <main id="main">
   <div class="page-header">
@@ -41,9 +19,15 @@
     <p>Aspetto, colori, gruppi spese e grafico mensile</p>
   </div>
 
-  <!-- ASPETTO -->
+  <!-- STILE -->
   <div class="card card-pad" style="margin-bottom:20px">
-    <h3 style="font-size:16px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)">🎨 Aspetto</h3>
+    <h3 style="font-size:16px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)"><span data-ic="personalizzazioni" data-s="18"></span> Stile</h3>
+    <div id="selettore-stile"></div>
+  </div>
+
+  <!-- ASPETTO (solo tema Classico) -->
+  <div class="card card-pad" id="card-aspetto" style="margin-bottom:20px">
+    <h3 style="font-size:16px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)"><span data-ic="personalizzazioni" data-s="18"></span> Aspetto</h3>
 
     <div class="setting-row">
       <label>Font</label>
@@ -92,18 +76,18 @@
 
   <!-- GRUPPI SPESE -->
   <div class="card card-pad" style="margin-bottom:20px">
-    <h3 style="font-size:16px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)">🏷️ Gruppi Spese</h3>
+    <h3 style="font-size:16px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)"><span data-ic="categorie" data-s="18"></span> Gruppi Spese</h3>
     <div id="gruppi-list"></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
       <input type="text" id="new-gruppo-nome" placeholder="Nome nuovo gruppo..." style="flex:1;min-width:140px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;min-height:44px">
       <input type="color" id="new-gruppo-colore" value="#6366F1" title="Colore gruppo" style="width:44px;height:44px;border:1px solid var(--border);border-radius:8px;cursor:pointer;padding:2px">
-      <button class="btn btn-primary" onclick="addGruppo()">＋ Aggiungi gruppo</button>
+      <button class="btn btn-primary" onclick="addGruppo()"><span data-ic="plus" data-s="16"></span> Aggiungi gruppo</button>
     </div>
   </div>
 
   <!-- GRAFICO MENSILE -->
   <div class="card card-pad">
-    <h3 style="font-size:16px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)">📊 Grafico Mensile (Dashboard)</h3>
+    <h3 style="font-size:16px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--border)"><span data-ic="dashboard" data-s="18"></span> Grafico Mensile (Dashboard)</h3>
 
     <div class="setting-row">
       <label>Tipo di grafico</label>
@@ -177,6 +161,8 @@ function renderCurrentPage() { renderPersonalizzazioni(); }
 
 function renderPersonalizzazioni() {
   const p = DB.global.personalizzazioni;
+  renderSelettoreStile('selettore-stile', true);
+  document.getElementById('card-aspetto').style.display = temaCorrente() === 'classico' ? '' : 'none';
   document.getElementById('p-font').value = p.font || "'DM Sans', sans-serif";
   const resolveColor = (key) => p.colori?.[key] || COLORI_DEFAULT[key];
   ['reddito','spese','debiti','investimenti','oro'].forEach(k => {
@@ -203,7 +189,7 @@ function renderGruppiList() {
   const coloriGruppi = DB.global.personalizzazioni?.coloriGruppi || {};
   let html = '';
   Object.entries(gruppi).forEach(([nome, cats], i) => {
-    const col = coloriGruppi[nome] || DEFAULT_COLORS_GRUPPI[i % DEFAULT_COLORS_GRUPPI.length];
+    const col = coloriGruppi[nome] || paletteTema()[i % paletteTema().length];
     html += `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">
       <input type="color" value="${col}" title="Colore ${nome}" style="width:36px;height:36px;border:1px solid var(--border);border-radius:6px;cursor:pointer;padding:2px" onchange="setGruppoColore('${nome}',this.value)">
       <span style="font-weight:500;flex:1;min-width:80px">${nome}</span>
@@ -219,8 +205,9 @@ function onFontChange() {
   const val = document.getElementById('p-font').value;
   DB.global.personalizzazioni.font = val;
   document.body.style.fontFamily = val;
+  document.documentElement.style.setProperty('--font', val);
   autoSave();
-  toast('✅ Font aggiornato', 'success');
+  toast('Font aggiornato', 'success');
 }
 
 function onColorChange(key, value) {
@@ -237,7 +224,7 @@ function resetColoriBase() {
   Object.entries(COLORI_DEFAULT).forEach(([k,v]) => document.documentElement.style.setProperty('--'+k, v));
   renderPersonalizzazioni();
   autoSave();
-  toast('✅ Colori ripristinati', 'success');
+  toast('Colori ripristinati', 'success');
 }
 
 function setGruppoColore(nome, colore) {
@@ -249,15 +236,15 @@ function setGruppoColore(nome, colore) {
 function addGruppo() {
   const nome = document.getElementById('new-gruppo-nome').value.trim();
   const colore = document.getElementById('new-gruppo-colore').value;
-  if (!nome) { toast('⚠️ Inserisci il nome del gruppo', 'error'); return; }
-  if (DB.global.categorie.SPESE[nome]) { toast('⚠️ Il gruppo esiste già', 'error'); return; }
+  if (!nome) { toast('Inserisci il nome del gruppo', 'error'); return; }
+  if (DB.global.categorie.SPESE[nome]) { toast('Il gruppo esiste già', 'error'); return; }
   DB.global.categorie.SPESE[nome] = [];
   if (!DB.global.personalizzazioni.coloriGruppi) DB.global.personalizzazioni.coloriGruppi = {};
   DB.global.personalizzazioni.coloriGruppi[nome] = colore;
   document.getElementById('new-gruppo-nome').value = '';
   autoSave();
   renderGruppiList();
-  toast(`✅ Gruppo "${nome}" aggiunto`, 'success');
+  toast(`Gruppo "${nome}" aggiunto`, 'success');
 }
 
 function deleteGruppo(nome) {
@@ -270,7 +257,7 @@ function deleteGruppo(nome) {
     if (DB.global.personalizzazioni.coloriGruppi) delete DB.global.personalizzazioni.coloriGruppi[nome];
     autoSave();
     renderGruppiList();
-    toast(`🗑️ Gruppo "${nome}" eliminato`);
+    toast(`Gruppo "${nome}" eliminato`);
   });
 }
 
@@ -286,12 +273,12 @@ function saveGrafico() {
   const colore2 = document.getElementById('c-g2').value || '';
   DB.global.personalizzazioni.grafico = { tipo, filtroTipo, filtroValore, colore1, colore2 };
   autoSave();
-  toast('✅ Grafico aggiornato', 'success');
+  toast('Grafico aggiornato', 'success');
 }
 
 // INIT
 initDB();
-document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+renderNavUser();
 document.querySelector(`[data-page="${PAGE_ID}"]`).classList.add('active');
 updateAnnoUI();
 renderPersonalizzazioni();

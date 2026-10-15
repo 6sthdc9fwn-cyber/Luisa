@@ -3,37 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎯 Budget — Finanze Personali</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Budget — Finanze Personali</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<script src="tema.js"></script>
+<script src="icone.js"></script>
 </head>
 <body>
 
-<button id="nav-toggle" onclick="toggleNav()">☰</button>
-<div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
-
-<nav id="nav">
-  <div class="nav-logo">
-    <h1>💰 Finanze<br><span id="nav-year">—</span></h1>
-    <span>Personali</span>
-  </div>
-  <div id="anno-switcher"></div>
-  <div class="nav-links">
-    <div class="nav-section">Overview</div>
-    <a class="nav-link" href="dashboard.html" data-page="dashboard"><span class="icon">📊</span> Dashboard</a>
-    <a class="nav-link" href="transazioni.html" data-page="transazioni"><span class="icon">💸</span> Transazioni</a>
-    <a class="nav-link" href="report.html" data-page="report"><span class="icon">📈</span> Report</a>
-    <div class="nav-section">Mensile</div>
-    <a class="nav-link" href="mensile.html" data-page="mensile"><span class="icon">📅</span> Mese Corrente</a>
-    <div class="nav-section">Gestione</div>
-    <a class="nav-link" href="budget.html" data-page="budget"><span class="icon">🎯</span> Budget</a>
-    <a class="nav-link" href="programmate.html" data-page="programmate"><span class="icon">🔁</span> Spese Programmate</a>
-    <a class="nav-link" href="categorie.html" data-page="categorie"><span class="icon">🏷️</span> Categorie</a>
-    <a class="nav-link" href="impostazioni.html" data-page="impostazioni"><span class="icon">⚙️</span> Impostazioni</a>
-    <a class="nav-link" href="personalizzazioni.html" data-page="personalizzazioni"><span class="icon">🎨</span> Personalizzazioni</a>
-  </div>
-  <div class="nav-user" id="nav-user">👤 —</div>
-</nav>
+<script src="shell.js"></script>
 
 <main id="main">
   <div class="page-header">
@@ -44,7 +22,7 @@
     <div class="table-wrap"><table class="budget-table" id="budget-table"></table></div>
   </div>
   <div style="margin-top:16px;text-align:right">
-    <button class="btn btn-primary" onclick="saveBudget()">💾 Salva Budget</button>
+    <button class="btn btn-primary" onclick="saveBudget()"><span data-ic="save" data-s="16"></span> Salva Budget</button>
   </div>
 </main>
 
@@ -97,11 +75,11 @@ function updateBudget(inp) {
   budgetAnno()[cat][mese] = val;
 }
 
-function saveBudget() { autoSave(); toast('💾 Budget salvato','success'); }
+function saveBudget() { autoSave(); toast('Budget salvato','success'); }
 
 // INIT
 initDB();
-document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+renderNavUser();
 document.querySelector(`[data-page="${PAGE_ID}"]`).classList.add('active');
 updateAnnoUI();
 renderBudget();

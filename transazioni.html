@@ -3,44 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💸 Transazioni — Finanze Personali</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Transazioni — Finanze Personali</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<script src="tema.js"></script>
+<script src="icone.js"></script>
 <style>
 .cat-suggestion{padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid var(--border);font-size:13px}
 .cat-suggestion:last-child{border-bottom:none}
 .cat-suggestion:hover{background:var(--surface2)}
-#bulk-bar{position:sticky;bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.12);padding:10px 16px;display:none;align-items:center;gap:10px;z-index:50;margin-top:12px}
+#bulk-bar{position:sticky;bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:10px 16px;display:none;align-items:center;gap:10px;z-index:50;margin-top:12px}
 .tx-check{width:16px;height:16px;cursor:pointer;accent-color:var(--reddito)}
+.multi-toggle{display:inline-flex;align-items:center;gap:4px;padding:2px 8px 2px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font:600 12.5px var(--font,inherit);cursor:pointer;white-space:nowrap}
+.multi-toggle:hover{border-color:var(--accent)}
+.multi-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.multi-toggle .chev{display:inline-flex;color:var(--text2)}
+tr.tx-detail td{background:var(--row);padding-top:6px;padding-bottom:12px}
+.tx-detail .det{display:flex;flex-direction:column;gap:5px;max-width:440px;font-size:13px}
+.tx-detail .det>div{display:flex;justify-content:space-between;gap:20px}
+.tx-detail .det .hit{font-weight:700}
+.tx-detail .det .tot{border-top:1px solid var(--border);padding-top:5px;color:var(--text2)}
 </style>
 </head>
 <body>
 
-<button id="nav-toggle" onclick="toggleNav()">☰</button>
-<div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
-
-<nav id="nav">
-  <div class="nav-logo">
-    <h1>💰 Finanze<br><span id="nav-year">—</span></h1>
-    <span>Personali</span>
-  </div>
-  <div id="anno-switcher"></div>
-  <div class="nav-links">
-    <div class="nav-section">Overview</div>
-    <a class="nav-link" href="dashboard.html" data-page="dashboard"><span class="icon">📊</span> Dashboard</a>
-    <a class="nav-link" href="transazioni.html" data-page="transazioni"><span class="icon">💸</span> Transazioni</a>
-    <a class="nav-link" href="report.html" data-page="report"><span class="icon">📈</span> Report</a>
-    <div class="nav-section">Mensile</div>
-    <a class="nav-link" href="mensile.html" data-page="mensile"><span class="icon">📅</span> Mese Corrente</a>
-    <div class="nav-section">Gestione</div>
-    <a class="nav-link" href="budget.html" data-page="budget"><span class="icon">🎯</span> Budget</a>
-    <a class="nav-link" href="programmate.html" data-page="programmate"><span class="icon">🔁</span> Spese Programmate</a>
-    <a class="nav-link" href="categorie.html" data-page="categorie"><span class="icon">🏷️</span> Categorie</a>
-    <a class="nav-link" href="impostazioni.html" data-page="impostazioni"><span class="icon">⚙️</span> Impostazioni</a>
-    <a class="nav-link" href="personalizzazioni.html" data-page="personalizzazioni"><span class="icon">🎨</span> Personalizzazioni</a>
-  </div>
-  <div class="nav-user" id="nav-user">👤 —</div>
-</nav>
+<script src="shell.js"></script>
 
 <main id="main">
   <div class="page-header">
@@ -54,7 +41,7 @@
         <input type="date" id="f-data-da" onchange="renderTransazioni()" style="font-size:13px;padding:5px 8px;border:1px solid var(--border);border-radius:8px;font-family:inherit">
         <label style="font-size:12px;color:var(--text2);white-space:nowrap">Al</label>
         <input type="date" id="f-data-a" onchange="renderTransazioni()" style="font-size:13px;padding:5px 8px;border:1px solid var(--border);border-radius:8px;font-family:inherit">
-        <button onclick="document.getElementById('f-data-da').value='';document.getElementById('f-data-a').value='';renderTransazioni()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:8px;background:transparent;cursor:pointer;color:var(--text2)" title="Azzera periodo">✕</button>
+        <button onclick="document.getElementById('f-data-da').value='';document.getElementById('f-data-a').value='';renderTransazioni()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:8px;background:transparent;cursor:pointer;color:var(--text2)" title="Azzera periodo"><span data-ic="x" data-s="14"></span></button>
       </div>
       <div>
         <select id="f-mese" onchange="renderTransazioni()">
@@ -82,16 +69,16 @@
           <option>Confermata</option><option>Da confermare</option><option>Programmata</option>
         </select>
       </div>
-      <div><input type="text" id="f-search" placeholder="🔍 Cerca..." oninput="renderTransazioni()" style="width:160px"></div>
+      <div><input type="text" id="f-search" placeholder="Cerca..." oninput="renderTransazioni()" style="width:160px"></div>
     </div>
-    <button class="btn btn-primary" onclick="openForm()">＋ Aggiungi</button>
+    <button class="btn btn-primary" onclick="openForm()"><span data-ic="plus" data-s="16"></span> Aggiungi</button>
   </div>
   <div id="trans-summary" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px"></div>
   <div id="bulk-bar">
     <span id="bulk-count" style="font-size:13px;font-weight:600;flex:1"></span>
-    <button class="btn btn-secondary btn-small" onclick="bulkConferma()">✓ Conferma</button>
-    <button class="btn btn-danger btn-small" onclick="bulkElimina()">🗑️ Elimina</button>
-    <button class="btn btn-secondary btn-small" onclick="deselectAll()">✕ Deseleziona</button>
+    <button class="btn btn-secondary btn-small" onclick="bulkConferma()"><span data-ic="tick" data-s="14"></span> Conferma</button>
+    <button class="btn btn-danger btn-small" onclick="bulkElimina()"><span data-ic="trash" data-s="16"></span> Elimina</button>
+    <button class="btn btn-secondary btn-small" onclick="deselectAll()"><span data-ic="x" data-s="14"></span> Deseleziona</button>
   </div>
   <div class="table-wrap">
     <table>
@@ -108,7 +95,7 @@
     </table>
   </div>
   <div id="trans-empty" class="empty" style="display:none">
-    <div class="icon">📭</div>
+    <div class="icon"><span data-ic="inbox" data-s="40"></span></div>
     <p>Nessuna transazione trovata</p>
   </div>
 </main>
@@ -116,7 +103,7 @@
 <!-- FORM TRANSAZIONE -->
 <div class="form-modal-backdrop" id="form-backdrop">
   <div class="form-modal">
-    <h3 id="form-title">➕ Nuova Transazione</h3>
+    <h3 id="form-title"><span data-ic="plus" data-s="18"></span> Nuova Transazione</h3>
     <div class="form-grid">
       <div class="form-group">
         <label>Data *</label>
@@ -134,7 +121,7 @@
         <label>Categoria *</label>
         <div id="splits-container"></div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
-          <button type="button" onclick="addSplit()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;color:var(--text2)">＋ Dividi</button>
+          <button type="button" onclick="addSplit()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;color:var(--text2)"><span data-ic="plus" data-s="14"></span> Dividi</button>
           <span id="splits-remainder" style="display:none;font-size:12px;font-weight:500"></span>
         </div>
       </div>
@@ -176,7 +163,7 @@
     </div>
     <div class="form-actions">
       <button class="btn btn-secondary" onclick="closeForm()">Annulla</button>
-      <button class="btn btn-primary" onclick="saveTransaction()">💾 Salva</button>
+      <button class="btn btn-primary" onclick="saveTransaction()"><span data-ic="save" data-s="16"></span> Salva</button>
     </div>
   </div>
 </div>
@@ -199,6 +186,29 @@ const PAGE_ID = 'transazioni';
 let sortDir = 'desc';
 let selectedIds = new Set();
 let _txsRendered = 0;
+const _txOpen = new Set();   // transazioni "Multipla" con i dettagli aperti (solo in memoria)
+
+// Una transazione con più categorie mostra "Multipla"; le categorie si vedono aprendola.
+const isMultipla = t => !!(t.splits && t.splits.length > 1);
+function multiToggleHtml(t) {
+  const open = _txOpen.has(t.id);
+  return `<button type="button" class="multi-toggle" onclick="toggleSplits('${t.id}',this)" aria-expanded="${open}" title="${open ? 'Nascondi' : 'Mostra'} le categorie">Multipla <span class="chev">${icona(open ? 'down' : 'right', 14)}</span></button>`;
+}
+function splitDetailHtml(t) {
+  const V = DB.global.valuta, fCat = document.getElementById('f-cat').value;
+  const righe = t.splits.map(s => `<div${s.categoria === fCat ? ' class="hit"' : ''}><span>${s.categoria}</span><span class="td-num">${V} ${fmt(s.importo)}</span></div>`).join('');
+  return `<tr class="tx-detail" data-detail="${t.id}"><td colspan="3"></td><td colspan="8"><div class="det">${righe}<div class="tot"><span>Totale</span><span class="td-num">${V} ${fmt(t.importo)}</span></div></div></td></tr>`;
+}
+function toggleSplits(id, btn) {
+  const tr = btn.closest('tr'), t = txAnno().find(x => x.id === id);
+  if (!t) return;
+  const open = !_txOpen.has(id);
+  if (open) { _txOpen.add(id); tr.insertAdjacentHTML('afterend', splitDetailHtml(t)); }
+  else { _txOpen.delete(id); const d = tr.nextElementSibling; if (d && d.dataset.detail === id) d.remove(); }
+  btn.setAttribute('aria-expanded', open);
+  btn.title = (open ? 'Nascondi' : 'Mostra') + ' le categorie';
+  btn.querySelector('.chev').innerHTML = icona(open ? 'down' : 'right', 14);
+}
 
 function toggleSort() {
   sortDir = sortDir === 'desc' ? 'asc' : 'desc';
@@ -232,17 +242,17 @@ function renderTransazioni() {
   if (fCat)    txs = txs.filter(t => t.categoria === fCat || (t.splits && t.splits.some(s => s.categoria === fCat)));
   if (fConto)  txs = txs.filter(t => t.conto === fConto);
   if (fStato)  txs = txs.filter(t => t.stato === fStato);
-  if (fSearch) txs = txs.filter(t => { const cats = t.splits ? t.splits.map(s=>s.categoria).join(' ') : (t.categoria||''); return (t.descrizione+cats+(t.note||'')).toLowerCase().includes(fSearch); });
+  if (fSearch) txs = txs.filter(t => { const cats = t.splits ? t.splits.map(s=>s.categoria).join(' ') : (t.categoria||''); return (t.descrizione+cats+(isMultipla(t)?' multipla':'')+(t.note||'')).toLowerCase().includes(fSearch); });
   txs.sort((a,b) => sortDir === 'desc' ? b.data.localeCompare(a.data) : a.data.localeCompare(b.data));
 
   const conf = txs.filter(txConfirmed);
   const V = DB.global.valuta;
   document.getElementById('trans-summary').innerHTML = `
-    <span style="font-size:13px;padding:5px 10px;background:#EFF6FF;color:var(--reddito);border-radius:6px;font-weight:500">💼 ${V} ${fmt(conf.filter(t=>t.tipo==='REDDITO').reduce((s,t)=>s+t.importo,0))}</span>
-    <span style="font-size:13px;padding:5px 10px;background:#FEF2F2;color:var(--spese);border-radius:6px;font-weight:500">💸 ${V} ${fmt(conf.filter(t=>t.tipo==='SPESE').reduce((s,t)=>s+t.importo,0))}</span>
-    <span style="font-size:13px;padding:5px 10px;background:#F5F3FF;color:var(--debiti);border-radius:6px;font-weight:500">💳 ${V} ${fmt(conf.filter(t=>t.tipo==='DEBITI').reduce((s,t)=>s+t.importo,0))}</span>
-    <span style="font-size:13px;padding:5px 10px;background:#F0FDF4;color:var(--investimenti);border-radius:6px;font-weight:500">📈 ${V} ${fmt(conf.filter(t=>t.tipo==='INVESTIMENTI').reduce((s,t)=>s+t.importo,0))}</span>
-    <span style="font-size:13px;padding:5px 10px;background:#F8FAFC;border-radius:6px;color:var(--text2)">${txs.length} transazioni</span>`;
+    <span style="font-size:13px;padding:5px 10px;background:color-mix(in srgb,var(--reddito) 12%,transparent);color:var(--reddito);border-radius:6px;font-weight:500">${icona('briefcase',16)} ${V} ${fmt(conf.filter(t=>t.tipo==='REDDITO').reduce((s,t)=>s+t.importo,0))}</span>
+    <span style="font-size:13px;padding:5px 10px;background:color-mix(in srgb,var(--spese) 12%,transparent);color:var(--spese);border-radius:6px;font-weight:500">${icona('banknote',16)} ${V} ${fmt(conf.filter(t=>t.tipo==='SPESE').reduce((s,t)=>s+t.importo,0))}</span>
+    <span style="font-size:13px;padding:5px 10px;background:color-mix(in srgb,var(--debiti) 12%,transparent);color:var(--debiti);border-radius:6px;font-weight:500">${icona('card',16)} ${V} ${fmt(conf.filter(t=>t.tipo==='DEBITI').reduce((s,t)=>s+t.importo,0))}</span>
+    <span style="font-size:13px;padding:5px 10px;background:color-mix(in srgb,var(--investimenti) 12%,transparent);color:var(--investimenti);border-radius:6px;font-weight:500">${icona('report',16)} ${V} ${fmt(conf.filter(t=>t.tipo==='INVESTIMENTI').reduce((s,t)=>s+t.importo,0))}</span>
+    <span style="font-size:13px;padding:5px 10px;background:var(--row);border-radius:6px;color:var(--text2)">${txs.length} transazioni</span>`;
 
   const tbody = document.getElementById('trans-tbody');
   if (!txs.length) { tbody.innerHTML = ''; document.getElementById('trans-empty').style.display = 'block'; return; }
@@ -255,25 +265,25 @@ function renderTransazioni() {
     <td><input type="checkbox" class="tx-check" value="${t.id}" ${selectedIds.has(t.id)?'checked':''} onchange="onCheckChange(this)"></td>
     <td class="td-date">${formatDateIt(t.data)}</td>
     <td><span class="badge badge-${t.tipo}">${t.tipo.slice(0,3)}</span></td>
-    <td>${t.splits&&t.splits.length>1 ? t.splits.map(s=>s.categoria).join(' + ') : (t.categoria||'—')}</td><td>${t.descrizione}</td>
+    <td>${isMultipla(t) ? multiToggleHtml(t) : (t.categoria||'—')}</td><td>${t.descrizione}</td>
     <td style="font-size:13px;color:var(--text2)">${t.metodo||'—'}</td>
     <td style="font-size:13px;color:var(--text2)">${t.tipo==='GIROCONTO' ? t.conto+' → '+t.contoDestinazione : t.conto}</td>
     <td class="td-num ${amtClass[t.tipo]}">${amtSign[t.tipo]}${V} ${fmt(t.importo)}</td>
     <td><span class="stato stato-${t.stato}">${t.stato}</span></td>
     <td style="font-size:13px;color:var(--text2);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.note||'—'}</td>
     <td style="white-space:nowrap">
-      <button class="btn btn-icon btn-small" onclick="openForm('${t.id}')" title="Modifica">✏️</button>
-      <button class="btn btn-icon btn-small" onclick="duplicaTx('${t.id}')" title="Duplica">📋</button>
-      <button class="btn btn-icon btn-small" onclick="deleteTransaction('${t.id}')" title="Elimina">🗑️</button>
+      <button class="btn btn-icon btn-small" onclick="openForm('${t.id}')" title="Modifica">${icona('pencil',16)}</button>
+      <button class="btn btn-icon btn-small" onclick="duplicaTx('${t.id}')" title="Duplica">${icona('copy',16)}</button>
+      <button class="btn btn-icon btn-small" onclick="deleteTransaction('${t.id}')" title="Elimina">${icona('trash',16)}</button>
     </td>
-  </tr>`).join('');
+  </tr>${isMultipla(t) && _txOpen.has(t.id) ? splitDetailHtml(t) : ''}`).join('');
   _txsRendered = txs.length;
   updateBulkBar();
 }
 
 function openForm(id) {
   editingId = id || null;
-  document.getElementById('form-title').textContent = id ? '✏️ Modifica Transazione' : '➕ Nuova Transazione';
+  document.getElementById('form-title').innerHTML = icona(id ? 'pencil' : 'plus', 18) + (id ? ' Modifica Transazione' : ' Nuova Transazione');
   populateContoSelect('f-fconto');
   populateMetodoSelect('f-metodo');
   if (id) {
@@ -389,7 +399,7 @@ function updateSplitRemainder() {
   const remEl = document.getElementById('splits-remainder');
   const V = DB.global.valuta;
   if (Math.abs(rem) < 0.005) {
-    remEl.textContent = '✓ Completo'; remEl.style.color = 'var(--investimenti)';
+    remEl.innerHTML = icona('tick',14) + ' Completo'; remEl.style.color = 'var(--investimenti)';
   } else if (rem > 0) {
     remEl.textContent = `Rimanente: ${V} ${fmt(rem)}`; remEl.style.color = 'var(--warning)';
   } else {
@@ -432,24 +442,24 @@ function saveTransaction() {
     cat = 'Giroconto'; splits = undefined;
   } else if (isMultiSplit) {
     splits = splitEls.map(r => ({ categoria: r.querySelector('.split-cat').value, importo: parseFloat(r.querySelector('.split-importo').value)||0 }));
-    if (splits.some(s => !s.categoria)) { toast('⚠️ Seleziona tutte le categorie nelle suddivisioni','error'); return; }
+    if (splits.some(s => !s.categoria)) { toast('Seleziona tutte le categorie nelle suddivisioni','error'); return; }
     const splitSum = splits.reduce((s,x)=>s+x.importo,0);
-    if (Math.abs(splitSum - importo) > 0.01) { toast(`⚠️ La somma delle categorie (${fmtEur(splitSum)}) deve uguagliare l'importo totale (${fmtEur(importo)})`,'error'); return; }
+    if (Math.abs(splitSum - importo) > 0.01) { toast(`La somma delle categorie (${fmtEur(splitSum)}) deve uguagliare l'importo totale (${fmtEur(importo)})`,'error'); return; }
     cat = splits[0].categoria;
   } else {
     cat = splitEls[0]?.querySelector('.split-cat').value || '';
     splits = undefined;
   }
-  if (!data||!tipo||(!isGiro&&!cat)||!desc||isNaN(importo)||importo<=0) { toast('⚠️ Compila tutti i campi obbligatori','error'); return; }
+  if (!data||!tipo||(!isGiro&&!cat)||!desc||isNaN(importo)||importo<=0) { toast('Compila tutti i campi obbligatori','error'); return; }
   const annoTx = parseInt(data.split('-')[0]);
-  if (annoTx !== annoAttivo) { toast(`⚠️ La data deve essere nell'anno ${annoAttivo}`,'error'); return; }
+  if (annoTx !== annoAttivo) { toast(`La data deve essere nell'anno ${annoAttivo}`,'error'); return; }
   const mese = parseInt(data.split('-')[1]);
   const contoInvest = tipo === 'INVESTIMENTI' ? document.getElementById('f-conto-invest').value : '';
-  if (tipo === 'INVESTIMENTI' && !contoInvest) { toast('⚠️ Seleziona il conto investimento','error'); return; }
+  if (tipo === 'INVESTIMENTI' && !contoInvest) { toast('Seleziona il conto investimento','error'); return; }
   const contoDa = document.getElementById('f-fconto').value;
   const contoDestinazione = isGiro ? document.getElementById('f-conto-dest').value : '';
-  if (isGiro && !contoDestinazione) { toast('⚠️ Seleziona il conto di destinazione','error'); return; }
-  if (isGiro && contoDa === contoDestinazione) { toast('⚠️ Il conto di origine e destinazione devono essere diversi','error'); return; }
+  if (isGiro && !contoDestinazione) { toast('Seleziona il conto di destinazione','error'); return; }
+  if (isGiro && contoDa === contoDestinazione) { toast('Il conto di origine e destinazione devono essere diversi','error'); return; }
   const t = { id:editingId||uid(), data, mese, tipo, categoria:cat, descrizione:desc, importo,
     splits,
     metodo:document.getElementById('f-metodo').value,
@@ -461,11 +471,11 @@ function saveTransaction() {
   if (editingId) {
     const idx = annoData().transazioni.findIndex(x => x.id === editingId);
     annoData().transazioni[idx] = t;
-    toast('✅ Transazione aggiornata','success');
+    toast('Transazione aggiornata','success');
   } else {
     annoData().transazioni.push(t);
     addCommissioneMetodo(t);
-    toast('✅ Transazione aggiunta','success');
+    toast('Transazione aggiunta','success');
   }
   closeForm(); autoSave(); renderCurrentPage();
 }
@@ -498,14 +508,14 @@ function updateBulkBar() {
 function bulkConferma() {
   if (!selectedIds.size) return;
   selectedIds.forEach(id => { const t = txAnno().find(x=>x.id===id); if (t) t.stato='Confermata'; });
-  toast(`✅ ${selectedIds.size} transazioni confermate`, 'success');
+  toast(`${selectedIds.size} transazioni confermate`, 'success');
   deselectAll(); autoSave(); renderCurrentPage();
 }
 function bulkElimina() {
   if (!selectedIds.size) return;
   showConfirm('Elimina transazioni', `Eliminare ${selectedIds.size} transazioni selezionate?`, 'Elimina', () => {
     annoData().transazioni = annoData().transazioni.filter(t => !selectedIds.has(t.id));
-    toast(`🗑️ ${selectedIds.size} transazioni eliminate`);
+    toast(`${selectedIds.size} transazioni eliminate`);
     deselectAll(); autoSave(); renderCurrentPage();
   });
 }
@@ -515,7 +525,7 @@ function duplicaTx(id) {
   const t = txAnno().find(x => x.id === id); if (!t) return;
   annoData().transazioni.push({...t, id: uid(), stato: 'Da confermare'});
   autoSave(); renderCurrentPage();
-  toast('📋 Transazione duplicata — modifica se necessario', 'success');
+  toast('Transazione duplicata — modifica se necessario', 'success');
 }
 
 // ── SUGGERIMENTO CATEGORIA ────────────────────────────────────────
@@ -560,7 +570,7 @@ document.addEventListener('click', e => {
 
 // INIT
 initDB();
-document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+renderNavUser();
 document.querySelector(`[data-page="${PAGE_ID}"]`).classList.add('active');
 updateAnnoUI();
 document.getElementById('f-stato').value = 'Confermata';

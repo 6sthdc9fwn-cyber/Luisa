@@ -1,0 +1,21 @@
+/* Classico = aspetto attuale: colori, font e layout restano quelli di styles.css (e delle Personalizzazioni).
+   Qui solo i token introdotti dal restyling (con valori chiari) e la compatibilità col markup nuovo. */
+:root{
+  --surface2:#F1F5F9;
+  --input:#FFFFFF;
+  --track:#F1F5F9;
+  --accent:var(--reddito);
+  --accent-ink:#FFFFFF;
+  --giro:#0369A1;
+  --axis:#94A3B8;
+  --row:#F8FAFC;
+  --font:'DM Sans',sans-serif;
+  --font-head:'DM Serif Display',serif;
+  --g1:#004561;--g2:#C0392B;--g3:#7358C3;--g4:#16A34A;--g5:#D97706;--g6:#0891B2;--g7:#DB2777;
+}
+/* elementi del menu introdotti dai temi scuri: nel Classico non compaiono */
+.nav-logo .logo-mark,#nav-user .avatar{display:none}
+.nav-link .icon{display:flex;align-items:center;justify-content:center;height:25px}
+.nav-link .icon svg{display:block;margin:0 auto}
+/* Come nei temi scuri (tema-comune.css): senza min-width:0 una tabella larga impedisce a <main> di restringersi e la pagina scorre in orizzontale */
+#main{min-width:0}

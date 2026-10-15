@@ -3,37 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🏷️ Categorie — Finanze Personali</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Categorie — Finanze Personali</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<script src="tema.js"></script>
+<script src="icone.js"></script>
 </head>
 <body>
 
-<button id="nav-toggle" onclick="toggleNav()">☰</button>
-<div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
-
-<nav id="nav">
-  <div class="nav-logo">
-    <h1>💰 Finanze<br><span id="nav-year">—</span></h1>
-    <span>Personali</span>
-  </div>
-  <div id="anno-switcher"></div>
-  <div class="nav-links">
-    <div class="nav-section">Overview</div>
-    <a class="nav-link" href="dashboard.html" data-page="dashboard"><span class="icon">📊</span> Dashboard</a>
-    <a class="nav-link" href="transazioni.html" data-page="transazioni"><span class="icon">💸</span> Transazioni</a>
-    <a class="nav-link" href="report.html" data-page="report"><span class="icon">📈</span> Report</a>
-    <div class="nav-section">Mensile</div>
-    <a class="nav-link" href="mensile.html" data-page="mensile"><span class="icon">📅</span> Mese Corrente</a>
-    <div class="nav-section">Gestione</div>
-    <a class="nav-link" href="budget.html" data-page="budget"><span class="icon">🎯</span> Budget</a>
-    <a class="nav-link" href="programmate.html" data-page="programmate"><span class="icon">🔁</span> Spese Programmate</a>
-    <a class="nav-link" href="categorie.html" data-page="categorie"><span class="icon">🏷️</span> Categorie</a>
-    <a class="nav-link" href="impostazioni.html" data-page="impostazioni"><span class="icon">⚙️</span> Impostazioni</a>
-    <a class="nav-link" href="personalizzazioni.html" data-page="personalizzazioni"><span class="icon">🎨</span> Personalizzazioni</a>
-  </div>
-  <div class="nav-user" id="nav-user">👤 —</div>
-</nav>
+<script src="shell.js"></script>
 
 <main id="main">
   <div class="page-header">
@@ -59,14 +37,17 @@
 <script>
 const PAGE_ID = 'categorie';
 
+let editing = null;
+let editingGruppo = null;
+
 function renderCurrentPage() { renderCategorie(); }
 
 function renderCategorie() {
   const configs = [
-    {tipo:'SPESE',       label:'💸 Spese',        cls:'spese'},
-    {tipo:'REDDITO',     label:'💼 Reddito',       cls:'reddito'},
-    {tipo:'DEBITI',      label:'💳 Debiti',        cls:'debiti'},
-    {tipo:'INVESTIMENTI',label:'📈 Investimenti',  cls:'investimenti'}
+    {tipo:'SPESE',       ic:'banknote', label:'Spese',        cls:'spese'},
+    {tipo:'REDDITO',     ic:'briefcase', label:'Reddito',       cls:'reddito'},
+    {tipo:'DEBITI',      ic:'card', label:'Debiti',        cls:'debiti'},
+    {tipo:'INVESTIMENTI',ic:'report', label:'Investimenti',  cls:'investimenti'}
   ];
   document.getElementById('cat-grid').innerHTML = configs.map(cfg => {
     const cats    = DB.global.categorie[cfg.tipo];
@@ -74,8 +55,19 @@ function renderCategorie() {
     const hasGroups = gruppi.length > 1;
     let items = '';
     for (const [gruppo, arr] of Object.entries(cats)) {
-      if (hasGroups) items += `<div style="padding:8px 16px 4px;font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase">${gruppo}</div>`;
-      items += arr.map(c => `<div class="cat-item"><span>${c}</span><button onclick="deleteCat('${cfg.tipo}','${gruppo}','${c}')" title="Elimina">×</button></div>`).join('');
+      if (hasGroups) {
+        if (editingGruppo && editingGruppo.tipo === cfg.tipo && editingGruppo.gruppo === gruppo) {
+          items += `<div class="cat-item"><input type="text" id="gruppo-edit-input" value="${gruppo.replace(/"/g,'&quot;')}" style="flex:1;min-width:0;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;outline:none" onkeydown="if(event.key==='Enter')saveEditGruppo();if(event.key==='Escape')cancelEditGruppo()"><span style="display:flex;gap:2px;margin-left:6px"><button onclick="saveEditGruppo()" title="Salva">✓</button><button onclick="cancelEditGruppo()" title="Annulla">✕</button></span></div>`;
+        } else {
+          items += `<div style="padding:8px 16px 4px;font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center"><span>${gruppo}</span><button onclick="startEditGruppo('${cfg.tipo}','${gruppo}')" title="Rinomina gruppo" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px;padding:2px 4px">✎</button></div>`;
+        }
+      }
+      items += arr.map((c, i) => {
+        if (editing && editing.tipo === cfg.tipo && editing.gruppo === gruppo && editing.idx === i) {
+          return `<div class="cat-item"><input type="text" id="cat-edit-input" value="${c.replace(/"/g,'&quot;')}" style="flex:1;min-width:0;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;outline:none" onkeydown="if(event.key==='Enter')saveEditCat();if(event.key==='Escape')cancelEditCat()"><span style="display:flex;gap:2px;margin-left:6px"><button onclick="saveEditCat()" title="Salva">✓</button><button onclick="cancelEditCat()" title="Annulla">✕</button></span></div>`;
+        }
+        return `<div class="cat-item"><span>${c}</span><span style="display:flex;gap:2px"><button onclick="startEditCat('${cfg.tipo}','${gruppo}',${i})" title="Rinomina">✎</button><button onclick="deleteCat('${cfg.tipo}','${gruppo}','${c}')" title="Elimina">×</button></span></div>`;
+      }).join('');
     }
     let addForm = '';
     if (hasGroups) {
@@ -83,20 +75,74 @@ function renderCategorie() {
       addForm = `<div class="cat-add" style="flex-wrap:wrap;gap:6px">
         <select id="cat-gruppo-${cfg.tipo}" style="padding:7px 8px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;outline:none;min-height:40px">${optsGruppo}</select>
         <input type="text" id="cat-input-${cfg.tipo}" placeholder="Nome categoria..." style="flex:1;min-width:100px" onkeypress="if(event.key==='Enter')addCatConGruppo('${cfg.tipo}')">
-        <button class="btn btn-primary btn-small" onclick="addCatConGruppo('${cfg.tipo}')">＋</button>
+        <button class="btn btn-primary btn-small" onclick="addCatConGruppo('${cfg.tipo}')">${icona('plus',14)}</button>
       </div>`;
     } else {
       const firstGroup = gruppi[0];
       addForm = `<div class="cat-add">
         <input type="text" id="cat-input-${cfg.tipo}" placeholder="Nuova categoria..." onkeypress="if(event.key==='Enter')addCat('${cfg.tipo}','${firstGroup}')">
-        <button class="btn btn-primary btn-small" onclick="addCat('${cfg.tipo}','${firstGroup}')">＋</button>
+        <button class="btn btn-primary btn-small" onclick="addCat('${cfg.tipo}','${firstGroup}')">${icona('plus',14)}</button>
       </div>`;
     }
     return `<div class="cat-group-card">
-      <div class="cat-group-header ${cfg.cls}"><span>${cfg.label}</span><span style="font-size:12px;opacity:.7">${Object.values(cats).flat().length} cat.</span></div>
+      <div class="cat-group-header ${cfg.cls}"><span>${icona(cfg.ic,16)} ${cfg.label}</span><span style="font-size:12px;opacity:.7">${Object.values(cats).flat().length} cat.</span></div>
       ${items}${addForm}
     </div>`;
   }).join('');
+  const inp = document.getElementById('cat-edit-input') || document.getElementById('gruppo-edit-input');
+  if (inp) { inp.focus(); inp.select(); }
+}
+
+function startEditGruppo(tipo, gruppo) { editing = null; editingGruppo = {tipo, gruppo}; renderCategorie(); }
+function cancelEditGruppo() { editingGruppo = null; renderCategorie(); }
+
+function saveEditGruppo() {
+  if (!editingGruppo) return;
+  const {tipo, gruppo} = editingGruppo;
+  const nuovo = document.getElementById('gruppo-edit-input').value.trim();
+  if (!nuovo) { toast('Il nome non può essere vuoto','error'); return; }
+  if (nuovo === gruppo) { cancelEditGruppo(); return; }
+  if (Object.keys(DB.global.categorie[tipo]).includes(nuovo)) { toast('Gruppo già esistente','error'); return; }
+  // Ricostruisce l'oggetto mantenendo l'ordine dei gruppi
+  const rinominato = {};
+  for (const [g, arr] of Object.entries(DB.global.categorie[tipo])) rinominato[g === gruppo ? nuovo : g] = arr;
+  DB.global.categorie[tipo] = rinominato;
+  const colori = DB.global.personalizzazioni && DB.global.personalizzazioni.coloriGruppi;
+  if (colori && colori[gruppo] !== undefined) { colori[nuovo] = colori[gruppo]; delete colori[gruppo]; }
+  editingGruppo = null;
+  autoSave(); renderCategorie();
+  toast(`Gruppo rinominato in "${nuovo}"`,'success');
+}
+
+function startEditCat(tipo, gruppo, idx) { editingGruppo = null; editing = {tipo, gruppo, idx}; renderCategorie(); }
+function cancelEditCat() { editing = null; renderCategorie(); }
+
+function saveEditCat() {
+  if (!editing) return;
+  const {tipo, gruppo, idx} = editing;
+  const arr = DB.global.categorie[tipo][gruppo];
+  const vecchio = arr[idx];
+  const nuovo = document.getElementById('cat-edit-input').value.trim();
+  if (!nuovo) { toast('Il nome non può essere vuoto','error'); return; }
+  if (nuovo === vecchio) { cancelEditCat(); return; }
+  if (Object.values(DB.global.categorie[tipo]).flat().includes(nuovo)) { toast('Categoria già esistente in questo tipo','error'); return; }
+  arr[idx] = nuovo;
+  const vecchioInUso = Object.values(DB.global.categorie).some(g => Object.values(g).flat().includes(vecchio));
+  // Propaga il nuovo nome a tutto ciò che referenzia la categoria
+  Object.values(DB.anni).forEach(anno => {
+    (anno.transazioni||[]).forEach(t => {
+      if (t.tipo === tipo && t.categoria === vecchio) t.categoria = nuovo;
+      (t.splits||[]).forEach(sp => { if (t.tipo === tipo && sp.categoria === vecchio) sp.categoria = nuovo; });
+    });
+    // Il budget è indicizzato per solo nome: si sposta solo se nessun'altra categoria usa ancora il vecchio nome
+    if (!vecchioInUso && anno.budget && anno.budget[vecchio] !== undefined && anno.budget[nuovo] === undefined) {
+      anno.budget[nuovo] = anno.budget[vecchio]; delete anno.budget[vecchio];
+    }
+  });
+  (DB.global.programmate||[]).forEach(p => { if (p.tipo === tipo && p.categoria === vecchio) p.categoria = nuovo; });
+  editing = null;
+  autoSave(); renderCategorie();
+  toast(`Categoria rinominata in "${nuovo}"`,'success');
 }
 
 function addCatConGruppo(tipo) {
@@ -108,26 +154,26 @@ function addCatConGruppo(tipo) {
 function addCat(tipo, gruppo) {
   const inp  = document.getElementById('cat-input-' + tipo);
   const nome = inp.value.trim();
-  if (!nome) { toast('⚠️ Inserisci un nome','error'); return; }
+  if (!nome) { toast('Inserisci un nome','error'); return; }
   if (!DB.global.categorie[tipo][gruppo]) DB.global.categorie[tipo][gruppo] = [];
   const tutteLeCat = Object.values(DB.global.categorie[tipo]).flat();
-  if (tutteLeCat.includes(nome)) { toast('⚠️ Categoria già esistente in questo tipo','error'); return; }
+  if (tutteLeCat.includes(nome)) { toast('Categoria già esistente in questo tipo','error'); return; }
   DB.global.categorie[tipo][gruppo].push(nome);
   inp.value = '';
   autoSave(); renderCategorie();
-  toast(`✅ "${nome}" aggiunta al gruppo ${gruppo}`,'success');
+  toast(`"${nome}" aggiunta al gruppo ${gruppo}`,'success');
 }
 
 function deleteCat(tipo, gruppo, cat) {
   showConfirm('Elimina categoria', `Eliminare "${cat}"? Le transazioni esistenti non saranno modificate.`, 'Elimina', () => {
     DB.global.categorie[tipo][gruppo] = DB.global.categorie[tipo][gruppo].filter(c => c !== cat);
-    autoSave(); renderCategorie(); toast('🗑️ Categoria eliminata');
+    autoSave(); renderCategorie(); toast('Categoria eliminata');
   });
 }
 
 // INIT
 initDB();
-document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+renderNavUser();
 document.querySelector(`[data-page="${PAGE_ID}"]`).classList.add('active');
 updateAnnoUI();
 renderCategorie();

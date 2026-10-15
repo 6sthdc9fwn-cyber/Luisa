@@ -3,37 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💰 Dashboard — Finanze Personali</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Dashboard — Finanze Personali</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<script src="tema.js"></script>
+<script src="icone.js"></script>
 </head>
 <body>
 
-<button id="nav-toggle" onclick="toggleNav()">☰</button>
-<div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
-
-<nav id="nav">
-  <div class="nav-logo">
-    <h1>💰 Finanze<br><span id="nav-year">—</span></h1>
-    <span>Personali</span>
-  </div>
-  <div id="anno-switcher"></div>
-  <div class="nav-links">
-    <div class="nav-section">Overview</div>
-    <a class="nav-link" href="dashboard.html" data-page="dashboard"><span class="icon">📊</span> Dashboard</a>
-    <a class="nav-link" href="transazioni.html" data-page="transazioni"><span class="icon">💸</span> Transazioni</a>
-    <a class="nav-link" href="report.html" data-page="report"><span class="icon">📈</span> Report</a>
-    <div class="nav-section">Mensile</div>
-    <a class="nav-link" href="mensile.html" data-page="mensile"><span class="icon">📅</span> Mese Corrente</a>
-    <div class="nav-section">Gestione</div>
-    <a class="nav-link" href="budget.html" data-page="budget"><span class="icon">🎯</span> Budget</a>
-    <a class="nav-link" href="programmate.html" data-page="programmate"><span class="icon">🔁</span> Spese Programmate</a>
-    <a class="nav-link" href="categorie.html" data-page="categorie"><span class="icon">🏷️</span> Categorie</a>
-    <a class="nav-link" href="impostazioni.html" data-page="impostazioni"><span class="icon">⚙️</span> Impostazioni</a>
-    <a class="nav-link" href="personalizzazioni.html" data-page="personalizzazioni"><span class="icon">🎨</span> Personalizzazioni</a>
-  </div>
-  <div class="nav-user" id="nav-user">👤 —</div>
-</nav>
+<script src="shell.js"></script>
 
 <main id="main">
   <div class="page-header">
@@ -44,7 +22,7 @@
   <div class="chart-row">
     <div class="chart-box">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <h4 style="margin:0">📈 Andamento mensile</h4>
+        <h4 style="margin:0"><span data-ic="report" data-s="18"></span> Andamento mensile</h4>
         <div style="display:flex;gap:6px;align-items:center">
           <select id="dash-filtro-tipo" title="Tipo filtro grafico" onchange="onChartFilterChange()" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;outline:none;font-family:inherit;color:var(--text2)">
             <option value="totale">Entrate vs Spese</option>
@@ -58,22 +36,22 @@
       <div style="display:flex;gap:4px;justify-content:space-between;margin-top:2px" id="chart-labels"></div>
     </div>
     <div class="chart-box">
-      <h4>🥧 Spese per gruppo</h4>
+      <h4><span data-ic="pie" data-s="18"></span> Spese per gruppo</h4>
       <div id="chart-donut"></div>
     </div>
   </div>
   <div class="chart-row">
     <div class="chart-box">
-      <h4>🏆 Top categorie spese</h4>
+      <h4><span data-ic="trophy" data-s="18"></span> Top categorie spese</h4>
       <div class="bar-chart" id="chart-top-cat"></div>
     </div>
     <div class="chart-box">
-      <h4>💼 Patrimonio attuale</h4>
+      <h4><span data-ic="briefcase" data-s="18"></span> Patrimonio attuale</h4>
       <div id="patrimonio-box"></div>
     </div>
   </div>
   <div class="card card-pad" style="margin-top:16px">
-    <h4 style="font-size:14px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px">📆 Saldi mensili</h4>
+    <h4 style="font-size:14px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px"><span data-ic="calendarDays" data-s="18"></span> Saldi mensili</h4>
     <div class="table-wrap"><table><thead id="saldi-head"></thead><tbody id="saldi-body"></tbody></table></div>
   </div>
 </main>
@@ -121,8 +99,8 @@ function fmtK(v) {
 function renderMonthlyChart() {
   const g = DB.global.personalizzazioni?.grafico || {};
   const monthlyTipo = g.tipo || 'barre';
-  const col1 = g.colore1 || 'var(--reddito)';
-  const col2 = g.colore2 || (g.filtroTipo==='gruppo' ? getGruppoColore(g.filtroValore) : g.filtroTipo==='categoria' ? 'var(--debiti)' : 'var(--spese)');
+  const col1 = coloreLeggibile(g.colore1) || 'var(--reddito)';
+  const col2 = coloreLeggibile(g.colore2) || (g.filtroTipo==='gruppo' ? getGruppoColore(g.filtroValore) : g.filtroTipo==='categoria' ? 'var(--debiti)' : 'var(--spese)');
   const data = Array.from({length:12}, (_,i) => getChartMonthData(i+1));
   const hasDual = data[0].v1 !== null;
   const d1 = hasDual ? data.map(d=>d.v1||0) : null;
@@ -158,7 +136,7 @@ function renderMonthlyChart() {
         if (showLabels && v > 0) svgContent += `<text x="${px(i)}" y="${py(v)-5}" text-anchor="middle" font-size="9" fill="${col}" font-family="DM Sans,sans-serif">${fmtK(v)}</text>`;
       });
     });
-    MESI_SHORT.forEach((m,i) => { svgContent += `<text x="${px(i)}" y="${H-3}" text-anchor="middle" font-size="9" fill="#94A3B8" font-family="DM Sans,sans-serif">${m}</text>`; });
+    MESI_SHORT.forEach((m,i) => { svgContent += `<text x="${px(i)}" y="${H-3}" text-anchor="middle" font-size="9" fill="var(--axis)" font-family="DM Sans,sans-serif">${m}</text>`; });
   } else {
     const gW = plotW/n, bW = Math.max(gW*.37, 3);
     data.forEach((d,i) => {
@@ -178,7 +156,7 @@ function renderMonthlyChart() {
           if (showLabels && bH > 14) svgContent += `<text x="${xB+gW*.43}" y="${y-3}" text-anchor="middle" font-size="9" fill="${col2}" font-family="DM Sans,sans-serif">${fmtK(v)}</text>`;
         }
       }
-      svgContent += `<text x="${PAD.l+i*gW+gW/2}" y="${H-3}" text-anchor="middle" font-size="9" fill="#94A3B8" font-family="DM Sans,sans-serif">${MESI_SHORT[i]}</text>`;
+      svgContent += `<text x="${PAD.l+i*gW+gW/2}" y="${H-3}" text-anchor="middle" font-size="9" fill="var(--axis)" font-family="DM Sans,sans-serif">${MESI_SHORT[i]}</text>`;
     });
   }
 
@@ -189,8 +167,8 @@ function renderMonthlyChart() {
     : (i => PAD.l + i*(plotW/n) + (plotW/n)/2);
   const pyM = v => PAD.t + plotH - (v/maxVal)*plotH;
   const maLine = ma.map((v,i)=>`${pxM(i)},${pyM(v)}`).join(' ');
-  svgContent += `<polyline points="${maLine}" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="5,3" opacity=".7"><title>Media mobile 3 mesi</title></polyline>`;
-  leg += `<span style="display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:14px;height:2px;background:#94A3B8;border-top:2px dashed #94A3B8"></span>Media 3m</span>`;
+  svgContent += `<polyline points="${maLine}" fill="none" stroke="var(--axis)" stroke-width="1.5" stroke-dasharray="5,3" opacity=".7"><title>Media mobile 3 mesi</title></polyline>`;
+  leg += `<span style="display:flex;align-items:center;gap:3px"><span style="display:inline-block;width:14px;height:2px;background:var(--axis);border-top:2px dashed var(--axis)"></span>Media 3m</span>`;
   leg += '</div>';
 
   document.getElementById('chart-labels').innerHTML = '';
@@ -238,10 +216,10 @@ function renderDashboard() {
   document.getElementById('dash-title').textContent = 'Dashboard ' + annoAttivo;
 
   document.getElementById('kpi-grid').innerHTML = `
-    <div class="kpi reddito"><label>💼 Entrate totali</label><div class="val">${V} ${fmt(at.reddito)}</div><div class="sub">Anno ${annoAttivo}</div></div>
-    <div class="kpi spese"><label>💸 Uscite totali</label><div class="val">${V} ${fmt(at.spese+at.debiti)}</div><div class="sub">Spese + Debiti</div></div>
-    <div class="kpi ${risparmio>=0?'investimenti':'spese'}"><label>💰 Risparmio netto</label><div class="val">${risparmio>=0?'+':''}${V} ${fmt(Math.abs(risparmio))}</div><div class="sub">${risparmio>=0?'Positivo ✅':'Negativo ⚠️'}</div></div>
-    <div class="kpi investimenti"><label>📈 Investimenti</label><div class="val">${V} ${fmt(at.investOut)}</div><div class="sub">Versato nell'anno</div></div>`;
+    <div class="kpi reddito"><label>${icona('briefcase',16)} Entrate totali</label><div class="val">${V} ${fmt(at.reddito)}</div><div class="sub">Anno ${annoAttivo}</div></div>
+    <div class="kpi spese"><label>${icona('banknote',16)} Uscite totali</label><div class="val">${V} ${fmt(at.spese+at.debiti)}</div><div class="sub">Spese + Debiti</div></div>
+    <div class="kpi kpi-hero ${risparmio>=0?'investimenti':'spese'}"><label>${icona('piggy',16)} Risparmio netto</label><div class="val">${risparmio>=0?'+':''}${V} ${fmt(Math.abs(risparmio))}</div><div class="sub">${risparmio>=0?icona('check',14)+' Positivo':icona('alert',14)+' Negativo'}</div></div>
+    <div class="kpi kpi-wide investimenti"><label>${icona('report',16)} Investimenti</label><div class="val">${V} ${fmt(at.investOut)}</div><div class="sub">Versato nell'anno</div></div>`;
 
   initChartFilter();
   renderMonthlyChart();
@@ -271,7 +249,7 @@ function renderDashboard() {
 
   const mesePat=Math.min(selectedMese,12);
   const contiPat=getConti();
-  const patData=contiPat.map(c=>{const sb=calcSaldoConto(c.nome,mesePat);return{nome:c.nome,icona:c.icona,col:c.colore||'var(--reddito)',val:sb.inserito??sb.calcolato};});
+  const patData=contiPat.map(c=>{const sb=calcSaldoConto(c.nome,mesePat);return{nome:c.nome,icona:c.icona,col:coloreLeggibile(c.colore)||'var(--reddito)',val:sb.inserito??sb.calcolato};});
   const patPos=patData.filter(d=>d.val>0);
   const totPat=patPos.reduce((s,d)=>s+d.val,0)||1;
   // Donut SVG
@@ -286,7 +264,7 @@ function renderDashboard() {
     start=end;
   });
   const patLegend=patPos.map(d=>`<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${d.col};flex-shrink:0"></span><span style="font-size:10px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${d.icona} ${d.nome}</span><span style="font-size:10px;font-weight:600;color:${d.col}">${(d.val/totPat*100).toFixed(1)}%</span></div>`).join('');
-  const patCards=patData.map(d=>`<div style="padding:8px 10px;background:#F8FAFC;border-radius:8px;border-left:3px solid ${d.col}"><div style="font-size:11px;color:var(--text2);margin-bottom:3px">${d.icona} ${d.nome}</div><div style="font-size:16px;font-weight:600;color:${d.col}">${V} ${fmt(d.val)}</div></div>`).join('');
+  const patCards=patData.map(d=>`<div style="padding:8px 10px;background:var(--row);border-radius:8px;border-left:3px solid ${d.col}"><div style="font-size:11px;color:var(--text2);margin-bottom:3px">${d.icona} ${d.nome}</div><div style="font-size:16px;font-weight:600;color:${d.col}">${V} ${fmt(d.val)}</div></div>`).join('');
   document.getElementById('patrimonio-box').innerHTML=`<div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
     <div style="flex-shrink:0;text-align:center"><svg viewBox="0 0 ${DW} ${DW}" style="width:${DW}px;height:${DW}px;display:block">${svgPaths}</svg><div style="margin-top:6px">${patLegend}</div></div>
     <div style="flex:1;min-width:120px;display:grid;grid-template-columns:1fr 1fr;gap:6px">${patCards}</div>
@@ -307,7 +285,7 @@ function renderDashboard() {
 
 // INIT
 initDB();
-document.getElementById('nav-user').textContent = '👤 ' + DB.global.nome;
+renderNavUser();
 document.querySelector(`[data-page="${PAGE_ID}"]`).classList.add('active');
 updateAnnoUI();
 renderDashboard();

@@ -151,10 +151,10 @@ function addNewAnno() {
   const nuovi = anniDisponibili();
   const input = document.getElementById('new-anno-input');
   const annoInput = input ? input.value.trim() : '';
-  if (!annoInput) { toast('⚠️ Inserisci un anno nel campo','error'); return; }
+  if (!annoInput) { toast('Inserisci un anno nel campo','error'); return; }
   const y = parseInt(annoInput);
-  if (isNaN(y) || y < 2000 || y > 2100) { toast('⚠️ Anno non valido (2000–2100)','error'); return; }
-  if (DB.anni[y]) { toast(`⚠️ L'anno ${y} esiste già`,'error'); return; }
+  if (isNaN(y) || y < 2000 || y > 2100) { toast('Anno non valido (2000–2100)','error'); return; }
+  if (DB.anni[y]) { toast(`L'anno ${y} esiste già`,'error'); return; }
   DB.anni[y] = { transazioni: [], budget: {}, saldiMensili: {} };
 
   const prevAnno = nuovi.length ? Math.max(...nuovi) : null;
@@ -172,7 +172,7 @@ function addNewAnno() {
   if (input) input.value = '';
   autoSave();
   switchAnno(y);
-  toast(`✅ Anno ${y} creato — saldi iniziali copiati dal ${prevAnno||'anno precedente'}`, 'success');
+  toast(`Anno ${y} creato — saldi iniziali copiati dal ${prevAnno||'anno precedente'}`, 'success');
 }
 
 function deleteAnno(anno) {
@@ -187,7 +187,7 @@ function deleteAnno(anno) {
     const anni = anniDisponibili();
     if (anni.length) switchAnno(anni[anni.length-1]);
     else { annoAttivo = new Date().getFullYear(); updateAnnoUI(); if (typeof renderCurrentPage === 'function') renderCurrentPage(); }
-    toast(`🗑️ Anno ${anno} eliminato`);
+    toast(`Anno ${anno} eliminato`);
   });
 }
 
@@ -202,20 +202,18 @@ function renderAnnoSwitcher() {
   if (!el) return;
   const anni = anniDisponibili();
   const prossimo = (anni.length ? Math.max(...anni) : annoAttivo) + 1;
-  let html = `<div style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.1)">
-    <div style="font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Anno attivo</div>
-    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">`;
+  let html = `<div class="anno-box">
+    <div class="anno-title">Anno attivo</div>
+    <div class="anno-chips">`;
   anni.forEach(a => {
-    const active = a === annoAttivo;
-    html += `<button onclick="switchAnno(${a})" style="padding:4px 10px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:${active?'var(--oro)':'rgba(255,255,255,.12)'};color:${active?'#000':'rgba(255,255,255,.8)'};transition:.2s">${a}</button>`;
+    html += `<button class="anno-chip${a === annoAttivo ? ' active' : ''}" onclick="switchAnno(${a})">${a}</button>`;
   });
   html += `</div>
-    <div style="display:flex;gap:4px;align-items:center">
-      <input type="number" id="new-anno-input" placeholder="${prossimo}" min="2000" max="2100"
-        style="width:68px;padding:4px 6px;border-radius:5px;font-size:12px;border:1px dashed rgba(255,255,255,.35);background:rgba(255,255,255,.05);color:rgba(255,255,255,.85);outline:none;font-family:inherit"
+    <div class="anno-tools">
+      <input type="number" id="new-anno-input" class="anno-input" placeholder="${prossimo}" min="2000" max="2100"
         onkeydown="if(event.key==='Enter')addNewAnno()">
-      <button onclick="addNewAnno()" style="padding:4px 10px;border-radius:5px;font-size:12px;cursor:pointer;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:rgba(255,255,255,.75)" title="Crea anno">＋</button>
-      <button onclick="deleteAnno(${annoAttivo})" style="padding:4px 8px;border-radius:5px;font-size:12px;cursor:pointer;border:1px solid rgba(192,57,43,.5);background:rgba(192,57,43,.2);color:#ff8a80" title="Elimina anno attivo">🗑️</button>
+      <button class="anno-add" onclick="addNewAnno()" title="Crea anno">${icona('plus',14)}</button>
+      <button class="anno-del" onclick="deleteAnno(${annoAttivo})" title="Elimina anno attivo">${icona('trash',14)}</button>
     </div>
   </div>`;
   el.innerHTML = html;
@@ -232,7 +230,13 @@ function toast(msg, type='') {
   const c = document.getElementById('toast-container');
   if (!c) return;
   const t = document.createElement('div');
-  t.className = 'toast ' + type; t.textContent = msg;
+  t.className = 'toast ' + type;
+  const ico = document.createElement('span');
+  ico.className = 'toast-ic';
+  ico.innerHTML = icona(type === 'success' ? 'check' : type === 'error' ? 'alert' : 'info', 16);
+  const txt = document.createElement('span');
+  txt.textContent = msg;
+  t.appendChild(ico); t.appendChild(txt);
   c.appendChild(t); setTimeout(()=>t.remove(), 3200);
 }
 
@@ -274,15 +278,15 @@ function annualTotals() {
   return {reddito,spese,debiti,investOut};
 }
 
-function ccPrevMese(mese) {
+function ccPrevMese(mese, nomeConto) {
   let tx;
   if (mese < 2) {
     // Gennaio: cerca le CC di Dicembre dell'anno precedente
     const prevAnno = annoAttivo - 1;
     if (!DB.anni[prevAnno]) return {spese:0, debiti:0};
-    tx = DB.anni[prevAnno].transazioni.filter(t => t.mese === 12 && t.metodo === 'Carta di Credito' && txConfirmed(t));
+    tx = DB.anni[prevAnno].transazioni.filter(t => t.mese === 12 && t.metodo === 'Carta di Credito' && t.conto === nomeConto && txConfirmed(t));
   } else {
-    tx = txAnno().filter(t => t.mese === mese-1 && t.metodo === 'Carta di Credito' && txConfirmed(t));
+    tx = txAnno().filter(t => t.mese === mese-1 && t.metodo === 'Carta di Credito' && t.conto === nomeConto && txConfirmed(t));
   }
   return { spese: tx.filter(t=>t.tipo==='SPESE').reduce((s,t)=>s+t.importo,0), debiti: tx.filter(t=>t.tipo==='DEBITI').reduce((s,t)=>s+t.importo,0) };
 }
@@ -309,7 +313,7 @@ function calcSaldoConto(nomeConto, mese) {
     const investIn  = tx.filter(t=>isInvestReturning(t)).reduce((s,t)=>s+t.importo,0);
     const giroOut   = tx.filter(t=>t.tipo==='GIROCONTO').reduce((s,t)=>s+t.importo,0);
     const giroIn    = allTxMese.filter(t=>t.tipo==='GIROCONTO'&&t.contoDestinazione===nomeConto).reduce((s,t)=>s+t.importo,0);
-    const cc = ccPrevMese(mese);
+    const cc = ccPrevMese(mese, nomeConto);
     const calcolato = saldoInizio + entrate - spese - debiti + (investIn-investOut) + (giroIn-giroOut) - cc.spese - cc.debiti;
     const inserito  = saldiAnno()[nomeConto]?.[mese]?.inserito ?? null;
     return { saldoInizio, entrate, spese, debiti, investOut, investIn, giroOut, giroIn, cc, calcolato, inserito, isMainBank:true };
@@ -334,7 +338,7 @@ function deleteTransaction(id) {
     annoData().transazioni = annoData().transazioni.filter(x=>x.id!==id);
     autoSave();
     if (typeof renderCurrentPage === 'function') renderCurrentPage();
-    toast('🗑️ Transazione eliminata');
+    toast('Transazione eliminata');
   });
 }
 
@@ -356,7 +360,7 @@ function confermaTx(id) {
   addCommissioneMetodo(tx);
   autoSave();
   if (typeof renderCurrentPage === 'function') renderCurrentPage();
-  toast(`✅ "${tx.descrizione}" confermata e conteggiata`, 'success');
+  toast(`"${tx.descrizione}" confermata e conteggiata`, 'success');
 }
 
 // ── SPESE PROGRAMMATE (logica condivisa) ──────────────────────────
@@ -455,6 +459,8 @@ function migrateDB() {
   if (!DB.global) DB = JSON.parse(JSON.stringify(DEFAULT_DB));
   if (!DB.anni) DB.anni = {};
   if (!DB.global.personalizzazioni) DB.global.personalizzazioni = JSON.parse(JSON.stringify(DEFAULT_DB.global.personalizzazioni));
+  if (!(window.TEMI_DISPONIBILI || []).includes(DB.global.personalizzazioni.tema))
+    DB.global.personalizzazioni.tema = window.TEMA_DEFAULT;
   if (!DB.global.personalizzazioni.grafico) DB.global.personalizzazioni.grafico = { tipo:'barre', filtroTipo:'totale', filtroValore:'', colore1:'', colore2:'' };
   if (!DB.global.metodi || !DB.global.metodi.length) DB.global.metodi = [...DEFAULT_DB.global.metodi];
   const usi = {};
@@ -488,23 +494,55 @@ function migrateDB() {
 }
 
 // ── PERSONALIZZAZIONI ─────────────────────────────────────────────
-const DEFAULT_COLORS_GRUPPI = ['#004561','#C0392B','#7358C3','#16A34A','#D97706','#0891B2','#DB2777'];
+const PALETTE_TEMI = {
+  classico: ['#004561','#C0392B','#7358C3','#16A34A','#D97706','#0891B2','#DB2777'],
+  glass:    ['#38bdf8','#a78bfa','#34d399','#fbbf24','#fb7185','#f472b6','#22d3ee'],
+  bento:    ['#d4ff3a','#7dd3fc','#ff7a6b','#c4b5fd','#ffc94d','#f9a8d4','#5eead4']
+};
+const paletteTema = () => PALETTE_TEMI[document.documentElement.dataset.theme] || PALETTE_TEMI.glass;
+
+// Tema scelto dall'utente (salvato in DB.global.personalizzazioni.tema); se manca vale il default di tema.js.
+function temaCorrente() {
+  const t = DB.global.personalizzazioni?.tema;
+  return (window.TEMI_DISPONIBILI || []).includes(t) ? t : (window.TEMA_DEFAULT || 'glass');
+}
+
+// Nei temi scuri schiarisce (solo in visualizzazione) i colori scelti in epoca "tema chiaro" che risulterebbero illeggibili.
+function coloreLeggibile(hex) {
+  if (!hex || !/^#[0-9a-f]{6}$/i.test(hex) || document.documentElement.dataset.theme === 'classico') return hex;
+  const c = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+  const lum = a => { const l = a.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * l[0] + 0.7152 * l[1] + 0.0722 * l[2]; };
+  if (lum(c) >= 0.25) return hex;
+  for (let t = 0.1; t <= 1; t += 0.1) {
+    const m = c.map(v => Math.round(v + (255 - v) * t));
+    if (lum(m) >= 0.3 || t >= 0.99) return '#' + m.map(v => v.toString(16).padStart(2, '0')).join('');
+  }
+  return hex;
+}
 
 function getGruppoColore(gruppo) {
   const custom = DB.global.personalizzazioni?.coloriGruppi?.[gruppo];
-  if (custom) return custom;
+  if (custom) return coloreLeggibile(custom);
   const gruppi = Object.keys(DB.global.categorie?.SPESE || {});
-  const idx = gruppi.indexOf(gruppo);
-  return DEFAULT_COLORS_GRUPPI[idx >= 0 ? idx % DEFAULT_COLORS_GRUPPI.length : 0];
+  const idx = gruppi.indexOf(gruppo), pal = paletteTema();
+  return pal[(idx >= 0 ? idx : 0) % pal.length];
 }
 
+// Font e colori base sono la personalizzazione del tema Classico: con Glass e Bento decide il tema.
+// I valori salvati non vengono toccati, quindi tornando al Classico ricompaiono.
 function applyPersonalizzazioni() {
-  const p = DB.global.personalizzazioni;
-  if (!p) return;
   const root = document.documentElement;
   const map = {reddito:'--reddito', spese:'--spese', debiti:'--debiti', investimenti:'--investimenti', oro:'--oro'};
+  if (root.dataset.theme !== 'classico') {
+    Object.values(map).forEach(v => root.style.removeProperty(v));
+    document.body.style.fontFamily = '';
+    root.style.removeProperty('--font');
+    return;
+  }
+  const p = DB.global.personalizzazioni;
+  if (!p) return;
   if (p.colori) Object.entries(map).forEach(([k,v]) => { if (p.colori[k]) root.style.setProperty(v, p.colori[k]); });
-  if (p.font) document.body.style.fontFamily = p.font;
+  if (p.font) { document.body.style.fontFamily = p.font; root.style.setProperty('--font', p.font); }
 }
 
 // ── INIT ──────────────────────────────────────────────────────────

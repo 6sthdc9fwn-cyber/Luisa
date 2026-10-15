@@ -1,11 +1,11 @@
 {
   "name": "finanze-personali-luisa",
-  "version": "1.0.0",
+  "version": "1.2.1",
   "description": "App per la gestione delle finanze personali",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-packager . \"Finanze Personali\" --platform=win32 --arch=x64 --out=dist --overwrite --ignore=node_modules"
+    "build": "electron-packager . \"Finanze Personali\" --platform=win32 --arch=x64 --out=dist --overwrite --ignore=node_modules --ignore=dist --ignore=dist-new --ignore=release-build"
   },
   "build": {
     "appId": "it.finanzepersonali",
